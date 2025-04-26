@@ -77,6 +77,17 @@
   gap: 1rem;
 }
 
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @media (min-width: 768px) {
   .deal-card-grid {
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
