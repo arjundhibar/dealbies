@@ -19,13 +19,28 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Search, Menu, User, LogOut, PlusCircle, Bell, Heart, ShoppingBag, Flame } from "lucide-react"
+import {
+  Search,
+  Menu,
+  User,
+  LogOut,
+  PlusCircle,
+  Bell,
+  Heart,
+  ShoppingBag,
+  Flame,
+  Tag,
+  MessageSquare,
+  ChevronDown,
+  Grid,
+} from "lucide-react"
 import { PostDealForm } from "@/components/post-deal-form"
 import { LoginForm } from "@/components/login-form"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export function Navbar() {
   const { user, signOut } = useAuth()
@@ -33,6 +48,7 @@ export function Navbar() {
   const [isPostDealOpen, setIsPostDealOpen] = useState(false)
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [activeTab, setActiveTab] = useState("for-you")
   const router = useRouter()
   const pathname = usePathname()
   const isMobile = useIsMobile()
@@ -81,7 +97,8 @@ export function Navbar() {
       return (
         <Sheet open={isLoginOpen} onOpenChange={setIsLoginOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="sm" className="font-normal">
+            <Button variant="ghost" size="sm" className="font-medium">
+              <User className="h-4 w-4 mr-2" />
               Login or Register
             </Button>
           </SheetTrigger>
@@ -97,7 +114,8 @@ export function Navbar() {
 
     return (
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-        <Button variant="ghost" size="sm" className="font-normal" onClick={() => setIsLoginOpen(true)}>
+        <Button variant="ghost" size="sm" className="font-medium" onClick={() => setIsLoginOpen(true)}>
+          <User className="h-4 w-4 mr-2" />
           Login or Register
         </Button>
         <DialogContent>
@@ -112,20 +130,20 @@ export function Navbar() {
   }
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-200 bg-white border-b",
-        isScrolled && "shadow-sm",
-      )}
-    >
-      <div className="container mx-auto px-4">
-        <div className="flex h-14 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full bg-white border-b">
+      <div className="container mx-auto">
+        {/* Top Navigation Bar */}
+        <div className="flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-1">
+              <Flame className="h-6 w-6 text-hotukdeals-red" />
+              <span className="text-xl font-bold">DealHunter</span>
+            </Link>
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="border rounded-md">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Menu</span>
+                <Button variant="outline" size="sm" className="border rounded-full flex items-center gap-2">
+                  <Menu className="h-4 w-4" />
+                  <span className="font-medium">Menu</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[350px]">
@@ -247,25 +265,27 @@ export function Navbar() {
               </SheetContent>
             </Sheet>
 
-            <Link href="/" className="flex items-center gap-1">
+            {/* <Link href="/" className="flex items-center gap-1">
               <Flame className="h-6 w-6 text-hotukdeals-red" />
               <span className="text-xl font-bold">DealHunter</span>
-            </Link>
+            </Link> */}
           </div>
 
-          <form onSubmit={handleSearch} className="relative hidden md:block max-w-xl w-full mx-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full pl-10 pr-4 h-10 rounded-full border-gray-300"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+          <form onSubmit={handleSearch} className="relative max-w-xl w-full mx-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search..."
+                className="w-full pl-10 pr-4 h-10 rounded-full border-gray-300"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           </form>
 
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-1">
+            <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-1 font-medium">
               <Bell className="h-4 w-4 mr-1" />
               Create DealAlert
             </Button>
@@ -273,7 +293,7 @@ export function Navbar() {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="font-normal">
+                  <Button variant="ghost" size="sm" className="font-medium">
                     <User className="h-4 w-4 mr-1" />
                     <span className="hidden md:inline">
                       {user.user_metadata?.username || user.email?.split("@")[0]}
@@ -309,8 +329,9 @@ export function Navbar() {
             <Dialog open={isPostDealOpen} onOpenChange={setIsPostDealOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-hotukdeals-red hover:bg-red-600 text-white rounded-full" size="sm">
-                  <PlusCircle className="mr-1 h-4 w-4" />
-                  <span>Post</span>
+                  <PlusCircle className="mr-1 h-4 w-4 md:hidden" />
+                  <span className="hidden md:inline mr-1">Post</span>
+                  <span className="md:hidden">Post</span>
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[600px]">
@@ -324,6 +345,127 @@ export function Navbar() {
               </DialogContent>
             </Dialog>
           </div>
+        </div>
+
+        {/* Secondary Navigation */}
+        <div className="flex border-t border-gray-100 overflow-x-auto scrollbar-hide">
+          <div className="flex items-center px-4 py-2 space-x-6">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium">
+                  <Grid className="h-4 w-4 mr-1" />
+                  Categories
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                {popularCategories.map((category) => (
+                  <DropdownMenuItem key={category.name} asChild>
+                    <Link href={category.href}>{category.name}</Link>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/categories" className="text-hotukdeals-red">
+                    View all categories
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium">
+                  <Tag className="h-4 w-4 mr-1" />
+                  Discount codes
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem asChild>
+                  <Link href="/coupons/popular">Popular</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/coupons/new">New</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/coupons/expiring">Expiring Soon</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium" asChild>
+              <Link href="/deals">
+                <ShoppingBag className="h-4 w-4 mr-1" />
+                Deals
+              </Link>
+            </Button>
+
+            <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium" asChild>
+              <Link href="/freebies">
+                <Heart className="h-4 w-4 mr-1" />
+                Freebies
+              </Link>
+            </Button>
+
+            <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium" asChild>
+              <Link href="/discussion">
+                <MessageSquare className="h-4 w-4 mr-1" />
+                Discussion
+              </Link>
+            </Button>
+          </div>
+        </div>
+
+        {/* Tabs Navigation */}
+        <div className="flex border-t border-gray-100 justify-between items-center px-4">
+          <Tabs defaultValue="for-you" className="w-full" value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="bg-transparent h-10 p-0">
+              <TabsTrigger
+                value="for-you"
+                className={cn(
+                  "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-hotukdeals-red data-[state=active]:shadow-none",
+                  activeTab === "for-you" ? "text-hotukdeals-red font-medium" : "text-gray-600",
+                )}
+              >
+                For you
+              </TabsTrigger>
+              <TabsTrigger
+                value="hottest"
+                className={cn(
+                  "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-hotukdeals-red data-[state=active]:shadow-none",
+                  activeTab === "hottest" ? "text-hotukdeals-red font-medium" : "text-gray-600",
+                )}
+              >
+                Hottest
+              </TabsTrigger>
+              <TabsTrigger
+                value="is-called"
+                className={cn(
+                  "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-hotukdeals-red data-[state=active]:shadow-none",
+                  activeTab === "is-called" ? "text-hotukdeals-red font-medium" : "text-gray-600",
+                )}
+              >
+                Is called
+              </TabsTrigger>
+              <TabsTrigger
+                value="new"
+                className={cn(
+                  "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-hotukdeals-red data-[state=active]:shadow-none",
+                  activeTab === "new" ? "text-hotukdeals-red font-medium" : "text-gray-600",
+                )}
+              >
+                New
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <Button variant="outline" size="sm" className="flex items-center gap-1 ml-auto">
+            Filter
+            <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-hotukdeals-red text-[10px] font-medium text-white">
+              1
+            </span>
+          </Button>
         </div>
       </div>
     </header>
