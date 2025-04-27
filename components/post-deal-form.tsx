@@ -14,9 +14,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
-import { useMediaQuery } from "@/hooks/use-media-query"
 
 interface PostDealFormProps {
   onSuccess?: () => void
@@ -58,7 +58,7 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
   const { user } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
-  const isMobile = useMediaQuery("(max-width: 768px)")
+  const isMobile = useIsMobile()
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -135,155 +135,48 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
   }
 
   const formContent = (
-    <ScrollArea className="max-h-[80vh] pr-4">
-      <div className="p-1">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
+    <div className="pr-1">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base">Title</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="e.g. 50% off Sony WH-1000XM4 Headphones"
+                    {...field}
+                    disabled={isLoading}
+                    className="h-10 sm:h-11"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
+          />
 
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
-              name="title"
+              name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base">Title</FormLabel>
+                  <FormLabel className="text-base">Current Price (£)</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g. 50% off Sony WH-1000XM4 Headphones"
-                      {...field}
-                      disabled={isLoading}
-                      className="h-10 sm:h-11"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base">Current Price (£)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="e.g. 199.99"
-                        {...field}
-                        disabled={isLoading}
-                        className="h-10 sm:h-11"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="originalPrice"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base">Original Price (£) (Optional)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="e.g. 299.99"
-                        {...field}
-                        value={field.value || ""}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : "")}
-                        disabled={isLoading}
-                        className="h-10 sm:h-11"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="merchant"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base">Merchant</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Amazon" {...field} disabled={isLoading} className="h-10 sm:h-11" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base">Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
-                      <FormControl>
-                        <SelectTrigger className="h-10 sm:h-11">
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
-                            {cat}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base">Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Provide details about the deal..."
-                      rows={4}
-                      {...field}
-                      disabled={isLoading}
-                      className="min-h-[100px] sm:min-h-[120px] resize-y"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="dealUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-base">Deal URL</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="url"
-                      placeholder="https://example.com/deal"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="e.g. 199.99"
                       {...field}
                       disabled={isLoading}
                       className="h-10 sm:h-11"
@@ -296,22 +189,38 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
 
             <FormField
               control={form.control}
-              name="imageUrl"
+              name="originalPrice"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base">Image URL (Optional)</FormLabel>
+                  <FormLabel className="text-base">Original Price (£) (Optional)</FormLabel>
                   <FormControl>
                     <Input
-                      type="url"
-                      placeholder="https://example.com/image.jpg"
-                      {...field}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="e.g. 299.99"
+                      value={field.value || ""}
+                      onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : "")}
                       disabled={isLoading}
                       className="h-10 sm:h-11"
                     />
                   </FormControl>
-                  <FormDescription className="text-xs sm:text-sm">
-                    Providing an image will make your deal more attractive
-                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="merchant"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base">Merchant</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Amazon" {...field} disabled={isLoading} className="h-10 sm:h-11" />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -319,46 +228,146 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
 
             <FormField
               control={form.control}
-              name="expiresAt"
+              name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base">Expiry Date (Optional)</FormLabel>
-                  <FormControl>
-                    <Input type="datetime-local" {...field} disabled={isLoading} className="h-10 sm:h-11" />
-                  </FormControl>
+                  <FormLabel className="text-base">Category</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
+                    <FormControl>
+                      <SelectTrigger className="h-10 sm:h-11">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+          </div>
 
-            <div className="pt-2">
-              <Button
-                type="submit"
-                className="w-full bg-hotukdeals-red hover:bg-opacity-90 text-white h-11 sm:h-12 text-base"
-                disabled={isLoading}
-              >
-                {isLoading ? "Posting..." : "Post Deal"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </div>
-    </ScrollArea>
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base">Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Provide details about the deal..."
+                    rows={4}
+                    {...field}
+                    disabled={isLoading}
+                    className="min-h-[100px] sm:min-h-[120px] resize-y"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="dealUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base">Deal URL</FormLabel>
+                <FormControl>
+                  <Input
+                    type="url"
+                    placeholder="https://example.com/deal"
+                    {...field}
+                    disabled={isLoading}
+                    className="h-10 sm:h-11"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base">Image URL (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="url"
+                    placeholder="https://example.com/image.jpg"
+                    {...field}
+                    disabled={isLoading}
+                    className="h-10 sm:h-11"
+                  />
+                </FormControl>
+                <FormDescription className="text-xs sm:text-sm">
+                  Providing an image will make your deal more attractive
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="expiresAt"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base">Expiry Date (Optional)</FormLabel>
+                <FormControl>
+                  <Input type="datetime-local" {...field} disabled={isLoading} className="h-10 sm:h-11" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="pt-2">
+            <Button
+              type="submit"
+              className="w-full bg-hotukdeals-red hover:bg-opacity-90 text-white h-11 sm:h-12 text-base"
+              disabled={isLoading}
+            >
+              {isLoading ? "Posting..." : "Post Deal"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   )
 
   if (isMobile) {
     return (
       <Sheet open={isOpen} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="h-[90vh]">
+        <SheetContent side="bottom" className="h-[90vh] overflow-hidden flex flex-col">
           <SheetHeader className="mb-4">
             <SheetTitle>Post a New Deal</SheetTitle>
             <SheetDescription>Share a great deal with the community</SheetDescription>
           </SheetHeader>
-          {formContent}
+          <div className="flex-1 overflow-auto pb-8">{formContent}</div>
         </SheetContent>
       </Sheet>
     )
   }
 
-  return formContent
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle>Post a New Deal</DialogTitle>
+          <DialogDescription>
+            Share a great deal with the community. Fill out the form below with all the details.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex-1 overflow-auto pb-6">{formContent}</div>
+      </DialogContent>
+    </Dialog>
+  )
 }

@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useIsMobile } from "@/hooks/use-mobile"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
-import { useMediaQuery } from "@/hooks/use-media-query"
 
 interface SignupFormProps {
   onSuccess?: () => void
@@ -27,7 +28,7 @@ export function SignupForm({ onSuccess, isOpen, onOpenChange }: SignupFormProps)
   const [error, setError] = useState<string | null>(null)
   const { signUp } = useAuth()
   const { toast } = useToast()
-  const isMobile = useMediaQuery("(max-width: 768px)")
+  const isMobile = useIsMobile()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -149,5 +150,15 @@ export function SignupForm({ onSuccess, isOpen, onOpenChange }: SignupFormProps)
     )
   }
 
-  return formContent
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Sign Up</DialogTitle>
+          <DialogDescription>Create a new account to start posting deals</DialogDescription>
+        </DialogHeader>
+        {formContent}
+      </DialogContent>
+    </Dialog>
+  )
 }

@@ -140,6 +140,10 @@ export function Navbar() {
 
     return (
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t z-50 flex justify-around items-center h-14">
+      {/* <Link href="/" className="flex items-center gap-1">
+                    <Flame className="h-6 w-6 text-hotukdeals-red" />
+                    <span className="text-xl font-bold">DealHunter</span>
+                  </Link> */}
         <Sheet>
           <SheetTrigger asChild>
             <Button
@@ -277,26 +281,14 @@ export function Navbar() {
           <span className="text-xs">DealAlerts</span>
         </Button>
 
-        <Dialog open={isPostDealOpen} onOpenChange={setIsPostDealOpen}>
-          <DialogTrigger asChild>
-            <Button
-              variant="ghost"
-              className="flex flex-col items-center justify-center gap-1 h-auto py-2 rounded-none flex-1"
-            >
-              <Plus className="h-5 w-5" />
-              <span className="text-xs">Post</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Post a New Deal</DialogTitle>
-              <DialogDescription>
-                Share a great deal with the community. Fill out the form below with all the details.
-              </DialogDescription>
-            </DialogHeader>
-            <PostDealForm onSuccess={handleDealPosted} />
-          </DialogContent>
-        </Dialog>
+        <Button
+          variant="ghost"
+          className="flex flex-col items-center justify-center gap-1 h-auto py-2 rounded-none flex-1"
+          onClick={() => setIsPostDealOpen(true)}
+        >
+          <Plus className="h-5 w-5" />
+          <span className="text-xs">Post</span>
+        </Button>
 
         {user ? (
           <DropdownMenu>
@@ -363,11 +355,7 @@ export function Navbar() {
               </>
             ) : (
               <>
-                  <div className="flex items-center gap-4">
-                    <Link href="/" className="flex items-center gap-1">
-                    <Flame className="h-6 w-6 text-hotukdeals-red" />
-                    <span className="text-xl font-bold">DealHunter</span>
-                  </Link>
+                <div className="flex items-center gap-4">
                   <Sheet>
                     <SheetTrigger asChild>
                       <Button variant="outline" size="sm" className="border rounded-full flex items-center gap-2">
@@ -494,10 +482,10 @@ export function Navbar() {
                     </SheetContent>
                   </Sheet>
 
-                  {/* <Link href="/" className="flex items-center gap-1">
+                  <Link href="/" className="flex items-center gap-1">
                     <Flame className="h-6 w-6 text-hotukdeals-red" />
                     <span className="text-xl font-bold">DealHunter</span>
-                  </Link> */}
+                  </Link>
                 </div>
 
                 <form onSubmit={handleSearch} className="relative max-w-xl w-full mx-4">
@@ -706,6 +694,11 @@ export function Navbar() {
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
+
+      {/* Mobile Post Deal Form */}
+      {isMobile && (
+        <PostDealForm onSuccess={handleDealPosted} isOpen={isPostDealOpen} onOpenChange={setIsPostDealOpen} />
+      )}
     </>
   )
 }
