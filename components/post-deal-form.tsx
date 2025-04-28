@@ -343,31 +343,37 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
     </div>
   )
 
-  if (isMobile) {
+  // If this component is being used directly in a dialog or sheet (controlled by parent)
+  if (isOpen !== undefined && onOpenChange) {
+    if (isMobile) {
+      return (
+        <Sheet open={isOpen} onOpenChange={onOpenChange}>
+          <SheetContent side="bottom" className="h-[90vh] overflow-hidden flex flex-col">
+            <SheetHeader className="mb-4">
+              <SheetTitle>Post a New Deal</SheetTitle>
+              <SheetDescription>Share a great deal with the community</SheetDescription>
+            </SheetHeader>
+            <div className="flex-1 overflow-auto pb-8">{formContent}</div>
+          </SheetContent>
+        </Sheet>
+      )
+    }
+
     return (
-      <Sheet open={isOpen} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="h-[90vh] overflow-hidden flex flex-col">
-          <SheetHeader className="mb-4">
-            <SheetTitle>Post a New Deal</SheetTitle>
-            <SheetDescription>Share a great deal with the community</SheetDescription>
-          </SheetHeader>
-          <div className="flex-1 overflow-auto pb-8">{formContent}</div>
-        </SheetContent>
-      </Sheet>
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Post a New Deal</DialogTitle>
+            <DialogDescription>
+              Share a great deal with the community. Fill out the form below with all the details.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-auto pb-6">{formContent}</div>
+        </DialogContent>
+      </Dialog>
     )
   }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle>Post a New Deal</DialogTitle>
-          <DialogDescription>
-            Share a great deal with the community. Fill out the form below with all the details.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex-1 overflow-auto pb-6">{formContent}</div>
-      </DialogContent>
-    </Dialog>
-  )
+  // If this component is being used directly inside a dialog or sheet content (not controlling the dialog/sheet itself)
+  return formContent
 }

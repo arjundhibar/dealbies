@@ -37,17 +37,19 @@ import {
 } from "lucide-react"
 import { PostDealForm } from "@/components/post-deal-form"
 import { LoginForm } from "@/components/login-form"
+import { SignupForm } from "@/components/signup-form"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
 export function Navbar() {
   const { user, signOut } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
   const [isPostDealOpen, setIsPostDealOpen] = useState(false)
   const [isLoginOpen, setIsLoginOpen] = useState(false)
+  const [isSignupOpen, setIsSignupOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeTab, setActiveTab] = useState("for-you")
   const router = useRouter()
@@ -78,6 +80,10 @@ export function Navbar() {
     setIsLoginOpen(false)
   }
 
+  const handleSignupSuccess = () => {
+    setIsSignupOpen(false)
+  }
+
   const mainCategories = [
     { name: "All Deals", href: "/", icon: Flame },
     { name: "Vouchers", href: "/coupons", icon: ShoppingBag },
@@ -92,8 +98,8 @@ export function Navbar() {
     { name: "Travel", href: "/category/travel" },
   ]
 
-  // Login button/link that handles both mobile and desktop cases
-  const LoginButton = () => {
+  // Auth button/link that handles both login and signup for mobile and desktop cases
+  const AuthButton = () => {
     if (isMobile) {
       return (
         <Sheet open={isLoginOpen} onOpenChange={setIsLoginOpen}>
@@ -104,14 +110,28 @@ export function Navbar() {
               className="font-medium flex flex-col items-center justify-center gap-1 h-auto py-2"
             >
               <User className="h-5 w-5" />
-              <span className="text-xs">Log in</span>
+              <span className="text-xs">Account</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="bottom" className="h-[80vh]">
-            <SheetHeader className="mb-4">
-              <SheetTitle>Log In</SheetTitle>
-            </SheetHeader>
-            <LoginForm onSuccess={handleLoginSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
+            <Tabs defaultValue="login" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              </TabsList>
+              <TabsContent value="login">
+                <SheetHeader className="mb-4">
+                  <SheetTitle>Log In</SheetTitle>
+                </SheetHeader>
+                <LoginForm onSuccess={handleLoginSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
+              </TabsContent>
+              <TabsContent value="signup">
+                <SheetHeader className="mb-4">
+                  <SheetTitle>Sign Up</SheetTitle>
+                </SheetHeader>
+                <SignupForm onSuccess={handleSignupSuccess} />
+              </TabsContent>
+            </Tabs>
           </SheetContent>
         </Sheet>
       )
@@ -123,12 +143,27 @@ export function Navbar() {
           <User className="h-4 w-4 mr-2" />
           Login or Register
         </Button>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Log In</DialogTitle>
-            <DialogDescription>Enter your credentials to access your account</DialogDescription>
-          </DialogHeader>
-          <LoginForm onSuccess={handleLoginSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
+        <DialogContent className="sm:max-w-[500px]">
+          <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+            <TabsContent value="login">
+              <DialogHeader className="mb-4">
+                <DialogTitle>Log In</DialogTitle>
+                <DialogDescription>Enter your credentials to access your account</DialogDescription>
+              </DialogHeader>
+              <LoginForm onSuccess={handleLoginSuccess} />
+            </TabsContent>
+            <TabsContent value="signup">
+              <DialogHeader className="mb-4">
+                <DialogTitle>Sign Up</DialogTitle>
+                <DialogDescription>Create a new account to start posting deals</DialogDescription>
+              </DialogHeader>
+              <SignupForm onSuccess={handleSignupSuccess} />
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     )
@@ -140,10 +175,10 @@ export function Navbar() {
 
     return (
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t z-50 flex justify-around items-center h-14">
-      {/* <Link href="/" className="flex items-center gap-1">
-                    <Flame className="h-6 w-6 text-hotukdeals-red" />
-                    <span className="text-xl font-bold">DealHunter</span>
-                  </Link> */}
+        <Link href="/" className="flex items-center gap-1">
+          <Flame className="h-6 w-6 text-hotukdeals-red" />
+          <span className="text-xl font-bold">DealHunter</span>
+        </Link>
         <Sheet>
           <SheetTrigger asChild>
             <Button
@@ -259,14 +294,8 @@ export function Navbar() {
                     onClick={() => setIsLoginOpen(true)}
                     className="block w-full rounded-md bg-hotukdeals-red px-3 py-2 text-center text-sm font-medium text-white hover:bg-red-600"
                   >
-                    Log In
+                    Log In / Sign Up
                   </Button>
-                  <Link
-                    href="/signup"
-                    className="block w-full rounded-md border border-hotukdeals-red px-3 py-2 text-center text-sm font-medium text-hotukdeals-red hover:bg-red-50"
-                  >
-                    Sign Up
-                  </Link>
                 </div>
               )}
             </nav>
@@ -324,7 +353,7 @@ export function Navbar() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <LoginButton />
+          <AuthButton />
         )}
       </div>
     )
@@ -356,6 +385,11 @@ export function Navbar() {
             ) : (
               <>
                 <div className="flex items-center gap-4">
+                  <Link href="/" className="flex items-center gap-1">
+                    <Flame className="h-6 w-6 text-hotukdeals-red" />
+                    <span className="text-xl font-bold">DealHunter</span>
+                  </Link>
+
                   <Sheet>
                     <SheetTrigger asChild>
                       <Button variant="outline" size="sm" className="border rounded-full flex items-center gap-2">
@@ -468,24 +502,13 @@ export function Navbar() {
                               onClick={() => setIsLoginOpen(true)}
                               className="block w-full rounded-md bg-hotukdeals-red px-3 py-2 text-center text-sm font-medium text-white hover:bg-red-600"
                             >
-                              Log In
+                              Log In / Sign Up
                             </Button>
-                            <Link
-                              href="/signup"
-                              className="block w-full rounded-md border border-hotukdeals-red px-3 py-2 text-center text-sm font-medium text-hotukdeals-red hover:bg-red-50"
-                            >
-                              Sign Up
-                            </Link>
                           </div>
                         )}
                       </nav>
                     </SheetContent>
                   </Sheet>
-
-                  <Link href="/" className="flex items-center gap-1">
-                    <Flame className="h-6 w-6 text-hotukdeals-red" />
-                    <span className="text-xl font-bold">DealHunter</span>
-                  </Link>
                 </div>
 
                 <form onSubmit={handleSearch} className="relative max-w-xl w-full mx-4">
@@ -540,7 +563,7 @@ export function Navbar() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   ) : (
-                    <LoginButton />
+                    <AuthButton />
                   )}
 
                   <Dialog open={isPostDealOpen} onOpenChange={setIsPostDealOpen}>
@@ -551,14 +574,16 @@ export function Navbar() {
                         <span className="md:hidden">Post</span>
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px]">
+                    <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
                       <DialogHeader>
                         <DialogTitle>Post a New Deal</DialogTitle>
                         <DialogDescription>
                           Share a great deal with the community. Fill out the form below with all the details.
                         </DialogDescription>
                       </DialogHeader>
-                      <PostDealForm onSuccess={handleDealPosted} />
+                      <div className="flex-1 overflow-auto pb-6">
+                        <PostDealForm onSuccess={handleDealPosted} />
+                      </div>
                     </DialogContent>
                   </Dialog>
                 </div>
