@@ -1,7 +1,5 @@
 "use client"
 
-import { DialogTrigger } from "@/components/ui/dialog"
-
 import type React from "react"
 
 import { useState, useEffect } from "react"
@@ -129,7 +127,7 @@ export function Navbar() {
                 <SheetHeader className="mb-4">
                   <SheetTitle>Sign Up</SheetTitle>
                 </SheetHeader>
-                <SignupForm onSuccess={handleSignupSuccess} />
+                <SignupForm onSuccess={handleSignupSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
               </TabsContent>
             </Tabs>
           </SheetContent>
@@ -161,7 +159,7 @@ export function Navbar() {
                 <DialogTitle>Sign Up</DialogTitle>
                 <DialogDescription>Create a new account to start posting deals</DialogDescription>
               </DialogHeader>
-              <SignupForm onSuccess={handleSignupSuccess} />
+              <SignupForm onSuccess={handleSignupSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
             </TabsContent>
           </Tabs>
         </DialogContent>
@@ -175,10 +173,7 @@ export function Navbar() {
 
     return (
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t z-50 flex justify-around items-center h-14">
-        <Link href="/" className="flex items-center gap-1">
-          <Flame className="h-6 w-6 text-hotukdeals-red" />
-          <span className="text-xl font-bold">DealHunter</span>
-        </Link>
+        
         <Sheet>
           <SheetTrigger asChild>
             <Button
@@ -313,7 +308,13 @@ export function Navbar() {
         <Button
           variant="ghost"
           className="flex flex-col items-center justify-center gap-1 h-auto py-2 rounded-none flex-1"
-          onClick={() => setIsPostDealOpen(true)}
+          onClick={() => {
+            if (user) {
+              setIsPostDealOpen(true)
+            } else {
+              setIsLoginOpen(true)
+            }
+          }}
         >
           <Plus className="h-5 w-5" />
           <span className="text-xs">Post</span>
@@ -566,26 +567,37 @@ export function Navbar() {
                     <AuthButton />
                   )}
 
-                  <Dialog open={isPostDealOpen} onOpenChange={setIsPostDealOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="bg-hotukdeals-red hover:bg-red-600 text-white rounded-full" size="sm">
-                        <PlusCircle className="mr-1 h-4 w-4 md:hidden" />
-                        <span className="hidden md:inline mr-1">Post</span>
-                        <span className="md:hidden">Post</span>
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
-                      <DialogHeader>
-                        <DialogTitle>Post a New Deal</DialogTitle>
-                        <DialogDescription>
-                          Share a great deal with the community. Fill out the form below with all the details.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="flex-1 overflow-auto pb-6">
-                        <PostDealForm onSuccess={handleDealPosted} />
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <Button
+                    className="bg-hotukdeals-red hover:bg-red-600 text-white rounded-full"
+                    size="sm"
+                    onClick={() => {
+                      if (user) {
+                        setIsPostDealOpen(true)
+                      } else {
+                        setIsLoginOpen(true)
+                      }
+                    }}
+                  >
+                    <PlusCircle className="mr-1 h-4 w-4 md:hidden" />
+                    <span className="hidden md:inline mr-1">Post</span>
+                    <span className="md:hidden">Post</span>
+                  </Button>
+
+                  {user && (
+                    <Dialog open={isPostDealOpen} onOpenChange={setIsPostDealOpen}>
+                      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
+                        <DialogHeader>
+                          <DialogTitle>Post a New Deal</DialogTitle>
+                          <DialogDescription>
+                            Share a great deal with the community. Fill out the form below with all the details.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="flex-1 overflow-auto pb-6">
+                          <PostDealForm onSuccess={handleDealPosted} />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
                 </div>
               </>
             )}
@@ -721,7 +733,7 @@ export function Navbar() {
       <MobileBottomNav />
 
       {/* Mobile Post Deal Form */}
-      {isMobile && (
+      {isMobile && user && (
         <PostDealForm onSuccess={handleDealPosted} isOpen={isPostDealOpen} onOpenChange={setIsPostDealOpen} />
       )}
     </>
