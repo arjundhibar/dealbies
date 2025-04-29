@@ -50,6 +50,7 @@ const formSchema = z.object({
   expiresAt: z.string().optional(),
 })
 
+//remove the form 
 type FormValues = z.infer<typeof formSchema>
 
 export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormProps) {
