@@ -41,6 +41,7 @@ import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { AppSidebar } from "@/components/app-sidebar"
 
 export function Navbar() {
   const { user, signOut } = useAuth()
@@ -53,6 +54,7 @@ export function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const isMobile = useIsMobile()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -173,129 +175,14 @@ export function Navbar() {
 
     return (
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t z-50 flex justify-around items-center h-14">
-        
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              className="flex flex-col items-center justify-center gap-1 h-auto py-2 rounded-none flex-1"
-            >
-              <Menu className="h-5 w-5" />
-              <span className="text-xs">Menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[300px] sm:w-[350px]">
-            <SheetHeader className="pb-6">
-              <SheetTitle className="flex items-center gap-2">
-                <Flame className="h-6 w-6 text-hotukdeals-red" />
-                <span className="text-xl font-bold">DealHunter</span>
-              </SheetTitle>
-            </SheetHeader>
-
-            <div className="mb-4">
-              <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search deals..."
-                  className="pl-8 pr-4"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </form>
-            </div>
-
-            <nav className="space-y-6">
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground">Main</h3>
-                <div className="space-y-1">
-                  {mainCategories.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={cn(
-                        "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium",
-                        pathname === item.href ? "bg-hotukdeals-red text-white" : "hover:bg-muted",
-                      )}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground">Categories</h3>
-                <div className="space-y-1">
-                  {popularCategories.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={cn(
-                        "block rounded-md px-3 py-2 text-sm font-medium",
-                        pathname === item.href ? "bg-hotukdeals-red text-white" : "hover:bg-muted",
-                      )}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                  <Link
-                    href="/categories"
-                    className="block rounded-md px-3 py-2 text-sm font-medium text-hotukdeals-red hover:bg-muted"
-                  >
-                    View all categories
-                  </Link>
-                </div>
-              </div>
-
-              {user ? (
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-muted-foreground">Account</h3>
-                  <div className="space-y-1">
-                    <Link
-                      href="/profile"
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-                    >
-                      <User className="h-4 w-4" />
-                      Profile
-                    </Link>
-                    <Link
-                      href="/my-deals"
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-                    >
-                      <ShoppingBag className="h-4 w-4" />
-                      My Deals
-                    </Link>
-                    <Link
-                      href="/saved"
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-                    >
-                      <Heart className="h-4 w-4" />
-                      Saved Deals
-                    </Link>
-                    <button
-                      onClick={() => signOut()}
-                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Log Out
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Button
-                    onClick={() => setIsLoginOpen(true)}
-                    className="block w-full rounded-md bg-hotukdeals-red px-3 py-2 text-center text-sm font-medium text-white hover:bg-red-600"
-                  >
-                    Log In / Sign Up
-                  </Button>
-                </div>
-              )}
-            </nav>
-          </SheetContent>
-        </Sheet>
+        <Button
+          variant="ghost"
+          className="flex flex-col items-center justify-center gap-1 h-auto py-2 rounded-none flex-1"
+          onClick={() => setIsSidebarOpen(true)}
+        >
+          <Menu className="h-5 w-5" />
+          <span className="text-xs">Menu</span>
+        </Button>
 
         <Button
           variant="ghost"
@@ -362,6 +249,12 @@ export function Navbar() {
 
   return (
     <>
+      {/* Sidebar Sheet */}
+      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+        <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0" hideCloseButton>
+          <AppSidebar onClose={() => setIsSidebarOpen(false)} />
+        </SheetContent>
+      </Sheet>
       <header className={cn("sticky top-0 z-40 w-full bg-white border-b", isScrolled && "shadow-sm")}>
         <div className="container mx-auto">
           {/* Top Navigation Bar */}
@@ -391,125 +284,15 @@ export function Navbar() {
                     <span className="text-xl font-bold">DealHunter</span>
                   </Link>
 
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" size="sm" className="border rounded-full flex items-center gap-2">
-                        <Menu className="h-4 w-4" />
-                        <span className="font-medium">Menu</span>
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="w-[300px] sm:w-[350px]">
-                      <SheetHeader className="pb-6">
-                        <SheetTitle className="flex items-center gap-2">
-                          <Flame className="h-6 w-6 text-hotukdeals-red" />
-                          <span className="text-xl font-bold">DealHunter</span>
-                        </SheetTitle>
-                      </SheetHeader>
-
-                      <div className="mb-4">
-                        <form onSubmit={handleSearch} className="relative">
-                          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            type="search"
-                            placeholder="Search deals..."
-                            className="pl-8 pr-4"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                          />
-                        </form>
-                      </div>
-
-                      <nav className="space-y-6">
-                        <div className="space-y-2">
-                          <h3 className="text-sm font-medium text-muted-foreground">Main</h3>
-                          <div className="space-y-1">
-                            {mainCategories.map((item) => (
-                              <Link
-                                key={item.name}
-                                href={item.href}
-                                className={cn(
-                                  "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium",
-                                  pathname === item.href ? "bg-hotukdeals-red text-white" : "hover:bg-muted",
-                                )}
-                              >
-                                <item.icon className="h-4 w-4" />
-                                {item.name}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <h3 className="text-sm font-medium text-muted-foreground">Categories</h3>
-                          <div className="space-y-1">
-                            {popularCategories.map((item) => (
-                              <Link
-                                key={item.name}
-                                href={item.href}
-                                className={cn(
-                                  "block rounded-md px-3 py-2 text-sm font-medium",
-                                  pathname === item.href ? "bg-hotukdeals-red text-white" : "hover:bg-muted",
-                                )}
-                              >
-                                {item.name}
-                              </Link>
-                            ))}
-                            <Link
-                              href="/categories"
-                              className="block rounded-md px-3 py-2 text-sm font-medium text-hotukdeals-red hover:bg-muted"
-                            >
-                              View all categories
-                            </Link>
-                          </div>
-                        </div>
-
-                        {user ? (
-                          <div className="space-y-2">
-                            <h3 className="text-sm font-medium text-muted-foreground">Account</h3>
-                            <div className="space-y-1">
-                              <Link
-                                href="/profile"
-                                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-                              >
-                                <User className="h-4 w-4" />
-                                Profile
-                              </Link>
-                              <Link
-                                href="/my-deals"
-                                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-                              >
-                                <ShoppingBag className="h-4 w-4" />
-                                My Deals
-                              </Link>
-                              <Link
-                                href="/saved"
-                                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-                              >
-                                <Heart className="h-4 w-4" />
-                                Saved Deals
-                              </Link>
-                              <button
-                                onClick={() => signOut()}
-                                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm font-medium hover:bg-muted"
-                              >
-                                <LogOut className="h-4 w-4" />
-                                Log Out
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="space-y-2">
-                            <Button
-                              onClick={() => setIsLoginOpen(true)}
-                              className="block w-full rounded-md bg-hotukdeals-red px-3 py-2 text-center text-sm font-medium text-white hover:bg-red-600"
-                            >
-                              Log In / Sign Up
-                            </Button>
-                          </div>
-                        )}
-                      </nav>
-                    </SheetContent>
-                  </Sheet>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border rounded-full flex items-center gap-2"
+                    onClick={() => setIsSidebarOpen(true)}
+                  >
+                    <Menu className="h-4 w-4" />
+                    <span className="font-medium">Menu</span>
+                  </Button>
                 </div>
 
                 <form onSubmit={handleSearch} className="relative max-w-xl w-full mx-4">
