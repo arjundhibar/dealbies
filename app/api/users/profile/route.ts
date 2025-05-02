@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { supabase } from "@/lib/supabase"
+import { error } from "console"
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const email = searchParams.get("email")
+    if (!supabase) {
+      return NextResponse.json({error : "Internal Server Error!"})
+    }
 
     // Get user from session if email not provided
     if (!email) {
@@ -59,6 +63,9 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  if (!supabase) {
+      return NextResponse.json({error : "Internal Server Error!"})
+    }
   try {
     const {
       data: { session },

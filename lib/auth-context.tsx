@@ -124,42 +124,70 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Make sure the signIn function properly authenticates with Supabase
   const signIn = async (email: string, password: string) => {
-    if (!supabase) throw new Error("Supabase client not initialized")
+  if (!supabase) throw new Error("Supabase client not initialized");
 
-    try {
-      const { error, data } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+  try {
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (error) {
-        // If email is not confirmed, try to resend the confirmation email
-        if (error.message.includes("Email not confirmed")) {
-          const { error: resendError } = await supabase.auth.resend({
-            type: "signup",
-            email,
-          })
-
-          if (resendError) {
-            throw new Error("Failed to resend confirmation email. Please try again later.")
-          }
-
-          throw new Error("Please check your email for the confirmation link. We've resent it to you.")
-        }
-        throw error
-      }
-
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in",
-      })
-
-      router.push("/")
-    } catch (error: any) {
-      console.error("Error signing in:", error)
-      throw new Error(error.message || "Invalid email or password")
+    if (error) {
+      console.error("Error signing in:", error.message);
+      throw new Error("Failed to sign in");
     }
+
+    // Get the session using getSession() instead of directly accessing session
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.error("Error fetching session:", sessionError.message);
+      return;
+    }
+
+    const session = sessionData?.session;
+    if (!session || !session.user) {
+      console.error("Session or user not found");
+      return;
+    }
+
+    // Now, we have the access token in the session
+    const accessToken = session.access_token; // Access the token from the session directly
+    if (!accessToken) {
+      console.error("Access token not found in session");
+      return;
+    }
+
+    // Now user is authenticated, safe to sync with Neon
+    const response = await fetch("/api/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        username: data.user.user_metadata.username || email.split("@")[0],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error syncing user to Neon:", errorData.error);
+    }
+
+    toast({
+      title: "Welcome back!",
+      description: "You have successfully logged in",
+    });
+
+    router.push("/");
+  } catch (error: any) {
+    console.error("Error signing in:", error);
+    throw new Error(error.message || "Invalid email or password");
   }
+};
+
+
+
 
   const signOut = async () => {
     if (!supabase) throw new Error("Supabase client not initialized")
