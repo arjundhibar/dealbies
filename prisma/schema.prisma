@@ -16,6 +16,7 @@ model User {
   avatarUrl  String?     @map("avatar_url")
   createdAt  DateTime    @default(now()) @map("created_at")
   updatedAt  DateTime    @default(now()) @map("updated_at")
+  role       Role        @default(USER)
   comments   Comment[]
   coupons    Coupon[]
   deals      Deal[]
@@ -114,4 +115,9 @@ model SavedDeal {
 
   @@unique([userId, dealId])
   @@map("saved_deals")
+}
+
+enum Role {
+  USER
+  ADMIN
 }
