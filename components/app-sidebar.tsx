@@ -25,6 +25,8 @@ import {
   Dumbbell,
   Phone,
   Wallet,
+  Bell,
+  Plane,
 } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
@@ -37,13 +39,14 @@ import { useTheme } from "next-themes"
 
 interface AppSidebarProps {
   onClose?: () => void
+  initialView?: "main" | "categories"
 }
 
-export function AppSidebar({ onClose }: AppSidebarProps) {
+export function AppSidebar({ onClose, initialView = "main" }: AppSidebarProps) {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const { user } = useAuth()
-  const [view, setView] = useState<"main" | "categories">("main")
+  const [view, setView] = useState<"main" | "categories">(initialView)
 
   const categories = [
     { name: "Electronics", icon: Smartphone, href: "/category/electronics" },
@@ -59,6 +62,8 @@ export function AppSidebar({ onClose }: AppSidebarProps) {
     { name: "Sports & Outdoors", icon: Dumbbell, href: "/category/sports" },
     { name: "Telecom & Internet", icon: Phone, href: "/category/telecom" },
     { name: "Money Matters & Insurance", icon: Wallet, href: "/category/money" },
+    { name: "Services and Contracts", icon: Bell, href: "/category/services-and-contracts" },
+    { name: "To Travel", icon: Plane, href: "/category/to-travel" },
   ]
 
   if (view === "categories") {

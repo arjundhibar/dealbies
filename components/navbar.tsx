@@ -55,6 +55,7 @@ export function Navbar() {
   const pathname = usePathname()
   const isMobile = useIsMobile()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [view, setView] = useState<"main" | "categories">("main")
 
   useEffect(() => {
     const handleScroll = () => {
@@ -174,7 +175,7 @@ export function Navbar() {
     if (!isMobile) return null
 
     return (
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t z-50 flex justify-around items-center h-14">
+      <div className="fixed bottom-0 left-0 right-0 bg-background text-foreground border-t z-50 flex justify-around items-center h-14">
         <Button
           variant="ghost"
           className="flex flex-col items-center justify-center gap-1 h-auto py-2 rounded-none flex-1"
@@ -252,10 +253,12 @@ export function Navbar() {
       {/* Sidebar Sheet */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0" hideCloseButton>
-          <AppSidebar onClose={() => setIsSidebarOpen(false)} />
+          <AppSidebar onClose={() => setIsSidebarOpen(false)} initialView={view} />
         </SheetContent>
       </Sheet>
-      <header className={cn("sticky top-0 z-40 w-full bg-white border-b", isScrolled && "shadow-sm")}>
+      <header
+        className={cn("sticky top-0 z-40 w-full bg-background text-foreground border-b", isScrolled && "shadow-sm")}
+      >
         <div className="container mx-auto">
           {/* Top Navigation Bar */}
           <div className={cn("flex h-16 items-center justify-between px-4", isMobile && "h-14")}>
@@ -387,30 +390,21 @@ export function Navbar() {
           </div>
 
           {/* Secondary Navigation - Categories */}
-          <div className={cn("flex border-t border-gray-100 overflow-x-auto scrollbar-hide", isMobile && "text-sm")}>
+          <div className={cn("flex  border-border overflow-x-auto scrollbar-hide", isMobile && "text-sm")}>
             <div className="flex items-center px-4 py-2 space-x-6">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium">
-                    <Grid className="h-4 w-4 mr-1" />
-                    Categories
-                    <ChevronDown className="h-3 w-3 ml-1" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56">
-                  {popularCategories.map((category) => (
-                    <DropdownMenuItem key={category.name} asChild>
-                      <Link href={category.href}>{category.name}</Link>
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/categories" className="text-hotukdeals-red">
-                      View all categories
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-1 font-medium"
+                onClick={() => {
+                  setIsSidebarOpen(true)
+                  // Access the AppSidebar's setView function by modifying the state before opening
+                  setView("categories")
+                }}
+              >
+                <Grid className="h-4 w-4 mr-1" />
+                Categories
+              </Button>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -457,7 +451,7 @@ export function Navbar() {
           </div>
 
           {/* Tabs Navigation */}
-          <div className="flex border-t border-gray-100 justify-between items-center px-4">
+          <div className="flex  border-border justify-between items-center px-4">
             <Tabs defaultValue="for-you" className="w-full" value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="bg-transparent h-10 p-0">
                 <TabsTrigger
