@@ -87,11 +87,17 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
 
       // Log the values being sent
       console.log("Submitting deal with values:", values)
-
+    
+      
+      const token = localStorage.getItem("auth_token");
+       if (!token) {
+      throw new Error("Missing authentication token")
+    }
       const response = await fetch("/api/deals", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(values),
       })

@@ -173,7 +173,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const errorData = await response.json();
       console.error("Error syncing user to Neon:", errorData.error);
     }
-
+    localStorage.setItem("auth_token", accessToken);
     toast({
       title: "Welcome back!",
       description: "You have successfully logged in",

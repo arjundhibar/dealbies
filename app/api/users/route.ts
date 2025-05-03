@@ -64,7 +64,8 @@ export async function POST(request: Request) {
     const existingUser = await prisma.user.findUnique({ where: { email } })
 
     if (existingUser) {
-      return NextResponse.json({ error: "User already exists" }, { status: 400 })
+      const { password: _, ...userWithoutPassword } = existingUser as any
+  return NextResponse.json(userWithoutPassword, { status: 200 })
     }
 
     // ✅ Create user in Neon DB
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
         avatarUrl: `/placeholder.svg?height=40&width=40&text=${(username || email.charAt(0)).toUpperCase()}`,
         createdAt: new Date(),
         updatedAt: new Date(),
+
       },
     })
 

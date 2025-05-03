@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getSupabase } from "@/lib/supabase"
+import { Prisma } from "@prisma/client"
+import { error } from "console"
 
 // Helper function to check if Prisma is initialized
 async function isPrismaInitialized() {
@@ -123,158 +125,119 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    // Check if Prisma is initialized
+    // 1. Check Prisma connection
     if (!(await isPrismaInitialized())) {
-      return NextResponse.json({ error: "Database connection not available. Please try again later." }, { status: 503 })
+      return NextResponse.json({ error: "Database connection not available." }, { status: 503 })
     }
 
-    // Ensure the request has the correct content type
+    // 2. Validate Content-Type
     const contentType = request.headers.get("content-type")
-    if (!contentType || !contentType.includes("application/json")) {
+    if (!contentType?.includes("application/json")) {
       return NextResponse.json({ error: "Content-Type must be application/json" }, { status: 400 })
     }
 
-    // Parse the request body
+    // 3. Parse request body
     let requestBody
     try {
       requestBody = await request.json()
     } catch (error) {
-      console.error("Error parsing request body:", error)
       return NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 })
     }
 
     const { title, description, imageUrl, price, originalPrice, merchant, category, dealUrl, expiresAt } = requestBody
 
-    // Validate required fields
     if (!title || !description || !merchant || !category || !dealUrl) {
-      return NextResponse.json(
-        { error: "Missing required fields. Please fill in all required information." },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // Get user from session
+    // 4. Get Supabase user from Authorization token
     const supabase = getSupabase()
+    const authHeader = request.headers.get("Authorization")
+    const token = authHeader?.replace("Bearer ", "")
+
     if (!supabase) {
-      return NextResponse.json({ error: "Authentication service unavailable" }, { status: 500 })
+      return NextResponse.json({error: "Internal Server Error!"})
+    }
+
+    if (!token) {
+      return NextResponse.json({ error: "Missing or invalid token" }, { status: 401 })
     }
 
     const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession()
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(token)
 
-    if (sessionError) {
-      console.error("Session error:", sessionError)
-      return NextResponse.json({ error: "Authentication error: " + sessionError.message }, { status: 401 })
+    if (userError || !user) {
+      return NextResponse.json({ error: "Unauthorized access" }, { status: 401 })
     }
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "You must be logged in to post a deal" }, { status: 401 })
-    }
+    // 5. Get or create user in your database
+    let dbUser = await prisma.user.findUnique({ where: { email: user.email! } })
 
-    // Find user in our database
-    let user
-    try {
-      user = await prisma.user.findUnique({
-        where: { email: session.user.email! },
-      })
-
-      if (!user) {
-        // If user doesn't exist in our database yet, create them
-        user = await prisma.user.create({
-          data: {
-            id: session.user.id,
-            email: session.user.email!,
-            username: session.user.user_metadata?.username || session.user.email!.split("@")[0],
-            password: "", // We don't need to store the password as Supabase handles authentication
-            avatarUrl: `/placeholder.svg?height=40&width=40&text=${(session.user.user_metadata?.username || session.user.email!.charAt(0)).toUpperCase()}`,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-        })
-      }
-    } catch (error) {
-      console.error("Error finding/creating user:", error)
-      return NextResponse.json(
-        {
-          error: "Your account is not properly registered. Please try logging out and back in.",
-        },
-        { status: 403 },
-      )
-    }
-
-    // Validate price format
-    let parsedPrice
-    try {
-      parsedPrice = price ? Number.parseFloat(price.toString()) : 0
-      if (isNaN(parsedPrice)) {
-        return NextResponse.json({ error: "Invalid price format" }, { status: 400 })
-      }
-    } catch (error) {
-      console.error("Price parsing error:", error)
-      return NextResponse.json({ error: "Invalid price format" }, { status: 400 })
-    }
-
-    // Validate original price format
-    let parsedOriginalPrice = null
-    if (originalPrice) {
-      try {
-        parsedOriginalPrice = Number.parseFloat(originalPrice.toString())
-        if (isNaN(parsedOriginalPrice)) {
-          return NextResponse.json({ error: "Invalid original price format" }, { status: 400 })
-        }
-      } catch (error) {
-        console.error("Original price parsing error:", error)
-        return NextResponse.json({ error: "Invalid original price format" }, { status: 400 })
-      }
-    }
-
-    // Create the deal
-    try {
-      const deal = await prisma.deal.create({
+    if (!dbUser) {
+      dbUser = await prisma.user.create({
         data: {
-          title,
-          description,
-          imageUrl: imageUrl || null,
-          price: parsedPrice,
-          originalPrice: parsedOriginalPrice,
-          merchant,
-          category,
-          dealUrl,
-          expiresAt: expiresAt ? new Date(expiresAt) : null,
-          userId: user.id,
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              username: true,
-              avatarUrl: true,
-            },
-          },
+          id: user.id,
+          email: user.email!,
+          username: user.user_metadata?.username || user.email!.split("@")[0],
+          avatarUrl: `/placeholder.svg?height=40&width=40&text=${(user.user_metadata?.username || user.email!.charAt(0)).toUpperCase()}`,
+          password: "", // Supabase handles auth
         },
       })
+    }
 
-      return NextResponse.json(
-        {
-          ...deal,
-          score: 0,
-          commentCount: 0,
-          postedBy: {
-            id: deal.user.id,
-            name: deal.user.username,
-            avatar: deal.user.avatarUrl,
+    // 6. Parse prices
+    let parsedPrice = price ? parseFloat(price) : 0
+    if (isNaN(parsedPrice)) return NextResponse.json({ error: "Invalid price format" }, { status: 400 })
+
+    let parsedOriginalPrice = originalPrice ? parseFloat(originalPrice) : null
+    if (originalPrice && parsedOriginalPrice !== null && isNaN(parsedOriginalPrice)) {
+
+      return NextResponse.json({ error: "Invalid original price format" }, { status: 400 })
+    }
+
+    // 7. Create the deal
+    const deal = await prisma.deal.create({
+      data: {
+        title,
+        description,
+        imageUrl: imageUrl || null,
+        price: parsedPrice,
+        originalPrice: parsedOriginalPrice,
+        merchant,
+        category,
+        dealUrl,
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
+        userId: dbUser.id,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            avatarUrl: true,
           },
         },
-        { status: 201 },
-      )
-    } catch (error) {
-      console.error("Error creating deal in database:", error)
-      return NextResponse.json({ error: "An error occurred while creating the deal in the database." }, { status: 500 })
-    }
+      },
+    })
+
+    // 8. Return response
+    return NextResponse.json(
+      {
+        ...deal,
+        score: 0,
+        commentCount: 0,
+        postedBy: {
+          id: deal.user.id,
+          name: deal.user.username,
+          avatar: deal.user.avatarUrl,
+        },
+      },
+      { status: 201 },
+    )
   } catch (error) {
     console.error("Unhandled error in POST /api/deals:", error)
-    return NextResponse.json({ error: "An unexpected error occurred. Please try again." }, { status: 500 })
+    return NextResponse.json({ error: "Unexpected server error" }, { status: 500 })
   }
 }

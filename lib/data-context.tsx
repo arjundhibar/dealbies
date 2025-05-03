@@ -222,7 +222,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     if (!currentUser.id || !currentUser.email) {
       throw new Error("Your account is not properly registered. Please try logging out and back in.")
     }
+    const token = localStorage.getItem("auth_token");
 
+if (!token) {
+  throw new Error("Missing authentication token. Please log in again.");
+}
     try {
       const response = await fetch("/api/deals", {
         method: "POST",
