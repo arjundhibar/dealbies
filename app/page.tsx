@@ -6,13 +6,13 @@ export default function Home() {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="all" className="w-full">
-        <div className="bg-white rounded-md border p-1">
+        {/* <div className="bg-white rounded-md border p-1">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="all">All Deals</TabsTrigger>
             <TabsTrigger value="popular">Popular</TabsTrigger>
             <TabsTrigger value="discussed">Most Discussed</TabsTrigger>
           </TabsList>
-        </div>
+        </div> */}
 
         <TabsContent value="all" className="mt-0">
           <DealsList />
