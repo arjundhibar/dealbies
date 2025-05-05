@@ -253,7 +253,11 @@ export function Navbar() {
       {/* Sidebar Sheet */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0" hideCloseButton>
-          <AppSidebar onClose={() => setIsSidebarOpen(false)} initialView={view} />
+          <AppSidebar
+            onClose={() => setIsSidebarOpen(false)}
+            initialView={view}
+            onLoginClick={() => setIsLoginOpen(true)}
+          />
         </SheetContent>
       </Sheet>
       <header
@@ -451,7 +455,7 @@ export function Navbar() {
           </div>
 
           {/* Tabs Navigation */}
-          <div className="flex  border-border justify-between items-center px-4">
+          <div className="flex border-border justify-between items-center px-4">
             <Tabs defaultValue="for-you" className="w-full" value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="bg-transparent h-10 p-0">
                 <TabsTrigger

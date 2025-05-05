@@ -40,9 +40,10 @@ import { useTheme } from "next-themes"
 interface AppSidebarProps {
   onClose?: () => void
   initialView?: "main" | "categories"
+  onLoginClick?: () => void
 }
 
-export function AppSidebar({ onClose, initialView = "main" }: AppSidebarProps) {
+export function AppSidebar({ onClose, initialView = "main", onLoginClick }: AppSidebarProps) {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
   const { user } = useAuth()
@@ -163,13 +164,21 @@ export function AppSidebar({ onClose, initialView = "main" }: AppSidebarProps) {
         <div className="space-y-3">
           <h3 className="text-xl font-bold">Account</h3>
 
-          <Link href="/login" className="flex items-center justify-between py-3 text-base" onClick={onClose}>
+          <button
+            className="flex items-center justify-between w-full py-3 text-base text-left"
+            onClick={() => {
+              if (onClose) onClose()
+              // We need to access the navbar's login state
+              // This will be passed as a prop
+              if (onLoginClick) onLoginClick()
+            }}
+          >
             <div className="flex items-center">
               <User className="h-6 w-6 mr-3" />
-              <span>Log in</span>
+              <span>Login or Register</span>
             </div>
             <ChevronRight className="h-6 w-6 text-muted-foreground" />
-          </Link>
+          </button>
         </div>
 
         {/* Appearance Section */}

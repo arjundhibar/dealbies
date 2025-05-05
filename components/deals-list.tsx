@@ -87,10 +87,10 @@ export function DealsList({ category, initialSort = "newest" }: DealsListProps) 
         <div className="flex flex-wrap items-center gap-2">
           <Dialog open={isPostDealOpen} onOpenChange={setIsPostDealOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-hotukdeals-red hover:bg-red-600 text-white" onClick={handlePostDealClick}>
+              {/* <Button className="bg-hotukdeals-red hover:bg-red-600 text-white" onClick={handlePostDealClick}>
                 <Plus className="mr-2 h-4 w-4" />
                 Post Deal
-              </Button>
+              </Button> */}
             </DialogTrigger>
             {user && (
               <DialogContent className="sm:max-w-[600px]">
