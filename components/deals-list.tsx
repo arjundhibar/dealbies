@@ -4,9 +4,8 @@ import { useState, useEffect } from "react"
 import { DealCard } from "@/components/deal-card"
 import { useData } from "@/lib/data-context"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
-import { Plus, Filter, ChevronDown } from "lucide-react"
+import { Plus } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -15,13 +14,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { PostDealForm } from "@/components/post-deal-form"
 import type { Deal } from "@/lib/types"
 import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface DealsListProps {
   category?: string
@@ -34,7 +31,6 @@ export function DealsList({ category, initialSort = "newest" }: DealsListProps) 
   const [sort, setSort] = useState(initialSort)
   const [filteredDeals, setFilteredDeals] = useState<Deal[]>([])
   const [isPostDealOpen, setIsPostDealOpen] = useState(false)
-  const [view, setView] = useState<"grid" | "list">("grid")
   const router = useRouter()
   const { toast } = useToast()
 
@@ -79,10 +75,10 @@ export function DealsList({ category, initialSort = "newest" }: DealsListProps) 
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 container mx-auto px-4 ">
       {/* Header section */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold">{category ? `${category} Deals` : "Latest Deals"}</h1>
+        <h1 className="text-xl font-bold text-foreground">{category ? `${category} Deals` : "Deals for you"}</h1>
 
         <div className="flex flex-wrap items-center gap-2">
           <Dialog open={isPostDealOpen} onOpenChange={setIsPostDealOpen}>
@@ -107,9 +103,10 @@ export function DealsList({ category, initialSort = "newest" }: DealsListProps) 
         </div>
       </div>
 
-      {/* Filters and sorting */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border bg-white p-3">
-        <div className="flex items-center gap-2">
+      {/* Filters and sorting - Removed grid/list toggle */}
+      <div className="">
+        {/* Filter and sort options commented out as they were in the original code */}
+        {/* <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="h-9">
@@ -137,40 +134,33 @@ export function DealsList({ category, initialSort = "newest" }: DealsListProps) 
               <SelectItem value="comments">Most Comments</SelectItem>
             </SelectContent>
           </Select>
-        </div>
+        </div> */}
 
-        <Tabs defaultValue="grid" value={view} onValueChange={(v) => setView(v as "grid" | "list")}>
-          <TabsList className="h-9">
-            <TabsTrigger value="grid" className="px-3">
-              Grid
-            </TabsTrigger>
-            <TabsTrigger value="list" className="px-3">
-              List
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        {/* Removed the grid/list toggle */}
       </div>
 
-      {/* Deals grid */}
+      {/* Deals list - Always in list view now */}
       {isLoading ? (
-        <div className="deal-card-grid">
+        <div className="space-y-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-lg border">
-              <Skeleton className="h-48 w-full rounded-t-lg" />
-              <div className="p-4 space-y-3">
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <div className="flex justify-between pt-2">
-                  <Skeleton className="h-8 w-20" />
-                  <Skeleton className="h-8 w-20" />
+            <div key={i} className="rounded-lg border bg-background">
+              <div className="flex flex-col md:flex-row">
+                <Skeleton className="h-48 w-full md:w-48 rounded-t-lg md:rounded-l-lg md:rounded-tr-none" />
+                <div className="p-4 space-y-3 flex-1">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <div className="flex justify-between pt-2">
+                    <Skeleton className="h-8 w-20" />
+                    <Skeleton className="h-8 w-20" />
+                  </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
       ) : filteredDeals.length === 0 ? (
-        <div className="rounded-lg border p-8 text-center">
+        <div className="rounded-lg border bg-background p-8 text-center">
           <h3 className="text-lg font-medium">No deals found</h3>
           <p className="text-muted-foreground mb-4">
             {category
@@ -198,7 +188,7 @@ export function DealsList({ category, initialSort = "newest" }: DealsListProps) 
           </Dialog>
         </div>
       ) : (
-        <div className={view === "grid" ? "deal-card-grid" : "space-y-4"}>
+        <div className="space-y-4">
           {filteredDeals.map((deal) => (
             <DealCard key={deal.id} deal={deal} />
           ))}

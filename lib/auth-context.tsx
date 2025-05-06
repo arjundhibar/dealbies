@@ -6,6 +6,7 @@ import { getSupabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import type { User, Session } from "@supabase/supabase-js"
 import { useToast } from "@/hooks/use-toast"
+import { NextResponse } from "next/server"
 
 type AuthContextType = {
   user: User | null
@@ -14,6 +15,7 @@ type AuthContextType = {
   signUp: (email: string, password: string, username: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
+  checkEmailExists: (email: string) => Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -68,6 +70,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getUser()
   }, [router, supabase])
+
+  const checkEmailExists = async (email: string): Promise<boolean> => {
+  try {
+    const res = await fetch(`/api/check-email?email=${encodeURIComponent(email)}`)
+    const data = await res.json()
+    return data.exists
+  } catch (error) {
+    console.error("Error checking email:", error)
+    return false
+  }
+}
 
   // Make sure the signUp function properly creates a user with Supabase
   const signUp = async (email: string, password: string, username: string) => {
@@ -210,7 +223,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, checkEmailExists }}>{children}</AuthContext.Provider>
   )
 }
 

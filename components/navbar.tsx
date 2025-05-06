@@ -34,13 +34,12 @@ import {
   Plus,
 } from "lucide-react"
 import { PostDealForm } from "@/components/post-deal-form"
-import { LoginForm } from "@/components/login-form"
-import { SignupForm } from "@/components/signup-form"
+import { UnifiedAuthForm } from "@/components/unified-auth-form"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { usePathname } from "next/navigation"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AppSidebar } from "@/components/app-sidebar"
 
 export function Navbar() {
@@ -48,7 +47,6 @@ export function Navbar() {
   const [searchQuery, setSearchQuery] = useState("")
   const [isPostDealOpen, setIsPostDealOpen] = useState(false)
   const [isLoginOpen, setIsLoginOpen] = useState(false)
-  const [isSignupOpen, setIsSignupOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeTab, setActiveTab] = useState("for-you")
   const router = useRouter()
@@ -81,10 +79,6 @@ export function Navbar() {
     setIsLoginOpen(false)
   }
 
-  const handleSignupSuccess = () => {
-    setIsSignupOpen(false)
-  }
-
   const mainCategories = [
     { name: "All Deals", href: "/", icon: Flame },
     { name: "Vouchers", href: "/coupons", icon: ShoppingBag },
@@ -115,24 +109,10 @@ export function Navbar() {
             </Button>
           </SheetTrigger>
           <SheetContent side="bottom" className="h-[80vh]">
-            <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-4">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              </TabsList>
-              <TabsContent value="login">
-                <SheetHeader className="mb-4">
-                  <SheetTitle>Log In</SheetTitle>
-                </SheetHeader>
-                <LoginForm onSuccess={handleLoginSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
-              </TabsContent>
-              <TabsContent value="signup">
-                <SheetHeader className="mb-4">
-                  <SheetTitle>Sign Up</SheetTitle>
-                </SheetHeader>
-                <SignupForm onSuccess={handleSignupSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
-              </TabsContent>
-            </Tabs>
+            <SheetHeader className="mb-4">
+              <SheetTitle>Log in or register</SheetTitle>
+            </SheetHeader>
+            <UnifiedAuthForm onSuccess={handleLoginSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
           </SheetContent>
         </Sheet>
       )
@@ -145,26 +125,15 @@ export function Navbar() {
           Login or Register
         </Button>
         <DialogContent className="sm:max-w-[500px]">
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            <TabsContent value="login">
-              <DialogHeader className="mb-4">
-                <DialogTitle>Log In</DialogTitle>
-                <DialogDescription>Enter your credentials to access your account</DialogDescription>
-              </DialogHeader>
-              <LoginForm onSuccess={handleLoginSuccess} />
-            </TabsContent>
-            <TabsContent value="signup">
-              <DialogHeader className="mb-4">
-                <DialogTitle>Sign Up</DialogTitle>
-                <DialogDescription>Create a new account to start posting deals</DialogDescription>
-              </DialogHeader>
-              <SignupForm onSuccess={handleSignupSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
-            </TabsContent>
-          </Tabs>
+          <DialogHeader className="mb-2">
+            <DialogTitle className="mb-4"><span className="flex items-center gap-1">
+                  <Flame className="h-6 w-6 text-hotukdeals-red" />
+                  <span className="text-xl font-bold">DealHunter</span>
+                </span></DialogTitle>
+            <DialogTitle>Log in or register</DialogTitle>
+            <DialogDescription>Enter your email to continue</DialogDescription>
+          </DialogHeader>
+          <UnifiedAuthForm onSuccess={handleLoginSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
         </DialogContent>
       </Dialog>
     )
