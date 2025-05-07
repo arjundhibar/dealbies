@@ -9,10 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
-
-
-
-
+import GoogleSignInButton from "./google-signin-button"
 
 const emailSchema = z.object({
   email: z.string().email({
@@ -26,20 +23,7 @@ const passwordSchema = z.object({
   }),
 })
 
-const GoogleSignInButton = () => {
-  return (
-    <Button
-      onClick={() => {
-        toast({
-          title: "Google Sign-In",
-          description: "This feature is not yet implemented.",
-        })
-      }}
-    >
-      Sign in with Google
-    </Button>
-  )
-}
+
 
 type Steps = "email" | "login" | "signup"
 
@@ -138,41 +122,8 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
               </div>
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2"
-              onClick={() => {
-                const googleButton = document.getElementById("google-signin-button")
-                if (googleButton) {
-                  googleButton.click()
-                }
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="lucide lucide-chrome"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <circle cx="12" cy="12" r="4" />
-                <line x1="21.17" y1="8" x2="12" y2="8" />
-                <line x1="3.95" y1="6.06" x2="8.54" y2="14" />
-                <line x1="10.88" y1="21.94" x2="15.46" y2="14" />
-              </svg>
-              Sign in with Google
-            </Button>
+            <GoogleSignInButton className="w-full flex items-center justify-center gap-2" />
 
-            <div className="hidden">
-              <GoogleSignInButton  />
-            </div>
           </form>
         </Form>
       )}
@@ -213,37 +164,8 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
               </div>
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2"
-              onClick={() => {
-                const googleButton = document.getElementById("google-signin-button")
-                if (googleButton) {
-                  googleButton.click()
-                }
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="lucide lucide-chrome"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <circle cx="12" cy="12" r="4" />
-                <line x1="21.17" y1="8" x2="12" y2="8" />
-                <line x1="3.95" y1="6.06" x2="8.54" y2="14" />
-                <line x1="10.88" y1="21.94" x2="15.46" y2="14" />
-              </svg>
-              Sign in with Google
-            </Button>
+            <GoogleSignInButton className="w-full flex items-center justify-center gap-2" />
+
           </form>
         </Form>
       )}

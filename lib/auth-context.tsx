@@ -16,6 +16,7 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   checkEmailExists: (email: string) => Promise<boolean>
+   signInWithGoogle: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -81,6 +82,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return false
   }
 }
+
+  const signInWithGoogle = async () => {
+
+    try {
+    if (!supabase) {
+          console.error("Supabase client not initialized")
+          setLoading(false)
+          return
+        }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`, // ✅ works in prod and dev
+      },
+    });
+
+    if (error) {
+      console.error("Google OAuth Error:", error.message);
+      toast({
+        title: "OAuth error",
+        description: "Failed to sign in with Google",
+        variant: "destructive",
+      });
+    }
+  } catch (error: any) {
+    console.error("Unexpected error in Google sign-in:", error.message);
+    toast({
+      title: "OAuth error",
+      description: error.message || "Unexpected error during Google login",
+      variant: "destructive",
+    });
+  }
+};
+
 
   // Make sure the signUp function properly creates a user with Supabase
   const signUp = async (email: string, password: string, username: string) => {
@@ -223,7 +258,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, checkEmailExists }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, checkEmailExists, signInWithGoogle }}>{children}</AuthContext.Provider>
   )
 }
 
