@@ -1,226 +1,293 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
-import { useAuth } from "@/lib/auth-context"
+import { useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
 import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-import { AlertCircle, Loader2 } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import GoogleSignInButton from "./GoogleSignInButton"
+import { toast } from "@/components/ui/use-toast"
+import { Loader2 } from "lucide-react"
 
-interface UnifiedAuthFormProps {
-  onSuccess?: () => void
-  isOpen?: boolean
-  onOpenChange?: (open: boolean) => void
+
+
+
+
+const emailSchema = z.object({
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+})
+
+const passwordSchema = z.object({
+  password: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
+  }),
+})
+
+const GoogleSignInButton = () => {
+  return (
+    <Button
+      onClick={() => {
+        toast({
+          title: "Google Sign-In",
+          description: "This feature is not yet implemented.",
+        })
+      }}
+    >
+      Sign in with Google
+    </Button>
+  )
 }
 
-export function UnifiedAuthForm({ onSuccess, isOpen, onOpenChange }: UnifiedAuthFormProps) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [username, setUsername] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [isCheckingEmail, setIsCheckingEmail] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [step, setStep] = useState<"email" | "login" | "signup">("email")
-  const { signIn, signUp, checkEmailExists } = useAuth()
-  const { toast } = useToast()
+type Steps = "email" | "login" | "signup"
 
-  // Reset form when dialog opens/closes
-  useEffect(() => {
-    if (isOpen) {
-      setEmail("")
-      setPassword("")
-      setUsername("")
-      setError(null)
-      setStep("email")
-    }
-  }, [isOpen])
+interface UnifiedAuthFormProps {
+  defaultStep?: Steps
+}
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!email) return
+export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps) {
+  const [step, setStep] = useState<Steps>(defaultStep)
+  const [email, setEmail] = useState<string>("")
+  const [isCheckingEmail, setIsCheckingEmail] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    setError(null)
+  // Email Form
+  const emailForm = useForm<z.infer<typeof emailSchema>>({
+    resolver: zodResolver(emailSchema),
+    defaultValues: {
+      email: "",
+    },
+  })
+
+  async function onSubmitEmail(values: z.infer<typeof emailSchema>) {
     setIsCheckingEmail(true)
-
-    try {
-      // Check if email exists in your authentication system
-      const exists = await checkEmailExists(email)
-
-      if (exists) {
-        setStep("login")
-      } else {
-        setStep("signup")
-      }
-    } catch (error: any) {
-      setError("Error checking email. Please try again.")
-    } finally {
-      setIsCheckingEmail(false)
-    }
+    // Simulate checking email
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setIsCheckingEmail(false)
+    setEmail(values.email)
+    setStep("login")
   }
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
-    setIsLoading(true)
+  // Password Form
+  const passwordForm = useForm<z.infer<typeof passwordSchema>>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      password: "",
+    },
+  })
 
-    try {
-      await signIn(email, password)
-      if (onSuccess) onSuccess()
-      if (onOpenChange) onOpenChange(false)
-    } catch (error: any) {
-      setError(error.message || "Invalid email or password. Please try again.")
-    } finally {
-      setIsLoading(false)
-    }
+  async function onSubmitLogin(values: z.infer<typeof passwordSchema>) {
+    setIsLoading(true)
+    // Simulate login
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setIsLoading(false)
+    toast({
+      title: "Login Successful",
+      description: "You are now logged in.",
+    })
   }
 
-  const handleSignupSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
+  async function onSubmitSignup(values: z.infer<typeof passwordSchema>) {
     setIsLoading(true)
-
-    try {
-      await signUp(email, password, username)
-      if (onSuccess) onSuccess()
-      if (onOpenChange) onOpenChange(false)
-      toast({
-        title: "Account created successfully!",
-        description: "Welcome to DealHunter.",
-      })
-    } catch (error: any) {
-      setError(error.message || "Error creating account. Please try again.")
-    } finally {
-      setIsLoading(false)
-    }
+    // Simulate signup
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setIsLoading(false)
+    toast({
+      title: "Signup Successful",
+      description: "Your account has been created.",
+    })
   }
 
   return (
-    <div className="space-y-4">
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
+    <div className="grid gap-6">
       {step === "email" && (
-        <form onSubmit={handleEmailSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={isCheckingEmail}
+        <Form {...emailForm}>
+          <form onSubmit={emailForm.handleSubmit(onSubmitEmail)} className="grid gap-4">
+            <FormField
+              control={emailForm.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="shadcn@example.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
+            <Button type="submit" className="w-full" disabled={isCheckingEmail}>
+              {isCheckingEmail ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Checking...
+                </>
+              ) : (
+                "Continue"
+              )}
+            </Button>
 
-          <Button type="submit" className="w-full" disabled={isCheckingEmail}>
-            {isCheckingEmail ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Checking...
-              </>
-            ) : (
-              "Continue"
-            )}
-          </Button>
-        </form>
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2"
+              onClick={() => {
+                const googleButton = document.getElementById("google-signin-button")
+                if (googleButton) {
+                  googleButton.click()
+                }
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-chrome"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="4" />
+                <line x1="21.17" y1="8" x2="12" y2="8" />
+                <line x1="3.95" y1="6.06" x2="8.54" y2="14" />
+                <line x1="10.88" y1="21.94" x2="15.46" y2="14" />
+              </svg>
+              Sign in with Google
+            </Button>
+
+            <div className="hidden">
+              <GoogleSignInButton  />
+            </div>
+          </form>
+        </Form>
       )}
 
       {step === "login" && (
-        <form onSubmit={handleLoginSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} disabled />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Button variant="link" className="p-0 h-auto text-sm" onClick={() => setStep("email")}>
-                Use different email
-              </Button>
-            </div>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isLoading}
-              autoFocus
+        <Form {...passwordForm}>
+          <form onSubmit={passwordForm.handleSubmit(onSubmitLogin)} className="grid gap-4">
+            <FormField
+              control={passwordForm.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Logging in...
+                </>
+              ) : (
+                "Log In"
+              )}
+            </Button>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Logging in...
-              </>
-            ) : (
-              "Log In"
-            )}
-                  </Button>
-                  
-        </form>
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2"
+              onClick={() => {
+                const googleButton = document.getElementById("google-signin-button")
+                if (googleButton) {
+                  googleButton.click()
+                }
+              }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lucide lucide-chrome"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="4" />
+                <line x1="21.17" y1="8" x2="12" y2="8" />
+                <line x1="3.95" y1="6.06" x2="8.54" y2="14" />
+                <line x1="10.88" y1="21.94" x2="15.46" y2="14" />
+              </svg>
+              Sign in with Google
+            </Button>
+          </form>
+        </Form>
       )}
 
       {step === "signup" && (
-        <form onSubmit={handleSignupSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" value={email} disabled />
-            <Button variant="link" className="p-0 h-auto text-sm" onClick={() => setStep("email")}>
-              Use different email
+        <Form {...passwordForm}>
+          <form onSubmit={passwordForm.handleSubmit(onSubmitSignup)} className="grid gap-4">
+            <FormField
+              control={passwordForm.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing up...
+                </>
+              ) : (
+                "Sign Up"
+              )}
             </Button>
-          </div>
+          </form>
+        </Form>
+      )}
 
-          <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              disabled={isLoading}
-              autoFocus
-            />
-          </div>
+      {step !== "email" && (
+        <Button variant="link" onClick={() => setStep("email")}>
+          Back to Email
+        </Button>
+      )}
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={isLoading}
-            />
-          </div>
-
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating account...
-              </>
-            ) : (
-              "Create Account"
-            )}
-          </Button>
-        </form>
+      {step === "login" && (
+        <Button variant="link" onClick={() => setStep("signup")}>
+          Create an account
+        </Button>
       )}
     </div>
   )

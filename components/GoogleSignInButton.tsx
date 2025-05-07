@@ -3,14 +3,22 @@
 
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
-export default function GoogleSignInButton() {
+interface GoogleSignInButtonProps {
+  id?: string
+}
+
+export default function GoogleSignInButton({ id }: GoogleSignInButtonProps) {
   const supabase = createClientComponentClient()
 
   const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`, 
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
       },
     })
 
@@ -20,10 +28,7 @@ export default function GoogleSignInButton() {
   }
 
   return (
-    <button
-      onClick={handleGoogleSignIn}
-      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-    >
+    <button id={id} onClick={handleGoogleSignIn} className="hidden">
       Sign in with Google
     </button>
   )
