@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -10,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
 import GoogleSignInButton from "./google-signin-button"
+import { useAuth } from "@/lib/auth-context"
 
 const emailSchema = z.object({
   email: z.string().email({
@@ -23,12 +26,22 @@ const passwordSchema = z.object({
   }),
 })
 
-
+const signupSchema = z.object({
+  username: z.string().min(3, {
+    message: "Username must be at least 3 characters.",
+  }),
+  password: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
+  }),
+})
 
 type Steps = "email" | "login" | "signup"
 
 interface UnifiedAuthFormProps {
   defaultStep?: Steps
+  onSuccess?: () => void
+  isOpen: boolean
+  onOpenChange: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps) {
@@ -36,6 +49,7 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
   const [email, setEmail] = useState<string>("")
   const [isCheckingEmail, setIsCheckingEmail] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const auth = useAuth()
 
   // Email Form
   const emailForm = useForm<z.infer<typeof emailSchema>>({
@@ -47,11 +61,25 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
 
   async function onSubmitEmail(values: z.infer<typeof emailSchema>) {
     setIsCheckingEmail(true)
-    // Simulate checking email
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsCheckingEmail(false)
-    setEmail(values.email)
-    setStep("login")
+    try {
+      const { email } = values
+      setEmail(email)
+
+      // Use the checkEmailExists function from auth context
+      const exists = await auth.checkEmailExists(email)
+
+      // Navigate to login if user exists, signup if not
+      setStep(exists ? "login" : "signup")
+    } catch (error) {
+      console.error("Error checking email:", error)
+      toast({
+        title: "Error",
+        description: "Failed to check email. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsCheckingEmail(false)
+    }
   }
 
   // Password Form
@@ -62,26 +90,47 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
     },
   })
 
+  // Signup Form with username and password
+  const signupForm = useForm<z.infer<typeof signupSchema>>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  })
+
   async function onSubmitLogin(values: z.infer<typeof passwordSchema>) {
     setIsLoading(true)
-    // Simulate login
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsLoading(false)
-    toast({
-      title: "Login Successful",
-      description: "You are now logged in.",
-    })
+    try {
+      await auth.signIn(email, values.password)
+      // No need for toast here as it's handled in the signIn function
+    } catch (error) {
+      console.error("Login error:", error)
+      toast({
+        title: "Login Failed",
+        description: "Invalid email or password. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  async function onSubmitSignup(values: z.infer<typeof passwordSchema>) {
+  async function onSubmitSignup(values: z.infer<typeof signupSchema>) {
     setIsLoading(true)
-    // Simulate signup
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsLoading(false)
-    toast({
-      title: "Signup Successful",
-      description: "Your account has been created.",
-    })
+    try {
+      await auth.signUp(email, values.password, values.username)
+      // No need for toast here as it's handled in the signUp function
+    } catch (error) {
+      console.error("Signup error:", error)
+      toast({
+        title: "Signup Failed",
+        description: "Failed to create account. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -96,7 +145,7 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="shadcn@example.com" {...field} />
+                    <Input placeholder="johndoe@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -123,7 +172,6 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
             </div>
 
             <GoogleSignInButton className="w-full flex items-center justify-center gap-2" />
-
           </form>
         </Form>
       )}
@@ -165,16 +213,28 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
             </div>
 
             <GoogleSignInButton className="w-full flex items-center justify-center gap-2" />
-
           </form>
         </Form>
       )}
 
       {step === "signup" && (
-        <Form {...passwordForm}>
-          <form onSubmit={passwordForm.handleSubmit(onSubmitSignup)} className="grid gap-4">
+        <Form {...signupForm}>
+          <form onSubmit={signupForm.handleSubmit(onSubmitSignup)} className="grid gap-4">
             <FormField
-              control={passwordForm.control}
+              control={signupForm.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder="johndoe" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={signupForm.control}
               name="password"
               render={({ field }) => (
                 <FormItem>
@@ -206,11 +266,11 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
         </Button>
       )}
 
-      {step === "login" && (
+      {/* {step === "login" && (
         <Button variant="link" onClick={() => setStep("signup")}>
           Create an account
         </Button>
-      )}
+      )} */}
     </div>
   )
 }
