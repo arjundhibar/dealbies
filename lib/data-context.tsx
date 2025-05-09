@@ -308,11 +308,15 @@ if (!token) {
 
   const voteDeal = async (dealId: string, voteType: "up" | "down"): Promise<void> => {
     if (!currentUser) throw new Error("You must be logged in to vote")
-
+    const token = localStorage.getItem("auth_token")
+    console.log("Token:", token)
+    if (!token) throw new Error("Missing auth token")
+    console.log("Attempting to vote for deal:", dealId, "Vote Type:", voteType)
     const response = await fetch("/api/votes", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+         "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify({
         dealId,

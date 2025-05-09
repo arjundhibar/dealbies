@@ -4,74 +4,86 @@ import { getSupabase } from "@/lib/supabase"
 
 export async function POST(request: Request) {
   try {
-    const { dealId, couponId, commentId, voteType } = await request.json()
+    const authHeader = request.headers.get("Authorization")
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Invalid authentication token" }, { status: 401 })
+    }
 
-    // Get user from session
-    const supabase = getSupabase()
+    const token = authHeader.split(" ")[1]
+    if (!token) {
+      return NextResponse.json({ error: "Missing authentication token" }, { status: 401 })
+    }
+
+    const supabase = getSupabase(token)
     if (!supabase) {
       return NextResponse.json({ error: "Authentication service unavailable" }, { status: 500 })
     }
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "You must be logged in to vote" }, { status: 401 })
+    const { data, error } = await supabase.auth.getUser()
+    if (error || !data.user) {
+      console.error("Token verification error:", error)
+      return NextResponse.json({ error: "Invalid authentication token" }, { status: 401 })
     }
 
-    // Find user in our database
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
-    })
+    const userId = data.user.id
+    const { dealId, voteType } = await request.json()
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    if (!dealId || !voteType) {
+      return NextResponse.json({ error: "Missing dealId or voteType" }, { status: 400 })
     }
 
-    // Check if user has already voted
-    const existingVote = await prisma.vote.findFirst({
+    const existingVote = await prisma.vote.findUnique({
       where: {
-        userId: user.id,
-        dealId,
-        couponId,
-        commentId,
+        userId_dealId_couponId_commentId: {
+          userId,
+          dealId,
+          couponId: '',
+          commentId: '',
+        },
       },
     })
 
     if (existingVote) {
-      // If same vote type, remove the vote
       if (existingVote.voteType === voteType) {
         await prisma.vote.delete({
-          where: { id: existingVote.id },
+          where: {
+            userId_dealId_couponId_commentId: {
+              userId,
+              dealId,
+              couponId: '',
+              commentId: '',
+            },
+          },
         })
-
-        return NextResponse.json({ action: "removed" })
+        return NextResponse.json({ action: "removed" }, { status: 200 })
+      } else {
+        await prisma.vote.update({
+          where: {
+            userId_dealId_couponId_commentId: {
+              userId,
+              dealId,
+              couponId: '',
+              commentId: '',
+            },
+          },
+          data: { voteType },
+        })
+        return NextResponse.json({ action: "updated" }, { status: 200 })
       }
-
-      // If different vote type, update the vote
-      const updatedVote = await prisma.vote.update({
-        where: { id: existingVote.id },
-        data: { voteType },
+    } else {
+      await prisma.vote.create({
+        data: {
+          userId,
+          dealId,
+          voteType,
+          couponId: null,
+          commentId: null,
+        },
       })
-
-      return NextResponse.json({ action: "updated", vote: updatedVote })
+      return NextResponse.json({ action: "created" }, { status: 201 })
     }
-
-    // Create new vote
-    const vote = await prisma.vote.create({
-      data: {
-        userId: user.id,
-        dealId,
-        couponId,
-        commentId,
-        voteType,
-      },
-    })
-
-    return NextResponse.json({ action: "created", vote }, { status: 201 })
-  } catch (error) {
-    console.error("Error processing vote:", error)
-    return NextResponse.json({ error: "An error occurred while processing the vote" }, { status: 500 })
+  } catch (error: any) {
+    console.error("Error:", error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
