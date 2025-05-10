@@ -83,38 +83,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 }
 
-  const signInWithGoogle = async () => {
-
-    try {
+const signInWithGoogle = async () => {
+  try {
     if (!supabase) {
-          console.error("Supabase client not initialized")
-          setLoading(false)
-          return
-        }
+      console.error("Supabase client not initialized")
+      setLoading(false)
+      return
+    }
+
+    // Get the base URL dynamically
+    const getURL = () => {
+      let url =
+        process?.env?.NEXT_PUBLIC_SITE_URL ?? // Set this to your site URL in production env.
+        process?.env?.NEXT_PUBLIC_VERCEL_URL ?? // Automatically set by Vercel.
+        "http://localhost:3000/"
+
+      // Make sure to include `https://` when not localhost.
+      url = url.includes("http") ? url : `https://${url}`
+      // Make sure to include trailing `/`.
+      url = url.charAt(url.length - 1) === "/" ? url : `${url}/`
+
+      return url
+    }
+
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
+      provider: "google",
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
+        redirectTo: `${getURL()}auth/callback`,
       },
-    });
+    })
 
     if (error) {
-      console.error("Google OAuth Error:", error.message);
+      console.error("Google OAuth Error:", error.message)
       toast({
         title: "OAuth error",
         description: "Failed to sign in with Google",
         variant: "destructive",
-      });
+      })
     }
   } catch (error: any) {
-    console.error("Unexpected error in Google sign-in:", error.message);
+    console.error("Unexpected error in Google sign-in:", error.message)
     toast({
       title: "OAuth error",
       description: error.message || "Unexpected error during Google login",
       variant: "destructive",
-    });
+    })
   }
-};
+}
 
 
   // Make sure the signUp function properly creates a user with Supabase
