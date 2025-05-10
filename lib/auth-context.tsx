@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`, // ✅ works in prod and dev
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
       },
     });
 
