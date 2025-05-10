@@ -9,6 +9,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  experimental: {
+    appDir: true, // Make sure this is enabled
+  },
 }
 
 export default nextConfig

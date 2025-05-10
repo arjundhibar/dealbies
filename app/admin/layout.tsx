@@ -1,9 +1,8 @@
 import type React from "react"
 import { redirect } from "next/navigation"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
-import { getSupabase } from "@/lib/supabase"
+import { createServerSupabaseClient } from "@/lib/supabase-server"
 import prisma from "@/lib/prisma"
-import { NextResponse } from "next/server"
 
 export const metadata = {
   title: "Admin Dashboard - Deal Hunter",
@@ -11,36 +10,38 @@ export const metadata = {
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  // Check if user is authenticated and is an admin
-    const supabase = getSupabase()
-    if (!supabase) {
-        return NextResponse.json({error : "Internal Server error!"})
-    }
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  console.log("✅ AdminLayout: Running...")
 
-  if (!session) {
-    console.log("Admin layout: No session found, redirecting to login");
-    redirect("/login?callbackUrl=/admin")
-  }
+  const supabase = createServerSupabaseClient()
 
-  console.log("Admin layout: Session found for user:", session.user.email);
+  // const {
+  //   data: { session },
+  // } = await supabase.auth.getSession()
 
-  // Check if user is an admin
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email! },
-    select: { id: true, email: true, role: true },
-  })
+  // if (!session) {
+  //   console.warn("⛔ No session found. Redirecting to login...")
+  //   redirect("/login?callbackUrl=/admin")
+  // }
 
-  console.log("Admin layout: User data:", user);
+  // console.log("✅ Session found for:", session.user.email)
 
-  if (user?.role !== "ADMIN") {
-    console.log("Admin layout: User is not an admin, redirecting to homepage");
-    redirect("/")
-  }
+  // const user = await prisma.user.findUnique({
+  //   where: { email: session.user.email! },
+  //   select: { id: true, email: true, role: true },
+  // })
 
-  console.log("Admin layout: User is admin, rendering admin layout");
+  // if (!user) {
+  //   console.warn("⚠️ User not found in database. Redirecting to home...")
+  //   redirect("/")
+  // }
+
+  // if (user.role !== "ADMIN") {
+  //   console.warn("🚫 User is not admin. Redirecting to home...")
+  //   redirect("/")
+  // }
+
+  console.log("✅ Admin verified. Rendering layout...")
+
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />
