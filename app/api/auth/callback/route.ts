@@ -10,9 +10,20 @@ export async function GET(request: NextRequest) {
   if (code) {
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
-    await supabase.auth.exchangeCodeForSession(code)
+
+    try {
+      const { error } = await supabase.auth.exchangeCodeForSession(code)
+      if (error) {
+        console.error("Error exchanging code for session:", error.message)
+      } else {
+        console.log("Successfully exchanged code for session")
+      }
+    } catch (err) {
+      console.error("Exception during code exchange:", err)
+    }
   }
 
   // URL to redirect to after sign in process completes
-  return NextResponse.redirect(requestUrl.origin)
+  // Explicitly redirect to the production URL
+  return NextResponse.redirect("https://dealhunter-woad.vercel.app")
 }
