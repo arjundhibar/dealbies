@@ -3,27 +3,35 @@ import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
+export const dynamic = "force-dynamic"
+
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get("code")
+
+  console.log("Auth callback received with code:", !!code)
 
   if (code) {
     const cookieStore = cookies()
     const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
     try {
-      const { error } = await supabase.auth.exchangeCodeForSession(code)
-      if (error) {
-        console.error("Error exchanging code for session:", error.message)
-      } else {
-        console.log("Successfully exchanged code for session")
-      }
-    } catch (err) {
-      console.error("Exception during code exchange:", err)
+      await supabase.auth.exchangeCodeForSession(code)
+    } catch (error) {
+      console.error("Error exchanging code for session:", error)
+      // Return to home page even if there's an error
+      return NextResponse.redirect(new URL("/", request.url))
     }
   }
 
-  // URL to redirect to after sign in process completes
-  // Explicitly redirect to the production URL
-  return NextResponse.redirect("https://dealhunter-woad.vercel.app")
+  // Get the hostname to determine if we're in production or development
+  const hostname = requestUrl.hostname
+  const isProduction = hostname !== "localhost"
+
+  // Redirect to the appropriate URL based on environment
+  const redirectUrl = isProduction ? "https://dealhunter-woad.vercel.app" : "http://localhost:3000"
+
+  console.log("Redirecting to:", redirectUrl)
+
+  return NextResponse.redirect(redirectUrl)
 }

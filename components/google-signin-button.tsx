@@ -1,20 +1,40 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ExternalLink } from "lucide-react"
-import { useAuth } from "@/lib/auth-context"
+import { ExternalLink, Loader2 } from "lucide-react"
 import { useState } from "react"
-import { Loader2 } from "lucide-react"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 export default function GoogleSignInButton({ className = "" }: { className?: string }) {
-  const { signInWithGoogle } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+  const supabase = createClientComponentClient()
 
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true)
-      await signInWithGoogle()
-      // The redirect will be handled by Supabase, so we don't need to do anything else here
+
+      // Get the current URL to determine if we're in production or development
+      const isProduction = window.location.hostname !== "localhost"
+
+      // Set the redirect URL based on the current environment
+      const redirectUrl = isProduction
+        ? "https://dealhunter-woad.vercel.app/auth/callback"
+        : "http://localhost:3000/auth/callback"
+
+      console.log("Using redirect URL:", redirectUrl)
+
+      // Sign in with Google using the determined redirect URL
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+        },
+      })
+
+      if (error) {
+        console.error("Google sign-in error:", error)
+        throw error
+      }
     } catch (error) {
       console.error("Google sign-in error:", error)
     } finally {
