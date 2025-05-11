@@ -23,13 +23,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL("/", request.url))
     }
   }
-
-  // Get the hostname to determine if we're in production or development
-  const hostname = requestUrl.hostname
-  const isProduction = hostname !== "localhost"
-
+  
   // Redirect to the appropriate URL based on environment
-  const redirectUrl = isProduction ? "https://dealhunter-woad.vercel.app" : "http://localhost:3000"
+  const redirectUrl = "https://dealhunter-woad.vercel.app" 
 
   console.log("Redirecting to:", redirectUrl)
 
