@@ -83,44 +83,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 }
 
-const signInWithGoogle = async () => {
-  try {
+  const signInWithGoogle = async () => {
+
+    try {
     if (!supabase) {
-      console.error("Supabase client not initialized")
-      setLoading(false)
-      return
-    }
-
-    // Force the redirect URL to be the production URL
-    // This is a hardcoded approach that ensures we're using the correct URL
-    const redirectUrl = "https://dealhunter-woad.vercel.app/auth/callback"
-
-    console.log("Redirecting to:", redirectUrl)
-
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: redirectUrl,
-      },
-    })
-
-    if (error) {
-      console.error("Google OAuth Error:", error.message)
+          console.error("Supabase client not initialized")
+          setLoading(false)
+          return
+        }
+        const redirectTo =
+        process.env.NODE_ENV === "production"
+          ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
+          : "http://localhost:3000/auth/callback"
+  
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo,
+        },
+      })
+  
+      if (error) {
+        console.error("Google OAuth Error:", error.message)
+        toast({
+          title: "OAuth error",
+          description: "Failed to sign in with Google",
+          variant: "destructive",
+        })
+      }
+    } catch (error: any) {
+      console.error("Unexpected error in Google sign-in:", error.message)
       toast({
         title: "OAuth error",
-        description: "Failed to sign in with Google",
+        description: error.message || "Unexpected error during Google login",
         variant: "destructive",
       })
     }
-  } catch (error: any) {
-    console.error("Unexpected error in Google sign-in:", error.message)
-    toast({
-      title: "OAuth error",
-      description: error.message || "Unexpected error during Google login",
-      variant: "destructive",
-    })
   }
-}
 
 
   // Make sure the signUp function properly creates a user with Supabase
