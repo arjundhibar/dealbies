@@ -15,8 +15,8 @@ import GoogleSignInButton from "./google-signin-button"
 import { useAuth } from "@/lib/auth-context"
 
 const emailSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address.",
+  email: z.string().min(3, {
+    message: "Please enter a valid email or username.",
   }),
 })
 
@@ -65,16 +65,16 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
       const { email } = values
       setEmail(email)
 
-      // Use the checkEmailExists function from auth context
-      const exists = await auth.checkEmailExists(email)
+      // Use the checkUserExists function from auth context
+      const exists = await auth.checkUserExists(email)
 
       // Navigate to login if user exists, signup if not
       setStep(exists ? "login" : "signup")
     } catch (error) {
-      console.error("Error checking email:", error)
+      console.error("Error checking user:", error)
       toast({
         title: "Error",
-        description: "Failed to check email. Please try again.",
+        description: "Failed to check user. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -143,9 +143,9 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Email or Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="johndoe@example.com" {...field} />
+                    <Input placeholder="johndoe@example.com or johndoe" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

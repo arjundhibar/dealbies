@@ -6,17 +6,17 @@ import { getSupabase } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import type { User, Session } from "@supabase/supabase-js"
 import { useToast } from "@/hooks/use-toast"
-import { NextResponse } from "next/server"
 
 type AuthContextType = {
   user: User | null
   session: Session | null
   loading: boolean
   signUp: (email: string, password: string, username: string) => Promise<void>
-  signIn: (email: string, password: string) => Promise<void>
+  signIn: (emailOrUsername: string, password: string) => Promise<void>
   signOut: () => Promise<void>
   checkEmailExists: (email: string) => Promise<boolean>
-   signInWithGoogle: () => Promise<void>
+  checkUserExists: (emailOrUsername: string) => Promise<boolean>
+  signInWithGoogle: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -73,36 +73,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [router, supabase])
 
   const checkEmailExists = async (email: string): Promise<boolean> => {
-  try {
-    const res = await fetch(`/api/check-email?email=${encodeURIComponent(email)}`)
-    const data = await res.json()
-    return data.exists
-  } catch (error) {
-    console.error("Error checking email:", error)
-    return false
+    try {
+      const res = await fetch(`/api/check-email?email=${encodeURIComponent(email)}`)
+      const data = await res.json()
+      return data.exists
+    } catch (error) {
+      console.error("Error checking email:", error)
+      return false
+    }
   }
-}
+
+  const checkUserExists = async (emailOrUsername: string): Promise<boolean> => {
+    try {
+      // Check if input contains @ symbol to determine if it's an email
+      const isEmail = emailOrUsername.includes("@")
+      const endpoint = isEmail
+        ? `/api/check-email?email=${encodeURIComponent(emailOrUsername)}`
+        : `/api/check-username?username=${encodeURIComponent(emailOrUsername)}`
+
+      const res = await fetch(endpoint)
+      const data = await res.json()
+      return data.exists
+    } catch (error) {
+      console.error("Error checking user:", error)
+      return false
+    }
+  }
 
   const signInWithGoogle = async () => {
-
     try {
-    if (!supabase) {
-          console.error("Supabase client not initialized")
-          setLoading(false)
-          return
-        }
-        const redirectTo =
+      if (!supabase) {
+        console.error("Supabase client not initialized")
+        setLoading(false)
+        return
+      }
+      const redirectTo =
         process.env.NODE_ENV === "production"
           ? `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`
           : "http://localhost:3000/auth/callback"
-  
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo,
         },
       })
-  
+
       if (error) {
         console.error("Google OAuth Error:", error.message)
         toast({
@@ -120,7 +136,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
     }
   }
-
 
   // Make sure the signUp function properly creates a user with Supabase
   const signUp = async (email: string, password: string, username: string) => {
@@ -176,71 +191,87 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   // Make sure the signIn function properly authenticates with Supabase
-  const signIn = async (email: string, password: string) => {
-  if (!supabase) throw new Error("Supabase client not initialized");
+  const signIn = async (emailOrUsername: string, password: string) => {
+    if (!supabase) throw new Error("Supabase client not initialized")
 
-  try {
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      // Determine if input is email or username
+      const isEmail = emailOrUsername.includes("@")
+      let email = emailOrUsername
 
-    if (error) {
-      console.error("Error signing in:", error.message);
-      throw new Error("Failed to sign in");
+      // If username is provided, we need to get the email first
+      if (!isEmail) {
+        try {
+          const response = await fetch(`/api/get-email?username=${encodeURIComponent(emailOrUsername)}`)
+          if (!response.ok) {
+            throw new Error("Username not found")
+          }
+          const data = await response.json()
+          email = data.email
+        } catch (error) {
+          console.error("Error getting email from username:", error)
+          throw new Error("Invalid username or password")
+        }
+      }
+
+      const { error, data } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        console.error("Error signing in:", error.message)
+        throw new Error("Failed to sign in")
+      }
+
+      // Get the session using getSession() instead of directly accessing session
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      if (sessionError) {
+        console.error("Error fetching session:", sessionError.message)
+        return
+      }
+
+      const session = sessionData?.session
+      if (!session || !session.user) {
+        console.error("Session or user not found")
+        return
+      }
+
+      // Now, we have the access token in the session
+      const accessToken = session.access_token // Access the token from the session directly
+      if (!accessToken) {
+        console.error("Access token not found in session")
+        return
+      }
+
+      // Now user is authenticated, safe to sync with Neon
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          username: data.user.user_metadata.username || email.split("@")[0],
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error("Error syncing user to Neon:", errorData.error)
+      }
+      localStorage.setItem("auth_token", accessToken)
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully logged in",
+      })
+
+      router.push("/")
+    } catch (error: any) {
+      console.error("Error signing in:", error)
+      throw new Error(error.message || "Invalid email or password")
     }
-
-    // Get the session using getSession() instead of directly accessing session
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError) {
-      console.error("Error fetching session:", sessionError.message);
-      return;
-    }
-
-    const session = sessionData?.session;
-    if (!session || !session.user) {
-      console.error("Session or user not found");
-      return;
-    }
-
-    // Now, we have the access token in the session
-    const accessToken = session.access_token; // Access the token from the session directly
-    if (!accessToken) {
-      console.error("Access token not found in session");
-      return;
-    }
-
-    // Now user is authenticated, safe to sync with Neon
-    const response = await fetch("/api/users", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        username: data.user.user_metadata.username || email.split("@")[0],
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Error syncing user to Neon:", errorData.error);
-    }
-    localStorage.setItem("auth_token", accessToken);
-    toast({
-      title: "Welcome back!",
-      description: "You have successfully logged in",
-    });
-
-    router.push("/");
-  } catch (error: any) {
-    console.error("Error signing in:", error);
-    throw new Error(error.message || "Invalid email or password");
   }
-};
-
-
-
 
   const signOut = async () => {
     if (!supabase) throw new Error("Supabase client not initialized")
@@ -263,7 +294,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signUp, signIn, signOut, checkEmailExists, signInWithGoogle }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider
+      value={{ user, session, loading, signUp, signIn, signOut, checkEmailExists, checkUserExists, signInWithGoogle }}
+    >
+      {children}
+    </AuthContext.Provider>
   )
 }
 
