@@ -262,12 +262,18 @@ if (!token) {
   }
 
   const addComment = async (dealId: string, content: string, parentId?: string): Promise<Comment> => {
+    console.log("currentUser in addComment:", currentUser);
     if (!currentUser) throw new Error("You must be logged in to comment")
 
+    const token = localStorage.getItem("auth_token")
+    if (!token) {
+      throw new Error("Missing auth token")
+    }
     const response = await fetch("/api/comments", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify({
         dealId,

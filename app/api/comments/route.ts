@@ -11,32 +11,43 @@ export async function POST(request: Request) {
 
     const { content, dealId, couponId, parentId } = await request.json()
 
-    // Get user from session
+    // Get user from authorization header
     const supabase = getSupabase()
     if (!supabase) {
       return NextResponse.json({ error: "Authentication service unavailable" }, { status: 500 })
     }
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
+    // Get authorization header
+    const authHeader = request.headers.get("authorization")
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Invalid authorization header" }, { status: 401 })
+    }
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "You must be logged in to post a comment" }, { status: 401 })
+    const token = authHeader.split(" ")[1]
+
+    // Verify the token
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token)
+
+    if (error || !user) {
+      console.error("Auth error:", error)
+      return NextResponse.json({ error: "Authentication failed" }, { status: 401 })
     }
 
     // Find user in our database
-    let user
+    let dbUser
     try {
-      user = await prisma.user.findUnique({
-        where: { email: session.user.email! },
+      dbUser = await prisma.user.findUnique({
+        where: { email: user.email! },
       })
     } catch (error) {
       console.error("Error finding user:", error)
       return NextResponse.json({ error: "Database error when finding user" }, { status: 500 })
     }
 
-    if (!user) {
+    if (!dbUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
@@ -49,7 +60,7 @@ export async function POST(request: Request) {
           dealId,
           couponId,
           parentId,
-          userId: user.id,
+          userId: dbUser.id,
         },
         include: {
           user: {
