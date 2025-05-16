@@ -1,15 +1,14 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient } from "@supabase/supabase-js";
 
-// Check if environment variables are defined
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error("Missing Supabase environment variables")
+  console.error("Missing Supabase environment variables");
 }
 
-// Create a singleton instance of the Supabase client
-let supabaseInstance: ReturnType<typeof createClient> | null = null
+let supabaseInstance: ReturnType<typeof createClient> | null = null;
 
 export function getSupabase(token?: string) {
   if (token) {
@@ -19,13 +18,19 @@ export function getSupabase(token?: string) {
           Authorization: `Bearer ${token}`,
         },
       },
-    })
+    });
   }
-  if (!supabaseInstance && supabaseUrl && supabaseAnonKey) {
-    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey)
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
   }
-  return supabaseInstance
+  return supabaseInstance;
 }
 
-// For server-side usage
-export const supabase = getSupabase()
+export function getSupabaseAdmin() {
+  if (!supabaseServiceRoleKey) {
+    throw new Error("Missing Supabase admin credentials");
+  }
+  return createClient(supabaseUrl, supabaseServiceRoleKey);
+}
+
+export const supabase = getSupabase(); // for client-side use

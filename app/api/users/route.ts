@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
-import { getSupabase } from "@/lib/supabase"
+import { getSupabase, getSupabaseAdmin } from "@/lib/supabase"
 
 export async function GET(request: Request) {
   try {
@@ -33,64 +33,34 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
-  try {
-    const supabase = getSupabase()
-    if (!supabase) {
-      return NextResponse.json({ error: "Authentication service unavailable" }, { status: 500 })
-    }
+export async function POST(req: Request) {
+  const authHeader = req.headers.get("Authorization");
+  const token = authHeader?.replace("Bearer ", "");
 
-    const authHeader = request.headers.get("Authorization")
-    const token = authHeader?.replace("Bearer ", "")
+  if (!token) return new Response("Unauthorized", { status: 401 });
 
-    if (!token) {
-      return NextResponse.json({ error: "Not authenticated or token missing" }, { status: 401 })
-    }
+  const supabase = getSupabase(token);
+  const { data: { user }, error } = await supabase.auth.getUser();
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser(token)
-
-    if (userError || !user) {
-      return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 })
-    }
-
-    // Now use 'user' (supabase user)
-    const { username } = await request.json()
-    const email = user.email!
-
-    // ✅ Check if user already exists
-    const existingUser = await prisma.user.findUnique({ where: { email } })
-
-    if (existingUser) {
-      const { password: _, ...userWithoutPassword } = existingUser as any
-  return NextResponse.json(userWithoutPassword, { status: 200 })
-    }
-
-    // ✅ Create user in Neon DB
-    const newUser = await prisma.user.create({
-      data: {
-        id: user.id,
-        email,
-        username: username || user.user_metadata?.username || email.split("@")[0],
-        password: "", // Supabase handles auth
-        avatarUrl: `/placeholder.svg?height=40&width=40&text=${(username || email.charAt(0)).toUpperCase()}`,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-
-      },
-    })
-
-    const { password: _, ...userWithoutPassword } = newUser as any
-    return NextResponse.json(userWithoutPassword, { status: 201 })
-  } catch (error: any) {
-    if (error.code === "P2002") {
-      // Prisma unique constraint error
-      return NextResponse.json({ error: "Email already exists" }, { status: 400 })
-    }
-
-    console.error("Error creating user:", error)
-    return NextResponse.json({ error: "An error occurred while creating the user" }, { status: 500 })
+  if (error || !user) {
+    console.error("Supabase user fetch error:", error);
+    return new Response("Invalid Supabase token", { status: 401 });
   }
+
+  const body = await req.json();
+  const email = user.email!;
+  const username = body.username || user.user_metadata?.username || email.split("@")[0];
+
+  const existing = await prisma.user.findUnique({ where: { id: user.id } });
+  if (existing) return new Response("User already exists", { status: 200 });
+
+  const newUser = await prisma.user.create({
+    data: {
+      id: user.id,
+      email,
+      username,
+    },
+  });
+
+  return Response.json({ user: newUser });
 }
