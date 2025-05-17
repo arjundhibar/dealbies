@@ -28,9 +28,14 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     }
 
     // Delete the deal
-    await prisma.deal.delete({
-      where: { id: params.id },
-    })
+    try {
+      await prisma.deal.delete({
+        where: { id: params.id },
+      })
+    } catch (err) {
+      console.error("Prisma deletion error:", err)
+      return NextResponse.json({ error: "Deal not found or already deleted" }, { status: 404 })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

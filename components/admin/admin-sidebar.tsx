@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Tag, Ticket, Users, Settings, LogOut, ChevronRight, ChevronLeft } from "lucide-react"
+import { LayoutDashboard, Tag, Ticket, Users, Settings, LogOut, ChevronRight, ChevronLeft, StoreIcon, ImageIcon, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { useAuth } from "@/lib/auth-context"
@@ -35,11 +35,52 @@ export function AdminSidebar() {
       icon: <Users className="h-5 w-5" />,
     },
     {
+      title: "Posts",
+      href: "/admin/posts",
+      icon: <Tag className="h-5 w-5" />, // You can change icons as needed
+    },
+    {
+      title: "Pages",
+      href: "/admin/pages",
+      icon: <LayoutDashboard className="h-5 w-5" />,
+    },
+    {
+      title: "Stores",
+      href: "/admin/stores",
+      icon: <StoreIcon className="h-5 w-5" />, // Add this icon at the top or replace
+    },
+    {
+      title: "Media",
+      href: "/admin/media",
+      icon: <ImageIcon className="h-5 w-5" />, // Add this icon at the top or replace
+    },
+    {
+      title: "Categories",
+      href: "/admin/categories",
+      icon: <Tag className="h-5 w-5" />,
+    },
+    {
+      title: "Comments",
+      href: "/admin/comments",
+      icon: <MessageCircle className="h-5 w-5" />, // Add at top or replace
+    },
+    {
+      title: "Referral",
+      href: "/admin/referral",
+      icon: <Users className="h-5 w-5" />,
+    },
+    {
+      title: "SEO",
+      href: "/admin/seo",
+      icon: <Settings className="h-5 w-5" />,
+    },
+    {
       title: "Settings",
       href: "/admin/settings",
       icon: <Settings className="h-5 w-5" />,
     },
   ]
+  
 
   return (
     <div

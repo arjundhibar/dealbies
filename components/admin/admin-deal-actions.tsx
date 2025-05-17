@@ -34,6 +34,7 @@ export function AdminDealActions({ deal }: AdminDealActionsProps) {
     try {
       const response = await fetch(`/api/admin/deals/${deal.id}`, {
         method: "DELETE",
+        credentials: "include"
       })
 
       if (!response.ok) {

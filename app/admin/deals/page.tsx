@@ -18,31 +18,28 @@ export default async function AdminDeals({
   const skip = (page - 1) * pageSize
 
   // Get deals with pagination
-  const deals = await prisma.deal.findMany({
+  const rawDeals = await prisma.deal.findMany({
     skip,
     take: pageSize,
     orderBy: {
       createdAt: "desc",
     },
     where: searchParams.category
-      ? {
-          category: searchParams.category,
-        }
+      ? { category: searchParams.category }
       : undefined,
     include: {
-      user: {
-        select: {
-          username: true,
-        },
-      },
-      _count: {
-        select: {
-          comments: true,
-          votes: true,
-        },
-      },
+      user: { select: { username: true } },
+      _count: { select: { comments: true, votes: true } },
     },
   })
+  
+  // Convert Decimal fields to number
+  const deals = rawDeals.map((deal) => ({
+    ...deal,
+    price: deal.price.toNumber(),
+    originalPrice: deal.originalPrice?.toNumber?.() ?? null,
+  }))
+  
 
   // Get total count for pagination
   const totalDeals = await prisma.deal.count({
@@ -126,7 +123,7 @@ export default async function AdminDeals({
                 <TableCell>{deal.user.username}</TableCell>
                 <TableCell>{formatDistanceToNow(new Date(deal.createdAt), { addSuffix: true })}</TableCell>
                 <TableCell>
-                  {deal.expired ? (
+                  {deal.expiresAt  ? (
                     <Badge variant="destructive">Expired</Badge>
                   ) : (
                     <Badge variant="outline">Active</Badge>
