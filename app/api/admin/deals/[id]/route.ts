@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
-import { getSupabase } from "@/lib/supabase"
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
+import { cookies } from "next/headers"
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+console.log("Admin deals route loaded")
+
+// ✅ DELETE Deal
+export async function DELETE(request: any, { params }: any) {
   try {
-    // Check if user is authenticated and is an admin
-      const supabase = getSupabase()
-      if (!supabase) {
-          return NextResponse.json({error : "Internal server error (no Supabase instance)"}, {status : 500})
-      }
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+
     const {
       data: { session },
     } = await supabase.auth.getSession()
@@ -17,9 +19,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if user is an admin
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+      where: { email: session.user.email },
       select: { role: true },
     })
 
@@ -27,32 +28,24 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    // Delete the deal
-    try {
-      await prisma.deal.delete({
-        where: { id: params.id },
-      })
-    } catch (err) {
-      console.error("Prisma deletion error:", err)
-      return NextResponse.json({ error: "Deal not found or already deleted" }, { status: 404 })
-    }
+    await prisma.deal.delete({
+      where: { id: params.id },
+    })
 
     return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error("Error deleting deal:", error)
-    return NextResponse.json({ error: "An error occurred while deleting the deal" }, { status: 500 })
+  } catch (err) {
+    console.error("DELETE ERROR:", err)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+// ✅ PUT (Update) Deal
+export async function PUT(request: { json: () => any }, { params }: any) {
   try {
-    const data = await request.json()
+    const body = await request.json()
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
 
-    // Check if user is authenticated and is an admin
-      const supabase = getSupabase()
-      if (!supabase) {
-          return NextResponse.json({error : "Internal server error (no Supabase instance)"}, {status : 500})
-      }
     const {
       data: { session },
     } = await supabase.auth.getSession()
@@ -61,9 +54,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if user is an admin
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
+      where: { email: session.user.email },
       select: { role: true },
     })
 
@@ -71,26 +63,25 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
-    // Update the deal
     const updatedDeal = await prisma.deal.update({
       where: { id: params.id },
       data: {
-        title: data.title,
-        description: data.description,
-        price: Number(data.price),
-        originalPrice: data.originalPrice ? Number(data.originalPrice) : null,
-        merchant: data.merchant,
-        category: data.category,
-        dealUrl: data.dealUrl,
-        imageUrl: data.imageUrl || null,
-        expired: data.expired || false,
-        expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
+        title: body.title,
+        description: body.description,
+        price: Number(body.price),
+        originalPrice: body.originalPrice ? Number(body.originalPrice) : null,
+        merchant: body.merchant,
+        category: body.category,
+        dealUrl: body.dealUrl,
+        imageUrl: body.imageUrl || null,
+        expired: body.expired || false,
+        expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
       },
     })
 
     return NextResponse.json(updatedDeal)
-  } catch (error) {
-    console.error("Error updating deal:", error)
-    return NextResponse.json({ error: "An error occurred while updating the deal" }, { status: 500 })
+  } catch (err) {
+    console.error("PUT ERROR:", err)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

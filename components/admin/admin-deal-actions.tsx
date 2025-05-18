@@ -34,9 +34,9 @@ export function AdminDealActions({ deal }: AdminDealActionsProps) {
     try {
       const response = await fetch(`/api/admin/deals/${deal.id}`, {
         method: "DELETE",
-        credentials: "include"
+        credentials: "include",
       })
-
+      console.log("deleting deal with id: ", deal.id);
       if (!response.ok) {
         throw new Error("Failed to delete deal")
       }
