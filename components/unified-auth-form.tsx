@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { toast } from "@/components/ui/use-toast"
-import { Loader2 } from "lucide-react"
+import { Loader2, X } from "lucide-react"
 import GoogleSignInButton from "./google-signin-button"
 import { useAuth } from "@/lib/auth-context"
 
@@ -44,7 +44,7 @@ interface UnifiedAuthFormProps {
   onOpenChange: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps) {
+export function UnifiedAuthForm({ defaultStep = "email", onOpenChange }: UnifiedAuthFormProps) {
   const [step, setStep] = useState<Steps>(defaultStep)
   const [email, setEmail] = useState<string>("")
   const [isCheckingEmail, setIsCheckingEmail] = useState<boolean>(false)
@@ -134,68 +134,121 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
   }
 
   return (
-    <div className="grid gap-6">
+    <div className="p-2 relative">
+      {/* Logo and close button */}
+      
+
+      {/* Title */}
+      {/* <h1 className="text-3xl font-bold mb-2">Log in or register</h1>
+      <p className="text-lg mb-8">Become part of the world's largest deals community!</p> */}
+
       {step === "email" && (
         <Form {...emailForm}>
-          <form onSubmit={emailForm.handleSubmit(onSubmitEmail)} className="grid gap-4">
+          <form onSubmit={emailForm.handleSubmit(onSubmitEmail)} className="space-y-6">
             <FormField
               control={emailForm.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email or Username</FormLabel>
+                  <FormLabel className="text-base">Username or email</FormLabel>
                   <FormControl>
-                    <Input placeholder="johndoe@example.com or johndoe" {...field} />
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-gray-400"
+                        >
+                          <circle cx="12" cy="8" r="5" />
+                          <path d="M20 21a8 8 0 0 0-16 0" />
+                        </svg>
+                      </div>
+                      <Input placeholder="johndoe@example.com or johndoe" {...field} className="pl-10 py-6 text-base" />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isCheckingEmail}>
+            <Button
+              type="submit"
+              className="w-full bg-[#E86C2A] hover:bg-[#D15E20] rounded-full text-white py-6 text-lg"
+              disabled={isCheckingEmail}
+            >
               {isCheckingEmail ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Checking...
                 </>
               ) : (
-                "Continue"
+                "Further"
               )}
             </Button>
 
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            <div className="my-6">
+              <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-gray-300"></div>
               </div>
             </div>
 
-            <GoogleSignInButton className="w-full flex items-center justify-center gap-2" />
+            <div className="space-y-3">
+              <GoogleSignInButton className="w-full flex items-center justify-center gap-2 py-5 border border-gray-300 rounded-full text-base font-medium" />
+
+              {/* <Button
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 py-5 border border-gray-300 rounded-full text-base font-medium"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.477 2 2 6.477 2 12C2 17.523 6.477 22 12 22C17.523 22 22 17.523 22 12C22 6.477 17.523 2 12 2ZM12.5 16.5H11V11H12.5V16.5ZM12 9.5C11.448 9.5 11 9.052 11 8.5C11 7.948 11.448 7.5 12 7.5C12.552 7.5 13 7.948 13 8.5C13 9.052 12.552 9.5 12 9.5Z" />
+                </svg>
+                Continue with Apple
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2 py-5 border border-gray-300 rounded-full text-base font-medium"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
+                  <path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96C18.34 21.21 22 17.06 22 12.06C22 6.53 17.5 2.04 12 2.04Z" />
+                </svg>
+                Continue with Facebook
+              </Button> */}
+            </div>
           </form>
         </Form>
       )}
 
       {step === "login" && (
         <Form {...passwordForm}>
-          <form onSubmit={passwordForm.handleSubmit(onSubmitLogin)} className="grid gap-4">
+          <form onSubmit={passwordForm.handleSubmit(onSubmitLogin)} className="space-y-6">
             <FormField
               control={passwordForm.control}
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel className="text-base">Password</FormLabel>
                   <FormControl>
-                    <Input type="password" {...field} />
+                    <Input type="password" {...field} className="py-6 text-base" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full bg-[#E86C2A] hover:bg-[#D15E20] text-white py-6 text-lg"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Logging in...
                 </>
               ) : (
@@ -203,31 +256,34 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
               )}
             </Button>
 
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            <div className="my-6">
+              <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-gray-300"></div>
               </div>
             </div>
 
-            <GoogleSignInButton className="w-full flex items-center justify-center gap-2" />
+            <div className="space-y-3">
+              <GoogleSignInButton className="w-full flex items-center justify-center gap-2 py-5 border border-gray-300 rounded-full text-base font-medium" />
+            </div>
+
+            <Button variant="link" onClick={() => setStep("email")} className="w-full mt-4">
+              Back to Email
+            </Button>
           </form>
         </Form>
       )}
 
       {step === "signup" && (
         <Form {...signupForm}>
-          <form onSubmit={signupForm.handleSubmit(onSubmitSignup)} className="grid gap-4">
+          <form onSubmit={signupForm.handleSubmit(onSubmitSignup)} className="space-y-6">
             <FormField
               control={signupForm.control}
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel className="text-base">Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="johndoe" {...field} />
+                    <Input placeholder="johndoe" {...field} className="py-6 text-base" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -238,39 +294,35 @@ export function UnifiedAuthForm({ defaultStep = "email" }: UnifiedAuthFormProps)
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel className="text-base">Password</FormLabel>
                   <FormControl>
-                    <Input type="password" {...field} />
+                    <Input type="password" {...field} className="py-6 text-base" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full bg-[#E86C2A] hover:bg-[#D15E20] text-white py-6 text-lg"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   Signing up...
                 </>
               ) : (
                 "Sign Up"
               )}
             </Button>
+
+            <Button variant="link" onClick={() => setStep("email")} className="w-full mt-4">
+              Back to Email
+            </Button>
           </form>
         </Form>
       )}
-
-      {step !== "email" && (
-        <Button variant="link" onClick={() => setStep("email")}>
-          Back to Email
-        </Button>
-      )}
-
-      {/* {step === "login" && (
-        <Button variant="link" onClick={() => setStep("signup")}>
-          Create an account
-        </Button>
-      )} */}
     </div>
   )
 }
