@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast"
 import { DealCardSaveButton } from "@/components/deal-card-save-button"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 interface DealCardProps {
   deal: Deal
@@ -44,6 +45,7 @@ export function DealCard({ deal }: DealCardProps) {
   const { toast } = useToast()
   const router = useRouter()
   const [isVoting, setIsVoting] = useState(false)
+  const isMobile = useIsMobile()
 
   const isExpired = expired || (expiresAt && isPast(new Date(expiresAt)))
   const discount = originalPrice ? calculateDiscount(Number(originalPrice), Number(price)) : null
@@ -69,6 +71,136 @@ export function DealCard({ deal }: DealCardProps) {
     }
   }
 
+  // Mobile layout
+  if (isMobile) {
+    return (
+      <Card className="overflow-hidden shadow-sm">
+        <div className="flex flex-col">
+          {/* Top section with image and voting */}
+          <div className="flex">
+            {/* Left side - Image and voting */}
+            <div className="w-[30%] relative">
+              <div className="relative aspect-square">
+                <Image
+                  src={imageUrl || "/placeholder.svg?height=400&width=400&query=product"}
+                  alt={title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+
+              {/* Voting controls overlaid on image */}
+              <div className="absolute inset-0 flex flex-col items-center justify-start pt-2">
+                <div className="flex flex-col items-center bg-white/80 rounded-full p-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("h-8 w-8 p-0 rounded-full", userVote === "down" && "text-blue-500")}
+                    onClick={() => handleVote("down")}
+                    disabled={isVoting}
+                  >
+                    <ChevronDown className="h-5 w-5" />
+                    <span className="sr-only">Downvote</span>
+                  </Button>
+
+                  <span className="text-xl font-bold text-hotukdeals-red">{score}°</span>
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn("h-8 w-8 p-0 rounded-full", userVote === "up" && "text-hotukdeals-red")}
+                    onClick={() => handleVote("up")}
+                    disabled={isVoting}
+                  >
+                    <ChevronUp className="h-5 w-5" />
+                    <span className="sr-only">Upvote</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right side - Content */}
+            <div className="w-[70%] p-3">
+              {/* Posted time */}
+              <div className="flex justify-end mb-1">
+                <Badge variant="outline" className="bg-gray-100 text-gray-600 font-normal">
+                  Posted {formatRelativeTime(postedAtDate)}
+                </Badge>
+              </div>
+
+              {/* Title */}
+              <Link href={`/deal/${id}`} className="hover:underline">
+                <h3 className="text-lg font-bold mb-1 line-clamp-2">{title}</h3>
+              </Link>
+
+              {/* Price section */}
+              <div className="flex items-center gap-2 my-2">
+                <span className="text-2xl font-bold text-hotukdeals-red">{formatCurrency(Number(price))}</span>
+                {originalPrice && (
+                  <>
+                    <span className="text-lg text-muted-foreground line-through">
+                      {formatCurrency(Number(originalPrice))}
+                    </span>
+                    <span className="text-green-600 font-bold">-{discount}%</span>
+                  </>
+                )}
+              </div>
+
+              {/* Available at */}
+              <div className="flex items-center gap-1 mb-1">
+                <span className="text-muted-foreground text-sm">Available at</span>
+                <span className="font-medium">{merchant}</span>
+              </div>
+
+              {/* Posted by */}
+              <div className="flex items-center gap-1 mb-1">
+                <Avatar className="h-5 w-5">
+                  <AvatarImage
+                    src={postedBy.avatar || "/placeholder.svg?height=40&width=40&text=U"}
+                    alt={postedBy.name}
+                  />
+                  <AvatarFallback>{postedBy.name.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm text-muted-foreground">Posted by</span>
+                <span className="text-sm font-medium">{postedBy.name}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom section with actions */}
+          <div className="flex items-center justify-between px-3 py-2">
+            <div className="flex items-center gap-4">
+              {/* Comments */}
+              <Button variant="ghost" size="sm" className="gap-1 p-0" asChild>
+                <Link href={`/deal/${id}#comments`}>
+                  <MessageSquare className="h-5 w-5" />
+                  <span className="ml-1">{commentCount}</span>
+                </Link>
+              </Button>
+
+              {/* Share */}
+              <Button variant="ghost" size="sm" className="gap-1 p-0">
+                <Share2 className="h-5 w-5" />
+              </Button>
+
+              {/* Save */}
+              <DealCardSaveButton dealId={id} />
+            </div>
+
+            {/* Get Deal button */}
+            <Button variant="default" size="sm" asChild className="bg-orange-500 hover:bg-orange-600">
+              <a href={dealUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
+                <span>Get Deal</span>
+                <ExternalLink className="ml-1 h-3 w-3" />
+              </a>
+            </Button>
+          </div>
+        </div>
+      </Card>
+    )
+  }
+
+  // Desktop layout (your existing layout)
   return (
     <Card className="overflow-hidden shadow-sm hover:shadow-md">
       <div className="flex">

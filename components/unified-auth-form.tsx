@@ -141,7 +141,7 @@ export function UnifiedAuthForm({ defaultStep = "email", onOpenChange }: Unified
       {/* Title */}
       {/* <h1 className="text-3xl font-bold mb-2">Log in or register</h1>
       <p className="text-lg mb-8">Become part of the world's largest deals community!</p> */}
-
+      
       {step === "email" && (
         <Form {...emailForm}>
           <form onSubmit={emailForm.handleSubmit(onSubmitEmail)} className="space-y-6">
@@ -323,6 +323,6 @@ export function UnifiedAuthForm({ defaultStep = "email", onOpenChange }: Unified
           </form>
         </Form>
       )}
-    </div>
+      </div>
   )
 }

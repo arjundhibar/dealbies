@@ -32,6 +32,7 @@ import {
   ChevronDown,
   Grid,
   Plus,
+  Sliders,
 } from "lucide-react"
 import { PostDealForm } from "@/components/post-deal-form"
 import { UnifiedAuthForm } from "@/components/unified-auth-form"
@@ -120,16 +121,18 @@ export function Navbar() {
 
     return (
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-        <Button variant="ghost" size="sm" className="font-medium" onClick={() => setIsLoginOpen(true)}>
+        <Button variant="ghost" size="sm" className="font-medium text-md rounded-full" onClick={() => setIsLoginOpen(true)}>
           <User className="h-4 w-4 mr-2" />
           Login or Register
         </Button>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader className="mb-2">
-            <DialogTitle className="mb-4"><span className="flex items-center gap-1">
-                  <Flame className="h-6 w-6 text-hotukdeals-red" />
-                  <span className="text-xl font-bold">DealHunter</span>
-                </span></DialogTitle>
+            <DialogTitle className="mb-4">
+              <span className="flex items-center gap-1">
+                <Flame className="h-6 w-6 text-hotukdeals-red" />
+                <span className="text-xl font-bold">DealHunter</span>
+              </span>
+            </DialogTitle>
             <DialogTitle>Log in or register</DialogTitle>
             <DialogDescription>Enter your email to continue</DialogDescription>
           </DialogHeader>
@@ -234,23 +237,25 @@ export function Navbar() {
       >
         <div className="container mx-auto">
           {/* Top Navigation Bar */}
-          <div className={cn("flex h-16 items-center justify-between px-4", isMobile && "h-14")}>
+          <div className={cn("flex items-center justify-between", isMobile ? "h-16 px-4 py-3" : "h-16 px-4")}>
             {isMobile ? (
               <>
-                <Link href="/" className="flex items-center gap-1">
-                  <Flame className="h-6 w-6 text-hotukdeals-red" />
-                  <span className="text-xl font-bold">DealHunter</span>
-                </Link>
-                <form onSubmit={handleSearch} className="relative max-w-[200px] w-full">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="search"
-                    placeholder="Search..."
-                    className="w-full pl-10 pr-4 h-9 rounded-full border-gray-300"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </form>
+                <div className="flex w-full items-center justify-between gap-4">
+                  <Link href="/" className="flex items-center gap-1 shrink-0">
+                    <Flame className="h-6 w-6 text-hotukdeals-red" />
+                    <span className="text-xl font-bold">DealHunter</span>
+                  </Link>
+                  <form onSubmit={handleSearch} className="relative flex-1 max-w-[65%]">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="Search..."
+                      className="w-full pl-12 pr-4 h-11 rounded-full border-gray-200 bg-gray-50"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </form>
+                </div>
               </>
             ) : (
               <>
@@ -285,7 +290,7 @@ export function Navbar() {
                 </form>
 
                 <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-1 font-medium">
+                  <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-1 font-medium text-md rounded-full">
                     <Bell className="h-4 w-4 mr-1" />
                     Create DealAlert
                   </Button>
@@ -363,65 +368,104 @@ export function Navbar() {
           </div>
 
           {/* Secondary Navigation - Categories */}
-          <div className={cn("flex  border-border overflow-x-auto scrollbar-hide", isMobile && "text-sm")}>
-            <div className="flex items-center px-4 py-2 space-x-6">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-1 font-medium"
-                onClick={() => {
-                  setIsSidebarOpen(true)
-                  // Access the AppSidebar's setView function by modifying the state before opening
-                  setView("categories")
-                }}
-              >
-                <Grid className="h-4 w-4 mr-1" />
-                Categories
-              </Button>
+          {isMobile ? (
+            <div className="flex overflow-x-auto scrollbar-hide">
+              <div className="flex items-center px-4 py-2.5 space-x-5 whitespace-nowrap">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-1 font-normal text-sm p-0"
+                  onClick={() => {
+                    setIsSidebarOpen(true)
+                    setView("categories")
+                  }}
+                >
+                  <Grid className="h-4 w-4 mr-1" />
+                  Categories
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium">
-                    <Tag className="h-4 w-4 mr-1" />
-                    Discount codes
-                    <ChevronDown className="h-3 w-3 ml-1" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start">
-                  <DropdownMenuItem asChild>
-                    <Link href="/coupons/popular">Popular</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/coupons/new">New</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/coupons/expiring">Expiring Soon</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-sm p-0">
+                  <Tag className="h-4 w-4 mr-1" />
+                  Discount codes
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
 
-              <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium" asChild>
-                <Link href="/deals">
-                  <ShoppingBag className="h-4 w-4 mr-1" />
-                  Deals
-                </Link>
-              </Button>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-sm p-0" asChild>
+                  <Link href="/deals">
+                    <ShoppingBag className="h-4 w-4 mr-1" />
+                    Deals
+                  </Link>
+                </Button>
 
-              <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium" asChild>
-                <Link href="/freebies">
-                  <Heart className="h-4 w-4 mr-1" />
-                  Freebies
-                </Link>
-              </Button>
-
-              <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium" asChild>
-                <Link href="/discussion">
-                  <MessageSquare className="h-4 w-4 mr-1" />
-                  Discussion
-                </Link>
-              </Button>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-sm p-0" asChild>
+                  <Link href="/freebies">
+                    <Heart className="h-4 w-4 mr-1" />
+                    Freebies
+                  </Link>
+                </Button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex border-border overflow-x-auto scrollbar-hide">
+              <div className="flex items-center px-4 py-2 space-x-6">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-1 font-medium"
+                  onClick={() => {
+                    setIsSidebarOpen(true)
+                    setView("categories")
+                  }}
+                >
+                  <Grid className="h-4 w-4 mr-1" />
+                  Categories
+                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium">
+                      <Tag className="h-4 w-4 mr-1" />
+                      Discount codes
+                      <ChevronDown className="h-3 w-3 ml-1" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start">
+                    <DropdownMenuItem asChild>
+                      <Link href="/coupons/popular">Popular</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/coupons/new">New</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/coupons/expiring">Expiring Soon</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium" asChild>
+                  <Link href="/deals">
+                    <ShoppingBag className="h-4 w-4 mr-1" />
+                    Deals
+                  </Link>
+                </Button>
+
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium" asChild>
+                  <Link href="/freebies">
+                    <Heart className="h-4 w-4 mr-1" />
+                    Freebies
+                  </Link>
+                </Button>
+
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium" asChild>
+                  <Link href="/discussion">
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    Discussion
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Tabs Navigation */}
           <div className="flex border-border justify-between items-center px-4">
@@ -466,12 +510,22 @@ export function Navbar() {
               </TabsList>
             </Tabs>
 
-            <Button variant="outline" size="sm" className="flex items-center gap-1 ml-auto">
-              Filter
-              <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-hotukdeals-red text-[10px] font-medium text-white">
-                1
-              </span>
-            </Button>
+            {isMobile ? (
+              <div className="flex items-center justify-center w-8 h-8 p-2 rounded-full border border-gray-200 bg-white ml-2">
+                <Sliders className="h-4 w-4" />
+                {/* <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-hotukdeals-red text-[10px] font-medium text-white">
+                  1
+                </span> */}
+              </div>
+            ) : (
+                <Button variant="outline" size="sm" className="flex items-center rounded-full gap-1 ml-auto">
+                  <Sliders className="h-5 w-5" />
+                Filter
+                <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-hotukdeals-red text-[10px] font-medium text-white">
+                  1
+                </span>
+              </Button>
+            )}
           </div>
         </div>
       </header>
