@@ -77,9 +77,9 @@ export function DealCard({ deal }: DealCardProps) {
       <Card className="overflow-hidden shadow-sm">
         <div className="flex flex-col">
           {/* Top section with image and voting */}
-          <div className="flex">
+          <div className="flex flex-col sm:flex-row">
             {/* Left side - Image and voting */}
-            <div className="w-[30%] relative">
+            <div className="relative sm:w-1/3 w-full flex-shrink-0">
               <div className="relative aspect-square">
                 <Image
                   src={imageUrl || "/placeholder.svg?height=400&width=400&query=product"}
@@ -91,7 +91,7 @@ export function DealCard({ deal }: DealCardProps) {
 
               {/* Voting controls overlaid on image */}
               <div className="absolute inset-0 flex flex-col items-center justify-start pt-2">
-                <div className="flex flex-col items-center bg-white/80 rounded-full p-1">
+                <div className="flex flex-row items-center bg-white/80 rounded-full p-1">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -120,7 +120,7 @@ export function DealCard({ deal }: DealCardProps) {
             </div>
 
             {/* Right side - Content */}
-            <div className="w-[70%] p-3">
+            <div className="flex-1 p-3 min-w-0">
               {/* Posted time */}
               <div className="flex justify-end mb-1">
                 <Badge variant="outline" className="bg-gray-100 text-gray-600 font-normal">
@@ -205,7 +205,7 @@ export function DealCard({ deal }: DealCardProps) {
     <Card className="overflow-hidden shadow-sm hover:shadow-md">
       <div className="flex">
         {/* Left side - Product image */}
-        <div className="w-[40%] relative">
+        <div className="w-[30%] relative">
           <div className="relative h-full">
             <Image
               src={imageUrl || "/placeholder.svg?height=400&width=600&query=product"}
@@ -224,7 +224,7 @@ export function DealCard({ deal }: DealCardProps) {
         </div>
 
         {/* Right side - Content */}
-        <div className="w-[60%] p-4 flex flex-col">
+        <div className="w-[70%] p-4 flex flex-col">
           {/* Top section with voting and posted time */}
           <div className="flex justify-between items-center mb-2">
             {/* Voting buttons */}

@@ -152,11 +152,11 @@ export default function DealPage() {
 
             <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2">
-                <span className="text-3xl font-bold text-primary">£{Number(price).toFixed(2)}</span>
+                <span className="text-3xl font-bold text-primary">₹{Number(price).toFixed(2)}</span>
                 {originalPrice && (
                   <>
                     <span className="text-xl text-muted-foreground line-through">
-                      £{Number(originalPrice).toFixed(2)}
+                    ₹{Number(originalPrice).toFixed(2)}
                     </span>
                     {discount && <Badge className="bg-red-500">-{discount}%</Badge>}
                   </>
@@ -254,7 +254,7 @@ export default function DealPage() {
                         {relatedDeal.title}
                       </Link>
                       <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>£{Number(relatedDeal.price).toFixed(2)}</span>
+                        <span>₹{Number(relatedDeal.price).toFixed(2)}</span>
                         <span>•</span>
                         <span>{relatedDeal.merchant}</span>
                       </div>

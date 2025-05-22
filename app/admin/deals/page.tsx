@@ -117,7 +117,7 @@ export default async function AdminDeals({
                     {deal.title}
                   </Link>
                 </TableCell>
-                <TableCell>£{deal.price.toFixed(2)}</TableCell>
+                <TableCell>₹{deal.price.toFixed(2)}</TableCell>
                 <TableCell>{deal.merchant}</TableCell>
                 <TableCell>{deal.category}</TableCell>
                 <TableCell>{deal.user.username}</TableCell>

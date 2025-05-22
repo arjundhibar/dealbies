@@ -47,7 +47,7 @@ export async function AdminRecentDeals() {
                   {deal.title}
                 </Link>
               </TableCell>
-              <TableCell>£{deal.price.toFixed(2)}</TableCell>
+              <TableCell>₹{deal.price.toFixed(2)}</TableCell>
               <TableCell>{deal.merchant}</TableCell>
               <TableCell>{deal.user.username}</TableCell>
               <TableCell>{formatDistanceToNow(new Date(deal.createdAt), { addSuffix: true })}</TableCell>

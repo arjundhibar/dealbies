@@ -144,7 +144,7 @@ export function AdminDealForm({ deal }: AdminDealFormProps) {
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Current Price (£)</FormLabel>
+                    <FormLabel>Current Price (₹)</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" min="0" {...field} disabled={isLoading}/>
                     </FormControl>
@@ -158,7 +158,7 @@ export function AdminDealForm({ deal }: AdminDealFormProps) {
                 name="originalPrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Original Price (£) (Optional)</FormLabel>
+                    <FormLabel>Original Price (₹) (Optional)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"

@@ -192,11 +192,11 @@ export function UnifiedAuthForm({ defaultStep = "email", onOpenChange }: Unified
               )}
             </Button>
 
-            <div className="my-6">
+            {/* <div className="my-6">
               <div className="relative flex py-2 items-center">
-                <div className="flex-grow border-t border-gray-300"></div>
+                <div className="flex-grow  border-gray-300"></div>
               </div>
-            </div>
+            </div> */}
 
             <div className="space-y-3">
               <GoogleSignInButton className="w-full flex items-center justify-center gap-2 py-5 border border-gray-300 rounded-full text-base font-medium" />

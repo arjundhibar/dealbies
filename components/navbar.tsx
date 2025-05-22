@@ -121,24 +121,42 @@ export function Navbar() {
 
     return (
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-        <Button variant="ghost" size="sm" className="font-medium text-md rounded-full" onClick={() => setIsLoginOpen(true)}>
-          <User className="h-4 w-4 mr-2" />
-          Login or Register
-        </Button>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader className="mb-2">
-            <DialogTitle className="mb-4">
-              <span className="flex items-center gap-1">
-                <Flame className="h-6 w-6 text-hotukdeals-red" />
-                <span className="text-xl font-bold">DealHunter</span>
-              </span>
-            </DialogTitle>
-            <DialogTitle>Log in or register</DialogTitle>
-            <DialogDescription>Enter your email to continue</DialogDescription>
-          </DialogHeader>
-          <UnifiedAuthForm onSuccess={handleLoginSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
-        </DialogContent>
-      </Dialog>
+  <Button
+    variant="ghost"
+    size="sm"
+    className="font-medium text-md rounded-full"
+    onClick={() => setIsLoginOpen(true)}
+  >
+    <User className="h-4 w-4 mr-2" />
+    Login or Register
+  </Button>
+
+  <DialogContent className="sm:max-w-[400px] p-6">
+    <DialogHeader className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Flame className="h-6 w-6 text-hotukdeals-red" />
+        <span className="text-xl font-bold">DealHunter</span>
+      </div>
+
+      <DialogTitle className="text-lg font-semibold">
+        Log in or register
+      </DialogTitle>
+
+      <DialogDescription className="text-base font-medium">
+        Become part of the world's largest deals community!
+      </DialogDescription>
+    </DialogHeader>
+
+    <div className="mt-4">
+      <UnifiedAuthForm
+        onSuccess={handleLoginSuccess}
+        isOpen={isLoginOpen}
+        onOpenChange={setIsLoginOpen}
+      />
+    </div>
+  </DialogContent>
+</Dialog>
+
     )
   }
 

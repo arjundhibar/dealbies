@@ -177,7 +177,7 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base">Current Price (£)</FormLabel>
+                  <FormLabel className="text-base">Current Price (₹)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -199,7 +199,7 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
               name="originalPrice"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base">Original Price (£) (Optional)</FormLabel>
+                  <FormLabel className="text-base">Original Price (₹) (Optional)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
