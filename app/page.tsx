@@ -1,31 +1,73 @@
+import { Button } from "@/components/ui/button"
 import { DealsList } from "@/components/deals-list"
+import { HottestDealsSidebar } from "@/components/hottest-deal-sidebar"
 import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent } from "@/components/ui/tabs"
+
+// Sample data for hottest deals
+const hottestDeals = [
+  {
+    id: "1",
+    title: "[Lidl Webshop] Free shipping from €49.99 – activate coupon in the Lidl Plus app",
+    score: 1206,
+    price: "€0",
+    imageUrl: "/generic-supermarket-logo.png",
+    dealUrl: "#",
+  },
+  {
+    id: "2",
+    title: "Sticker Mule 10 custom stickers for €1",
+    score: 496,
+    price: "€1",
+    imageUrl: "/placeholder.svg?height=64&width=64&query=sticker",
+    dealUrl: "#",
+  },
+  {
+    id: "3",
+    title: "BYD DOLPHIN SURF Boost (43.2kWh 332Km, 88hp)",
+    score: 436,
+    price: "€24,990",
+    imageUrl: "/placeholder.svg?height=64&width=64&query=car",
+    dealUrl: "#",
+  },
+]
 
 export default function Home() {
   return (
-    <div className="space-y-6">
-      <Tabs defaultValue="all" className="w-full">
-        {/* <div className="bg-white rounded-md border p-1">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="all">All Deals</TabsTrigger>
-            <TabsTrigger value="popular">Popular</TabsTrigger>
-            <TabsTrigger value="discussed">Most Discussed</TabsTrigger>
-          </TabsList>
-        </div> */}
+    <div className="space-y-4 lg:m-5">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <div className="lg:col-span-3">
+          <Tabs defaultValue="all" className="w-full">
+            <TabsContent value="all" className="mt-0">
+              <DealsList />
+            </TabsContent>
 
-        <TabsContent value="all" className="mt-0">
-          <DealsList />
-        </TabsContent>
+            <TabsContent value="popular" className="mt-0">
+              <DealsList initialSort="hottest" />
+            </TabsContent>
 
-        <TabsContent value="popular" className="mt-0">
-          <DealsList initialSort="hottest" />
-        </TabsContent>
+            <TabsContent value="discussed" className="mt-0">
+              <DealsList initialSort="comments" />
+            </TabsContent>
+          </Tabs>
+        </div>
 
-        <TabsContent value="discussed" className="mt-0">
-          <DealsList initialSort="comments" />
-        </TabsContent>
-      </Tabs>
+        <div className="hidden lg:block mt-16">
+          <HottestDealsSidebar deals={hottestDeals} />
+
+          <div className="mt-8">
+            <Card className="bg-white p-4">
+              <h3 className="font-medium mb-2">Advertisement</h3>
+              <div className="bg-gray-100 h-[300px] flex items-center justify-center text-gray-400">Ad Space</div>
+              <div className="flex justify-end mt-2">
+                <Button variant="link" className="text-xs text-gray-500 p-0">
+                  Show less
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>

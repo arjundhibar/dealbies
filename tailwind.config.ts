@@ -64,13 +64,22 @@ const config = {
           ring: "hsl(var(--sidebar-ring))",
         },
         hotukdeals: {
-          red: "#fa6665",
+          red: "#f7641b",
+          redHover: "#eb611f",
+          
           blue: "#0062e0",
           gray: "#f5f5f5",
           "dark-gray": "#666666",
           "light-gray": "#f9f9f9",
           "border-gray": "#e5e5e5",
         },
+        vote: {
+          blue: "#005498",
+        yellow : "#f3a21c",
+        lightOrange: "#f7641b",
+        lightRed: "#f03648",
+        red: "#ce1734",
+        }
       },
       borderRadius: {
         lg: "var(--radius)",

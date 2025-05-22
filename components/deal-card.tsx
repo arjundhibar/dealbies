@@ -75,85 +75,84 @@ export function DealCard({ deal }: DealCardProps) {
   if (isMobile) {
     return (
       <Card className="overflow-hidden shadow-sm">
-        <div className="flex flex-col">
-          {/* Top section with image and voting */}
-          <div className="flex flex-col sm:flex-row">
-            {/* Left side - Image and voting */}
-            <div className="relative sm:w-1/3 w-full flex-shrink-0">
-              <div className="relative aspect-square">
-                <Image
-                  src={imageUrl || "/placeholder.svg?height=400&width=400&query=product"}
-                  alt={title}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-
-              {/* Voting controls overlaid on image */}
-              <div className="absolute inset-0 flex flex-col items-center justify-start pt-2">
-                <div className="flex flex-row items-center bg-white/80 rounded-full p-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn("h-8 w-8 p-0 rounded-full", userVote === "down" && "text-blue-500")}
-                    onClick={() => handleVote("down")}
-                    disabled={isVoting}
-                  >
-                    <ChevronDown className="h-5 w-5" />
-                    <span className="sr-only">Downvote</span>
-                  </Button>
-
-                  <span className="text-xl font-bold text-hotukdeals-red">{score}°</span>
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={cn("h-8 w-8 p-0 rounded-full", userVote === "up" && "text-hotukdeals-red")}
-                    onClick={() => handleVote("up")}
-                    disabled={isVoting}
-                  >
-                    <ChevronUp className="h-5 w-5" />
-                    <span className="sr-only">Upvote</span>
-                  </Button>
-                </div>
-              </div>
+        <div className="flex w-full">
+          {/* Left side - Image with overlay controls */}
+          <div className="relative w-1/3">
+            {/* Product Image */}
+            <div className="relative aspect-[2/4]">
+              <Image
+                src={imageUrl || "/placeholder.svg?height=400&width=400&query=product"}
+                alt={title}
+                fill
+                className="object-cover z-5"
+              />
             </div>
 
-            {/* Right side - Content */}
-            <div className="flex-1 p-3 min-w-0">
-              {/* Posted time */}
-              <div className="flex justify-end mb-1">
-                <Badge variant="outline" className="bg-gray-100 text-gray-600 font-normal">
-                  Posted {formatRelativeTime(postedAtDate)}
-                </Badge>
-              </div>
+            {/* Top overlay - Voting */}
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/80 rounded-full px-1 py-1 flex items-center ">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn("h-8 w-8 p-0 rounded-full", userVote === "down" && "text-blue-500")}
+                onClick={() => handleVote("down")}
+                disabled={isVoting}
+              >
+                <ChevronDown className="h-5 w-5" />
+              </Button>
+              <span className="text-lg font-bold text-vote-red">{score}°</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn("h-8 w-8 p-0 rounded-full", userVote === "up" && "text-hotukdeals-red")}
+                onClick={() => handleVote("up")}
+                disabled={isVoting}
+              >
+                <ChevronUp className="h-5 w-5" />
+              </Button>
+            </div>
 
-              {/* Title */}
-              <Link href={`/deal/${id}`} className="hover:underline">
-                <h3 className="text-lg font-bold mb-1 line-clamp-2">{title}</h3>
+            {/* Bottom overlay - Actions */}
+            <div className="absolute bottom-1 text-gray-500 left-[40%] -translate-x-1/2 z-10 flex rounded-full">
+              <Link href={`/deal/${id}#comments`}>
+                <Button variant="ghost" size="icon" className="p-0 font-semibold">
+                  <MessageSquare className="h-5 w-5 " />
+                </Button>
+              </Link>
+              <Button variant="ghost" size="icon" className="p-0">
+                <Share2 className="h-5 w-5" />
+              </Button>
+              {/* <DealCardSaveButton dealId={id} /> */}
+            </div>
+          </div>
+
+          {/* Right side - Deal Info */}
+          <div className="w-2/3 p-2 flex flex-col justify-between">
+            <div>
+              <Badge variant="outline" className="bg-gray-100 text-gray-600 font-normal mb-6 ml-20">
+                Posted {formatRelativeTime(postedAtDate)}
+              </Badge>
+
+              <Link href={`/deal/${id}`} className="hover:text-hotukdeals-red">
+                <h3 className="text-base font-bold line-clamp-2 mb-1">{title}</h3>
               </Link>
 
-              {/* Price section */}
-              <div className="flex items-center gap-2 my-2">
-                <span className="text-2xl font-bold text-hotukdeals-red">{formatCurrency(Number(price))}</span>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-base font-bold text-hotukdeals-red">{formatCurrency(Number(price))}</span>
                 {originalPrice && (
                   <>
-                    <span className="text-lg text-muted-foreground line-through">
+                    <span className="text-base text-muted-foreground line-through">
                       {formatCurrency(Number(originalPrice))}
                     </span>
-                    <span className="text-green-600 font-bold">-{discount}%</span>
+                    <span className="text-green-600 text-[14px] font-bold">-{discount}%</span>
                   </>
                 )}
               </div>
 
-              {/* Available at */}
-              <div className="flex items-center gap-1 mb-1">
-                <span className="text-muted-foreground text-sm">Available at</span>
-                <span className="font-medium">{merchant}</span>
+              <div className="text-[12px] text-muted-foreground mb-1">
+                Available at <span className="font-medium">{merchant}</span>
               </div>
 
-              {/* Posted by */}
-              <div className="flex items-center gap-1 mb-1">
+              <div className="flex items-center gap-1 text-[12px] text-muted-foreground">
                 <Avatar className="h-5 w-5">
                   <AvatarImage
                     src={postedBy.avatar || "/placeholder.svg?height=40&width=40&text=U"}
@@ -161,35 +160,18 @@ export function DealCard({ deal }: DealCardProps) {
                   />
                   <AvatarFallback>{postedBy.name.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <span className="text-sm text-muted-foreground">Posted by</span>
-                <span className="text-sm font-medium">{postedBy.name}</span>
+                <span>Posted by</span>
+                <span className="font-medium">{postedBy.name}</span>
               </div>
             </div>
-          </div>
 
-          {/* Bottom section with actions */}
-          <div className="flex items-center justify-between px-3 py-2">
-            <div className="flex items-center gap-4">
-              {/* Comments */}
-              <Button variant="ghost" size="sm" className="gap-1 p-0" asChild>
-                <Link href={`/deal/${id}#comments`}>
-                  <MessageSquare className="h-5 w-5" />
-                  <span className="ml-1">{commentCount}</span>
-                </Link>
-              </Button>
-
-              {/* Share */}
-              <Button variant="ghost" size="sm" className="gap-1 p-0">
-                <Share2 className="h-5 w-5" />
-              </Button>
-
-              {/* Save */}
-              <DealCardSaveButton dealId={id} />
-            </div>
-
-            {/* Get Deal button */}
-            <Button variant="default" size="sm" asChild className="bg-orange-500 hover:bg-orange-600">
-              <a href={dealUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
+            <Button
+              variant="default"
+              size="sm"
+              asChild
+              className="bg-hotukdeals-red hover:bg-hotukdeals-redHover mt-4 rounded-full"
+            >
+              <a href={dealUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
                 <span>Get Deal</span>
                 <ExternalLink className="ml-1 h-3 w-3" />
               </a>
@@ -202,10 +184,10 @@ export function DealCard({ deal }: DealCardProps) {
 
   // Desktop layout (your existing layout)
   return (
-    <Card className="overflow-hidden shadow-sm hover:shadow-md">
+    <Card className="overflow-hidden shadow-sm hover:shadow-md h-62">
       <div className="flex">
         {/* Left side - Product image */}
-        <div className="w-[30%] relative">
+        <div className="w-[30%] relative p-3 bg-[#0f375f0d]">
           <div className="relative h-full">
             <Image
               src={imageUrl || "/placeholder.svg?height=400&width=600&query=product"}
@@ -226,13 +208,13 @@ export function DealCard({ deal }: DealCardProps) {
         {/* Right side - Content */}
         <div className="w-[70%] p-4 flex flex-col">
           {/* Top section with voting and posted time */}
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex justify-between items-center mb-2 ">
             {/* Voting buttons */}
-            <div className="flex items-center">
+            <div className="flex items-center bg-[#0f375f0d] rounded-full p-1">
               <Button
                 variant="outline"
                 size="icon"
-                className={cn("rounded-full border-gray-300 h-10 w-10", userVote === "down" && "text-blue-500")}
+                className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "down" && "text-blue-500")}
                 onClick={() => handleVote("down")}
                 disabled={isVoting}
               >
@@ -240,12 +222,12 @@ export function DealCard({ deal }: DealCardProps) {
                 <span className="sr-only">Downvote</span>
               </Button>
 
-              <span className="text-xl font-bold text-hotukdeals-red mx-2">{score}°</span>
+              <span className="text-lg font-bold text-hotukdeals-red mx-2">{score}°</span>
 
               <Button
                 variant="outline"
                 size="icon"
-                className={cn("rounded-full border-gray-300 h-10 w-10", userVote === "up" && "text-hotukdeals-red")}
+                className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "up" && "text-hotukdeals-red")}
                 onClick={() => handleVote("up")}
                 disabled={isVoting}
               >
@@ -255,53 +237,48 @@ export function DealCard({ deal }: DealCardProps) {
             </div>
 
             {/* Posted time */}
-            <div className="text-sm text-muted-foreground">Posted {formatRelativeTime(postedAtDate)}</div>
+            <div className="text-sm text-muted-foreground bg-[#0f375f0d] p-1">Posted {formatRelativeTime(postedAtDate)}</div>
           </div>
 
           {/* Title */}
-          <Link href={`/deal/${id}`} className="hover:underline">
-            <h3 className="text-xl font-bold mb-1">{title}</h3>
+          <Link href={`/deal/${id}`} className="hover:text-hotukdeals-redHover">
+            <h3 className="text-lg font-bold">{title}</h3>
           </Link>
 
           {/* Price section */}
-          <div className="flex items-center gap-2 my-2">
-            <span className="text-2xl font-bold text-hotukdeals-red">{formatCurrency(Number(price))}</span>
-            {originalPrice && (
-              <>
-                <span className="text-lg text-muted-foreground line-through">
-                  {formatCurrency(Number(originalPrice))}
-                </span>
-                <span className="text-green-600 font-bold">-{discount}%</span>
-              </>
-            )}
-          </div>
+          {/* Price, Merchant, Posted By - All in one line */}
+<div className="flex items-center gap-2 my-2 flex-wrap">
+  <div className="flex items-center gap-2">
+    <span className="text-2xl font-bold text-hotukdeals-red">{formatCurrency(Number(price))}</span>
+    {originalPrice && (
+      <>
+        <span className="text-xl text-muted-foreground line-through">
+          {formatCurrency(Number(originalPrice))}
+        </span>
+        <span className="text-green-600 font-bold">-{discount}%</span>
+      </>
+    )}
+  </div>
+    <span className="text-gray-500">|</span>
+  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+    <span>Available at</span>
+    <Badge variant="outline" className="bg-white">
+      {merchant}
+    </Badge>
+  </div>
 
-          {/* Available at */}
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-muted-foreground">Available at</span>
-            <Badge variant="outline" className="bg-white">
-              {merchant}
-            </Badge>
+  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+    <span>Posted by</span>
+    <span className="font-medium">{postedBy.name}</span>
+  </div>
+</div>
 
-            {/* Posted by */}
-            <div className="flex items-center gap-1 ml-auto">
-              <span className="text-sm text-muted-foreground">Posted by</span>
-              <Avatar className="h-6 w-6">
-                <AvatarImage
-                  src={postedBy.avatar || "/placeholder.svg?height=40&width=40&text=U"}
-                  alt={postedBy.name}
-                />
-                <AvatarFallback>{postedBy.name.charAt(0).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <span className="text-sm font-medium">{postedBy.name}</span>
-            </div>
-          </div>
 
           {/* Description */}
           <p className="line-clamp-2 text-sm text-muted-foreground mb-auto">{description}</p>
 
           {/* Bottom section with actions */}
-          <div className="flex items-center justify-between mt-4 pt-2 border-t border-gray-200">
+          <div className="flex items-center justify-between mt-4 pt-1">
             <div className="flex items-center gap-3">
               {/* Comments */}
               <Button variant="ghost" size="sm" className="gap-1 p-0" asChild>
@@ -321,9 +298,14 @@ export function DealCard({ deal }: DealCardProps) {
             </div>
 
             {/* Get Deal button */}
-            <Button variant="default" size="sm" asChild className="bg-orange-500 hover:bg-orange-600">
+            <Button
+              variant="default"
+              size="sm"
+              asChild
+              className="bg-hotukdeals-red hover:bg-hotukdeals-redHover rounded-full px-8"
+            >
               <a href={dealUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
-                <span>Get Deal</span>
+                <span className="text-md">Get Deal</span>
                 <ExternalLink className="ml-1 h-3 w-3" />
               </a>
             </Button>

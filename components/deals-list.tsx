@@ -75,71 +75,14 @@ export function DealsList({ category, initialSort = "newest" }: DealsListProps) 
   }
 
   return (
-    <div className="space-y-4 container mx-auto px-4 ">
+    <div className="space-y-4">
       {/* Header section */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-bold text-foreground">{category ? `${category} Deals` : "Deals for you"}</h1>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <Dialog open={isPostDealOpen} onOpenChange={setIsPostDealOpen}>
-            <DialogTrigger asChild>
-              {/* <Button className="bg-hotukdeals-red hover:bg-red-600 text-white" onClick={handlePostDealClick}>
-                <Plus className="mr-2 h-4 w-4" />
-                Post Deal
-              </Button> */}
-            </DialogTrigger>
-            {user && (
-              <DialogContent className="sm:max-w-[600px]">
-                <DialogHeader>
-                  <DialogTitle>Post a New Deal</DialogTitle>
-                  <DialogDescription>
-                    Share a great deal with the community. Fill out the form below with all the details.
-                  </DialogDescription>
-                </DialogHeader>
-                <PostDealForm onSuccess={handleDealPosted} />
-              </DialogContent>
-            )}
-          </Dialog>
-        </div>
+      <div>
+        <h1 className="text-xl font-bold text-gray-500">Deals for you</h1>
+        <p className="text-gray-500">Specially selected deals based on your interactions on the platform</p>
       </div>
 
-      {/* Filters and sorting - Removed grid/list toggle */}
-      <div className="">
-        {/* Filter and sort options commented out as they were in the original code */}
-        {/* <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9">
-                <Filter className="mr-2 h-4 w-4" />
-                Filter
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              <DropdownMenuItem onClick={() => router.push("/")}>All Deals</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/category/tech")}>Tech</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/category/fashion")}>Fashion</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/category/home")}>Home</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/category/gaming")}>Gaming</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Select value={sort} onValueChange={setSort}>
-            <SelectTrigger className="w-[150px] h-9">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="hottest">Hottest</SelectItem>
-              <SelectItem value="comments">Most Comments</SelectItem>
-            </SelectContent>
-          </Select>
-        </div> */}
-
-        {/* Removed the grid/list toggle */}
-      </div>
-
-      {/* Deals list - Always in list view now */}
+      {/* Deals list */}
       {isLoading ? (
         <div className="space-y-4">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -169,7 +112,7 @@ export function DealsList({ category, initialSort = "newest" }: DealsListProps) 
           </p>
           <Dialog open={isPostDealOpen} onOpenChange={setIsPostDealOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-hotukdeals-red hover:bg-red-600 text-white" onClick={handlePostDealClick}>
+              <Button className="bg-[#E86C2A] hover:bg-[#D15E20] text-white" onClick={handlePostDealClick}>
                 <Plus className="mr-2 h-4 w-4" />
                 Post a Deal
               </Button>
