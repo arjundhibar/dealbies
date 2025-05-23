@@ -134,7 +134,7 @@ export function Navbar() {
   <DialogContent className="sm:max-w-[400px] p-6">
     <DialogHeader className="space-y-2">
       <div className="flex items-center gap-2">
-        <Flame className="h-6 w-6 text-hotukdeals-red" />
+        <Flame className="h-6 w-6 text-dealhunter-red" />
         <span className="text-xl font-bold">DealHunter</span>
       </div>
 
@@ -260,7 +260,7 @@ export function Navbar() {
               <>
                 <div className="flex w-full items-center justify-between gap-4">
                   <Link href="/" className="flex items-center gap-1 shrink-0">
-                    <Flame className="h-6 w-6 text-hotukdeals-red" />
+                    <Flame className="h-6 w-6 text-dealhunter-red" />
                     <span className="text-xl font-bold">DealHunter</span>
                   </Link>
                   <form onSubmit={handleSearch} className="relative flex-1 max-w-[65%]">
@@ -279,7 +279,7 @@ export function Navbar() {
               <>
                 <div className="flex items-center gap-4">
                   <Link href="/" className="flex items-center gap-1">
-                    <Flame className="h-6 w-6 text-hotukdeals-red" />
+                    <Flame className="h-6 w-6 text-dealhunter-red" />
                     <span className="text-xl font-bold">DealHunter</span>
                   </Link>
 
@@ -350,7 +350,7 @@ export function Navbar() {
                   )}
 
                   <Button
-                    className="bg-hotukdeals-red hover:bg-red-600 text-white rounded-full"
+                    className="bg-dealhunter-red hover:bg-red-600 text-white rounded-full"
                     size="sm"
                     onClick={() => {
                       if (user) {
@@ -492,8 +492,8 @@ export function Navbar() {
                 <TabsTrigger
                   value="for-you"
                   className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-hotukdeals-red data-[state=active]:shadow-none",
-                    activeTab === "for-you" ? "text-hotukdeals-red font-medium" : "text-gray-600",
+                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none",
+                    activeTab === "for-you" ? "text-dealhunter-red font-medium" : "text-gray-600",
                   )}
                 >
                   For you
@@ -501,8 +501,8 @@ export function Navbar() {
                 <TabsTrigger
                   value="hottest"
                   className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-hotukdeals-red data-[state=active]:shadow-none",
-                    activeTab === "hottest" ? "text-hotukdeals-red font-medium" : "text-gray-600",
+                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none",
+                    activeTab === "hottest" ? "text-dealhunter-red font-medium" : "text-gray-600",
                   )}
                 >
                   Hottest
@@ -510,8 +510,8 @@ export function Navbar() {
                 <TabsTrigger
                   value="is-called"
                   className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-hotukdeals-red data-[state=active]:shadow-none",
-                    activeTab === "is-called" ? "text-hotukdeals-red font-medium" : "text-gray-600",
+                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none",
+                    activeTab === "is-called" ? "text-dealhunter-red font-medium" : "text-gray-600",
                   )}
                 >
                   Is called
@@ -519,8 +519,8 @@ export function Navbar() {
                 <TabsTrigger
                   value="new"
                   className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-hotukdeals-red data-[state=active]:shadow-none",
-                    activeTab === "new" ? "text-hotukdeals-red font-medium" : "text-gray-600",
+                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none",
+                    activeTab === "new" ? "text-dealhunter-red font-medium" : "text-gray-600",
                   )}
                 >
                   New
@@ -531,7 +531,7 @@ export function Navbar() {
             {isMobile ? (
               <div className="flex items-center justify-center w-8 h-8 p-2 rounded-full border border-gray-200 bg-white ml-2">
                 <Sliders className="h-4 w-4" />
-                {/* <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-hotukdeals-red text-[10px] font-medium text-white">
+                {/* <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
                   1
                 </span> */}
               </div>
@@ -539,7 +539,7 @@ export function Navbar() {
                 <Button variant="outline" size="sm" className="flex items-center rounded-full gap-1 ml-auto">
                   <Sliders className="h-5 w-5" />
                 Filter
-                <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-hotukdeals-red text-[10px] font-medium text-white">
+                <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
                   1
                 </span>
               </Button>

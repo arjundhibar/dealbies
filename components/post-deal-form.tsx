@@ -339,7 +339,7 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
           <div className="pt-2">
             <Button
               type="submit"
-              className="w-full bg-hotukdeals-red hover:bg-opacity-90 text-white h-11 sm:h-12 text-base"
+              className="w-full bg-dealhunter-red hover:bg-opacity-90 text-white h-11 sm:h-12 text-base"
               disabled={isLoading}
             >
               {isLoading ? "Posting..." : "Post Deal"}

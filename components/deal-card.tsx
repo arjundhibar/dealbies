@@ -103,7 +103,7 @@ export function DealCard({ deal }: DealCardProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("h-8 w-8 p-0 rounded-full", userVote === "up" && "text-hotukdeals-red")}
+                className={cn("h-8 w-8 p-0 rounded-full", userVote === "up" && "text-dealhunter-red")}
                 onClick={() => handleVote("up")}
                 disabled={isVoting}
               >
@@ -132,12 +132,12 @@ export function DealCard({ deal }: DealCardProps) {
                 Posted {formatRelativeTime(postedAtDate)}
               </Badge>
 
-              <Link href={`/deal/${id}`} className="hover:text-hotukdeals-red">
+              <Link href={`/deal/${id}`} className="hover:text-dealhunter-red">
                 <h3 className="text-base font-bold line-clamp-2 mb-1">{title}</h3>
               </Link>
 
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-base font-bold text-hotukdeals-red">{formatCurrency(Number(price))}</span>
+                <span className="text-base font-bold text-dealhunter-red">{formatCurrency(Number(price))}</span>
                 {originalPrice && (
                   <>
                     <span className="text-base text-muted-foreground line-through">
@@ -169,7 +169,7 @@ export function DealCard({ deal }: DealCardProps) {
               variant="default"
               size="sm"
               asChild
-              className="bg-hotukdeals-red hover:bg-hotukdeals-redHover mt-4 rounded-full"
+              className="bg-dealhunter-red hover:bg-dealhunter-redHover mt-4 rounded-full"
             >
               <a href={dealUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
                 <span>Get Deal</span>
@@ -184,10 +184,10 @@ export function DealCard({ deal }: DealCardProps) {
 
   // Desktop layout (your existing layout)
   return (
-    <Card className="overflow-hidden shadow-sm hover:shadow-md h-62">
+    <Card className="overflow-hidden shadow-sm hover:shadow-md h-62 dark:bg-dark-secondary">
       <div className="flex">
         {/* Left side - Product image */}
-        <div className="w-[30%] relative p-3 bg-[#0f375f0d]">
+        <div className="w-[30%] relative p-3 bg-[#0f375f0d] dark:bg-dark-tertiary">
           <div className="relative h-full">
             <Image
               src={imageUrl || "/placeholder.svg?height=400&width=600&query=product"}
@@ -210,7 +210,7 @@ export function DealCard({ deal }: DealCardProps) {
           {/* Top section with voting and posted time */}
           <div className="flex justify-between items-center mb-2 ">
             {/* Voting buttons */}
-            <div className="flex items-center bg-[#0f375f0d] rounded-full p-1">
+            <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary">
               <Button
                 variant="outline"
                 size="icon"
@@ -222,12 +222,12 @@ export function DealCard({ deal }: DealCardProps) {
                 <span className="sr-only">Downvote</span>
               </Button>
 
-              <span className="text-lg font-bold text-hotukdeals-red mx-2">{score}°</span>
+              <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
 
               <Button
                 variant="outline"
                 size="icon"
-                className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "up" && "text-hotukdeals-red")}
+                className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "up" && "text-dealhunter-red")}
                 onClick={() => handleVote("up")}
                 disabled={isVoting}
               >
@@ -241,7 +241,7 @@ export function DealCard({ deal }: DealCardProps) {
           </div>
 
           {/* Title */}
-          <Link href={`/deal/${id}`} className="hover:text-hotukdeals-redHover">
+          <Link href={`/deal/${id}`} className="hover:text-dealhunter-redHover">
             <h3 className="text-lg font-bold">{title}</h3>
           </Link>
 
@@ -249,7 +249,7 @@ export function DealCard({ deal }: DealCardProps) {
           {/* Price, Merchant, Posted By - All in one line */}
 <div className="flex items-center gap-2 my-2 flex-wrap">
   <div className="flex items-center gap-2">
-    <span className="text-2xl font-bold text-hotukdeals-red">{formatCurrency(Number(price))}</span>
+    <span className="text-2xl font-bold text-dealhunter-red">{formatCurrency(Number(price))}</span>
     {originalPrice && (
       <>
         <span className="text-xl text-muted-foreground line-through">
@@ -262,7 +262,7 @@ export function DealCard({ deal }: DealCardProps) {
     <span className="text-gray-500">|</span>
   <div className="flex items-center gap-1 text-sm text-muted-foreground">
     <span>Available at</span>
-    <Badge variant="outline" className="bg-white">
+    <Badge variant="outline" className="bg-white dark:text-white dark:bg-dark-secondary">
       {merchant}
     </Badge>
   </div>
@@ -279,9 +279,9 @@ export function DealCard({ deal }: DealCardProps) {
 
           {/* Bottom section with actions */}
           <div className="flex items-center justify-between mt-4 pt-1">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 ">
               {/* Comments */}
-              <Button variant="ghost" size="sm" className="gap-1 p-0" asChild>
+              <Button variant="ghost" size="sm" className="gap-1 p-0 hover:text-dealhunter-red" asChild>
                 <Link href={`/deal/${id}#comments`}>
                   <MessageSquare className="h-4 w-4" />
                   <span className="ml-1">{commentCount}</span>
@@ -289,7 +289,7 @@ export function DealCard({ deal }: DealCardProps) {
               </Button>
 
               {/* Share */}
-              <Button variant="ghost" size="sm" className="gap-1 p-0">
+              <Button variant="ghost" size="sm" className="gap-1 p-0 hover:text-dealhunter-red">
                 <Share2 className="h-4 w-4" />
               </Button>
 
@@ -302,7 +302,7 @@ export function DealCard({ deal }: DealCardProps) {
               variant="default"
               size="sm"
               asChild
-              className="bg-hotukdeals-red hover:bg-hotukdeals-redHover rounded-full px-8"
+              className="bg-dealhunter-red hover:bg-dealhunter-redHover rounded-full px-8"
             >
               <a href={dealUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
                 <span className="text-md">Get Deal</span>

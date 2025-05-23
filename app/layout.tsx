@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-hotukdeals-gray`}>
+      <body className={`${inter.className} bg-dealhunter-gray dark:bg-dark-primary`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <AuthProvider>
             <DataProvider>
@@ -32,7 +32,7 @@ export default function RootLayout({
                 <main className="flex-1 py-4">
                   <div className="container mx-auto px-4">{children}</div>
                 </main>
-                <footer className="border-t bg-white py-6">
+                <footer className="border-t bg-white py-6 dark:bg-dark-secondary">
                   <div className="container mx-auto px-4">
                     <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                       <div className="flex items-center gap-2">

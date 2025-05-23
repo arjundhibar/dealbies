@@ -56,7 +56,7 @@ export default function Home() {
           <HottestDealsSidebar deals={hottestDeals} />
 
           <div className="mt-8">
-            <Card className="bg-white p-4">
+            <Card className="bg-white p-4 dark:bg-dark-secondary">
               <h3 className="font-medium mb-2">Advertisement</h3>
               <div className="bg-gray-100 h-[300px] flex items-center justify-center text-gray-400">Ad Space</div>
               <div className="flex justify-end mt-2">

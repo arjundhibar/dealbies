@@ -63,18 +63,23 @@ const config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        hotukdeals: {
+        dealhunter: {
           red: "#f7641b",
           redHover: "#eb611f",
-          
+
           blue: "#0062e0",
           gray: "#f5f5f5",
           "dark-gray": "#666666",
           "light-gray": "#f9f9f9",
           "border-gray": "#e5e5e5",
         },
+        dark: {
+          primary: "#000",
+          secondary: "#1d1f20",
+          tertiary:"#28292a",
+        },
         vote: {
-          blue: "#005498",
+        blue: "#005498",
         yellow : "#f3a21c",
         lightOrange: "#f7641b",
         lightRed: "#f03648",

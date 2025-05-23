@@ -68,7 +68,7 @@
 }
 
 .temperature-hot {
-  @apply text-hotukdeals-red;
+  @apply text-dealhunter-red;
 }
 
 .deal-card-grid {

@@ -25,7 +25,7 @@ export function HottestDealsSidebar({ deals }: HottestDealsSidebarProps) {
   if (!isVisible) return null
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mt-1">
+    <div className="bg-white rounded-lg borderoverflow-hidden mt-1 dark:bg-dark-secondary">
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-lg">Hottest Deals</h3>
