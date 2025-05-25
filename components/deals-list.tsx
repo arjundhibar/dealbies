@@ -78,8 +78,8 @@ export function DealsList({ category, initialSort = "newest" }: DealsListProps) 
     <div className="space-y-4">
       {/* Header section */}
       <div>
-        <h1 className="text-xl font-bold text-gray-500">Deals for you</h1>
-        <p className="text-gray-500">Specially selected deals based on your interactions on the platform</p>
+        <h1 className="text-xl font-bold text-gray-500 dark:text-[#8F949B]">Deals for you</h1>
+        <p className="text-gray-500 dark:text-[#8F949B]">Specially selected deals based on your interactions on the platform</p>
       </div>
 
       {/* Deals list */}

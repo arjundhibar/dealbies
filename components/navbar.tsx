@@ -492,7 +492,7 @@ export function Navbar() {
                 <TabsTrigger
                   value="for-you"
                   className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none",
+                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red  ",
                     activeTab === "for-you" ? "text-dealhunter-red font-medium" : "text-gray-600",
                   )}
                 >
