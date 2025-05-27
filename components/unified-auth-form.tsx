@@ -243,7 +243,7 @@ export function UnifiedAuthForm({ defaultStep = "email", onOpenChange }: Unified
             />
             <Button
               type="submit"
-              className="w-full bg-[#E86C2A] hover:bg-[#D15E20] text-white py-6 text-lg"
+              className="w-full bg-dealhunter-red hover:bg-dealhunter-redHover text-white py-6 text-lg"
               disabled={isLoading}
             >
               {isLoading ? (

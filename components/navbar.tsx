@@ -111,7 +111,11 @@ export function Navbar() {
           </SheetTrigger>
           <SheetContent side="bottom" className="h-[80vh]">
             <SheetHeader className="mb-4">
-              <SheetTitle>Log in or register</SheetTitle>
+              <SheetTitle><div className="flex items-center gap-2">
+        <Flame className="h-6 w-6 text-dealhunter-red" />
+        <span className="text-xl font-bold">DealHunter</span>
+              </div> </SheetTitle>
+              {/* <SheetTitle>Login or register</SheetTitle> */}
             </SheetHeader>
             <UnifiedAuthForm onSuccess={handleLoginSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
           </SheetContent>

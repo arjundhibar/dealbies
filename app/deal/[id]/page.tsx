@@ -126,7 +126,7 @@ export default function DealPage() {
   const postedAtDate = new Date(createdAt)
 
   return (
-    <div className="container mx-auto py-2 px-4 max-w-6xl">
+    <div className="container mx-auto py-0 sm:py-2 px-0 sm:px-4 max-w-6xl">
       {/* Main Deal Card */}
       <Card className="mb-6 overflow-hidden dark:bg-dark-secondary">
         <div className="flex flex-col lg:flex-row">
@@ -157,34 +157,38 @@ export default function DealPage() {
                 {/* Voting buttons */}
                 <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary">
               <Button
-                variant="ghost"
-                size="sm"
-                className={cn("h-8 w-8 p-0 rounded-full", userVote === "down" && "text-blue-500")}
+                variant="outline"
+                size="icon"
+                className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "down" && "text-blue-500")}
                 onClick={() => handleVote("down")}
                 disabled={isVoting}
               >
                 <ChevronDown className="h-5 w-5" />
+                <span className="sr-only">Downvote</span>
               </Button>
-              <span className="text-lg font-bold text-dealhunter-red">{score}°</span>
+
+              <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
+
               <Button
-                variant="ghost"
-                size="sm"
-                className={cn("h-8 w-8 p-0 rounded-full", userVote === "up" && "text-dealhunter-red")}
+                variant="outline"
+                size="icon"
+                className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "up" && "text-dealhunter-red")}
                 onClick={() => handleVote("up")}
                 disabled={isVoting}
               >
                 <ChevronUp className="h-5 w-5" />
+                <span className="sr-only">Upvote</span>
               </Button>
             </div>
               </div>
 
               {/* Action buttons */}
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="gap-1">
-                  <MessageCircle className="h-4 w-4" />
+              <div className="flex items-center gap-2 ">
+                <Button variant="ghost" size="sm" className="gap-1 hover:text-dealhunter-redHover">
+                  <MessageCircle className="h-4 w-4 " />
                   {commentCount}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={handleShare} className="gap-1">
+                <Button variant="ghost" size="sm" onClick={handleShare} className="gap-1 hover:text-dealhunter-redHover">
                   <Share2 className="h-4 w-4" />
                   To share
                 </Button>
@@ -202,11 +206,11 @@ export default function DealPage() {
 
             {/* Merchant info */}
             <p className="text-muted-foreground mb-6">
-              Available at <span className="text-white font-medium">{merchant}</span>
+              Available at <span className="text-black font-medium">{merchant}</span>
             </p>
 
             {/* Deal button */}
-            <Button size="lg" className="w-full lg:w-auto bg-orange-500 hover:bg-orange-600" asChild>
+            <Button size="lg" className="w-full lg:w-auto bg-orange-500 hover:bg-orange-600 rounded-full" asChild>
               <a href={dealUrl} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="mr-2 h-5 w-5" />
                 To deal
