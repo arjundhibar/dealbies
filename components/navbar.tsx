@@ -33,6 +33,7 @@ import {
   Grid,
   Plus,
   Sliders,
+  LayoutGrid,
 } from "lucide-react"
 import { PostDealForm } from "@/components/post-deal-form"
 import { UnifiedAuthForm } from "@/components/unified-auth-form"
@@ -354,7 +355,7 @@ export function Navbar() {
                   )}
 
                   <Button
-                    className="bg-dealhunter-red hover:bg-red-600 text-white rounded-full"
+                    className="bg-transparent hover:bg-[#fbe3d1] text-dealhunter-red border border-dealhunter-red rounded-full"
                     size="sm"
                     onClick={() => {
                       if (user) {
@@ -364,8 +365,9 @@ export function Navbar() {
                       }
                     }}
                   >
-                    <PlusCircle className="mr-1 h-4 w-4 md:hidden" />
-                    <span className="hidden md:inline mr-1">Post</span>
+                      <PlusCircle className="mr-1 h-4 w-4 md:hidden" />
+                      <Plus className="h-5 w-5" />
+                    <span className="hidden md:inline mr-1 text-base">Post</span>
                     <span className="md:hidden">Post</span>
                   </Button>
 
@@ -430,18 +432,19 @@ export function Navbar() {
             </div>
           ) : (
             <div className="flex border-border overflow-x-auto scrollbar-hide">
-              <div className="flex items-center px-4 py-2 space-x-6">
+              <div className="flex items-center px-4 py-2 space-x-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex items-center gap-1 font-medium"
+                  className="flex items-center gap-1 font-"
                   onClick={() => {
                     setIsSidebarOpen(true)
                     setView("categories")
                   }}
                 >
-                  <Grid className="h-4 w-4 mr-1" />
-                  Categories
+                  <LayoutGrid className="h-4 w-4 mr-1" />
+                    Categories
+                    <ChevronDown className="h-3 w-3 ml-1" />
                 </Button>
 
                 <DropdownMenu>
@@ -496,7 +499,7 @@ export function Navbar() {
                 <TabsTrigger
                   value="for-you"
                   className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red  ",
+                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
                     activeTab === "for-you" ? "text-dealhunter-red font-medium" : "text-gray-600",
                   )}
                 >
@@ -505,7 +508,7 @@ export function Navbar() {
                 <TabsTrigger
                   value="hottest"
                   className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none",
+                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none hover:text-dealhunter-red",
                     activeTab === "hottest" ? "text-dealhunter-red font-medium" : "text-gray-600",
                   )}
                 >
@@ -514,7 +517,7 @@ export function Navbar() {
                 <TabsTrigger
                   value="is-called"
                   className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none",
+                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none hover:text-dealhunter-red",
                     activeTab === "is-called" ? "text-dealhunter-red font-medium" : "text-gray-600",
                   )}
                 >
@@ -523,7 +526,7 @@ export function Navbar() {
                 <TabsTrigger
                   value="new"
                   className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none",
+                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none hover:text-dealhunter-red",
                     activeTab === "new" ? "text-dealhunter-red font-medium" : "text-gray-600",
                   )}
                 >
@@ -540,7 +543,7 @@ export function Navbar() {
                 </span> */}
               </div>
             ) : (
-                <Button variant="outline" size="sm" className="flex items-center rounded-full gap-1 ml-auto">
+                <Button variant="outline" size="sm" className="flex items-center rounded-full gap-1 mb-2 ml-auto">
                   <Sliders className="h-5 w-5" />
                 Filter
                 <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
