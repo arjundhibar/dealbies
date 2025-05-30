@@ -34,6 +34,11 @@ import {
   Plus,
   Sliders,
   LayoutGrid,
+  Gift,
+  MessagesSquare,
+  AlarmClockCheck,
+  Tags,
+  TagIcon,
 } from "lucide-react"
 import { PostDealForm } from "@/components/post-deal-form"
 import { UnifiedAuthForm } from "@/components/unified-auth-form"
@@ -113,8 +118,8 @@ export function Navbar() {
           <SheetContent side="bottom" className="h-[80vh]">
             <SheetHeader className="mb-4">
               <SheetTitle><div className="flex items-center gap-2">
-        <Flame className="h-6 w-6 text-dealhunter-red" />
-        <span className="text-xl font-bold">DealHunter</span>
+                <Flame className="h-6 w-6 text-dealhunter-red" />
+                <span className="text-xl font-bold">DealHunter</span>
               </div> </SheetTitle>
               {/* <SheetTitle>Login or register</SheetTitle> */}
             </SheetHeader>
@@ -126,41 +131,41 @@ export function Navbar() {
 
     return (
       <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-  <Button
-    variant="ghost"
-    size="sm"
-    className="font-medium text-md rounded-full"
-    onClick={() => setIsLoginOpen(true)}
-  >
-    <User className="h-4 w-4 mr-2" />
-    Login or Register
-  </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md"
+          onClick={() => setIsLoginOpen(true)}
+        >
+          <User className="h-4 w-4" />
+          Login or Register
+        </Button>
 
-  <DialogContent className="sm:max-w-[400px] p-6">
-    <DialogHeader className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Flame className="h-6 w-6 text-dealhunter-red" />
-        <span className="text-xl font-bold">DealHunter</span>
-      </div>
+        <DialogContent className="sm:max-w-[400px] p-6">
+          <DialogHeader className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Flame className="h-6 w-6 text-dealhunter-red" />
+              <span className="text-xl font-bold">DealHunter</span>
+            </div>
 
-      <DialogTitle className="text-lg font-semibold">
-        Log in or register
-      </DialogTitle>
+            <DialogTitle className="text-lg font-semibold">
+              Log in or register
+            </DialogTitle>
 
-      <DialogDescription className="text-base font-medium">
-        Become part of the world's largest deals community!
-      </DialogDescription>
-    </DialogHeader>
+            <DialogDescription className="text-base font-medium">
+              Become part of the world's largest deals community!
+            </DialogDescription>
+          </DialogHeader>
 
-    <div className="mt-4">
-      <UnifiedAuthForm
-        onSuccess={handleLoginSuccess}
-        isOpen={isLoginOpen}
-        onOpenChange={setIsLoginOpen}
-      />
-    </div>
-  </DialogContent>
-</Dialog>
+          <div className="mt-4">
+            <UnifiedAuthForm
+              onSuccess={handleLoginSuccess}
+              isOpen={isLoginOpen}
+              onOpenChange={setIsLoginOpen}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
     )
   }
@@ -258,13 +263,13 @@ export function Navbar() {
       <header
         className={cn("sticky top-0 z-40 w-full bg-background text-foreground border-b", isScrolled && "shadow-sm")}
       >
-        <div className="container mx-auto">
+        <div className={cn("mx-[110px]", isMobile && "mx-0")}>
           {/* Top Navigation Bar */}
-          <div className={cn("flex items-center justify-between", isMobile ? "h-16 px-4 py-3" : "h-16 px-4")}>
+          <div className={cn("flex items-center justify-between h-14")}>
             {isMobile ? (
               <>
                 <div className="flex w-full items-center justify-between gap-4">
-                  <Link href="/" className="flex items-center gap-1 shrink-0">
+                  <Link href="/" className="flex items-center gap-1">
                     <Flame className="h-6 w-6 text-dealhunter-red" />
                     <span className="text-xl font-bold">DealHunter</span>
                   </Link>
@@ -282,16 +287,16 @@ export function Navbar() {
               </>
             ) : (
               <>
-                <div className="flex items-center gap-4">
-                  <Link href="/" className="flex items-center gap-1">
-                    <Flame className="h-6 w-6 text-dealhunter-red" />
+                <div className="flex items-center gap-6">
+                  <Link href="/" className="flex items-center gap-1 shrink-0 h-[3.4357rem] w-[147px]">
+                    <Flame className="h-6 w-6 text-dealhunter-red font-bold" />
                     <span className="text-xl font-bold">DealHunter</span>
                   </Link>
 
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border rounded-full flex items-center gap-2"
+                    className="border rounded-full flex items-center gap-1 h-10"
                     onClick={() => setIsSidebarOpen(true)}
                   >
                     <Menu className="h-4 w-4" />
@@ -312,11 +317,16 @@ export function Navbar() {
                   </div>
                 </form>
 
-                <div className="flex items-center gap-3">
-                  <Button variant="ghost" size="sm" className="hidden md:flex items-center gap-1 font-medium text-md rounded-full">
-                    <Bell className="h-4 w-4 mr-1" />
+                <div className="flex items-center gap-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md"
+                  >
+                    <AlarmClockCheck className="h-4 w-4 mr-1" />
                     Create DealAlert
                   </Button>
+
 
                   {user ? (
                     <DropdownMenu>
@@ -355,21 +365,23 @@ export function Navbar() {
                   )}
 
                   <Button
-                    className="bg-transparent hover:bg-[#fbe3d1] text-dealhunter-red border border-dealhunter-red rounded-full"
+                    className="bg-transparent text-[#f7641b] border border-[#f97936] rounded-full 
+             hover:bg-[#fbf3ef] dark:hover:bg-[#481802]"
                     size="sm"
                     onClick={() => {
                       if (user) {
-                        setIsPostDealOpen(true)
+                        setIsPostDealOpen(true);
                       } else {
-                        setIsLoginOpen(true)
+                        setIsLoginOpen(true);
                       }
                     }}
                   >
-                      <PlusCircle className="mr-1 h-4 w-4 md:hidden" />
-                      <Plus className="h-5 w-5" />
+                    <PlusCircle className="mr-1 h-4 w-4 md:hidden" />
+                    <Plus className="h-5 w-5" />
                     <span className="hidden md:inline mr-1 text-base">Post</span>
                     <span className="md:hidden">Post</span>
                   </Button>
+
 
                   {user && (
                     <Dialog open={isPostDealOpen} onOpenChange={setIsPostDealOpen}>
@@ -394,66 +406,72 @@ export function Navbar() {
           {/* Secondary Navigation - Categories */}
           {isMobile ? (
             <div className="flex overflow-x-auto scrollbar-hide">
-              <div className="flex items-center px-4 py-2.5 space-x-5 whitespace-nowrap">
+              <div className="flex items-center py-2.5 space-x-3 whitespace-nowrap">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex items-center gap-1 font-normal text-sm p-0"
-                  onClick={() => {
-                    setIsSidebarOpen(true)
-                    setView("categories")
-                  }}
-                >
-                  <Grid className="h-4 w-4 mr-1" />
-                  Categories
-                  <ChevronDown className="h-3 w-3 ml-1" />
-                </Button>
-
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-sm p-0">
-                  <Tag className="h-4 w-4 mr-1" />
-                  Discount codes
-                  <ChevronDown className="h-3 w-3 ml-1" />
-                </Button>
-
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-sm p-0" asChild>
-                  <Link href="/deals">
-                    <ShoppingBag className="h-4 w-4 mr-1" />
-                    Deals
-                  </Link>
-                </Button>
-
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-sm p-0" asChild>
-                  <Link href="/freebies">
-                    <Heart className="h-4 w-4 mr-1" />
-                    Freebies
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex border-border overflow-x-auto scrollbar-hide">
-              <div className="flex items-center px-4 py-2 space-x-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center gap-1 font-"
+                  className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
                   onClick={() => {
                     setIsSidebarOpen(true)
                     setView("categories")
                   }}
                 >
                   <LayoutGrid className="h-4 w-4 mr-1" />
+                  Categories
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
+
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]">
+                  <Tag className="h-4 w-4 mr-1" />
+                  Discount codes
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
+
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                  <Link href="/deals">
+                    <TagIcon className="h-4 w-4 mr-1" />
+                    Deals
+                  </Link>
+                </Button>
+
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                  <Link href="/freebies">
+                    <Gift className="h-4 w-4 mr-1" />
+                    Freebies
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                  <Link href="/discussion">
+                    <MessagesSquare className="h-4 w-4 mr-1" />
+                    Discussion
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex border-border overflow-x-auto scrollbar-hide">
+              <div className="flex items-center py-2 space-x-1 gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                    onClick={() => {
+                      setIsSidebarOpen(true)
+                      setView("categories")
+                    }}
+                  >
+                    <LayoutGrid className="h-4 w-4 mr-1" />
                     Categories
                     <ChevronDown className="h-3 w-3 ml-1" />
-                </Button>
+                  </Button>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium">
-                      <Tag className="h-4 w-4 mr-1" />
-                      Discount codes
-                      <ChevronDown className="h-3 w-3 ml-1" />
-                    </Button>
+                      <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]">
+                        <Tag className="h-4 w-4 mr-1" />
+                        Discount codes
+                        <ChevronDown className="h-3 w-3 ml-1" />
+                      </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
                     <DropdownMenuItem asChild>
@@ -468,32 +486,32 @@ export function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium" asChild>
-                  <Link href="/deals">
-                    <ShoppingBag className="h-4 w-4 mr-1" />
-                    Deals
-                  </Link>
-                </Button>
+                  <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                    <Link href="/deals">
+                      <TagIcon className="h-4 w-4 mr-1" />
+                      Deals
+                    </Link>
+                  </Button>
 
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium" asChild>
-                  <Link href="/freebies">
-                    <Heart className="h-4 w-4 mr-1" />
-                    Freebies
-                  </Link>
-                </Button>
+                  <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                    <Link href="/freebies">
+                      <Gift className="h-4 w-4 mr-1" />
+                      Freebies
+                    </Link>
+                  </Button>
 
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-medium" asChild>
-                  <Link href="/discussion">
-                    <MessageSquare className="h-4 w-4 mr-1" />
-                    Discussion
-                  </Link>
-                </Button>
+                  <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                    <Link href="/discussion">
+                      <MessagesSquare className="h-4 w-4 mr-1" />
+                      Discussion
+                    </Link>
+                  </Button>
               </div>
             </div>
           )}
 
           {/* Tabs Navigation */}
-          <div className="flex border-border justify-between items-center px-4">
+          <div className="flex border-border justify-between items-center">
             <Tabs defaultValue="for-you" className="w-full" value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="bg-transparent h-10 p-0">
                 <TabsTrigger
@@ -537,14 +555,15 @@ export function Navbar() {
 
             {isMobile ? (
               <div className="flex items-center justify-center w-8 h-8 p-2 rounded-full border border-gray-200 bg-white ml-2">
+
                 <Sliders className="h-4 w-4" />
                 {/* <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
                   1
                 </span> */}
               </div>
             ) : (
-                <Button variant="outline" size="sm" className="flex items-center rounded-full gap-1 mb-2 ml-auto">
-                  <Sliders className="h-5 w-5" />
+              <Button variant="outline" size="sm" className="flex items-center rounded-full gap-1 mb-2 ml-auto">
+                <Sliders className="h-5 w-5" />
                 Filter
                 <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
                   1

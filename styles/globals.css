@@ -2,7 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+*{
+  margin-left: 110px;
+    margin-right: 110px;
+}
 body {
+ 
   font-family: Arial, Helvetica, sans-serif;
 }
 

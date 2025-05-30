@@ -66,7 +66,6 @@ const config = {
         dealhunter: {
           red: "#f7641b",
           redHover: "#eb611f",
-
           blue: "#0062e0",
           gray: "#f5f5f5",
           "dark-gray": "#666666",

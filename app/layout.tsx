@@ -30,10 +30,10 @@ export default function RootLayout({
               <div className="flex min-h-screen flex-col">
                 <Navbar />
                 <main className="flex-1 py-4">
-                  <div className="container mx-auto px-4">{children}</div>
+                  <div className="mx-[110px] md:mx-[110px] mx-0">{children}</div>
                 </main>
                 <footer className="border-t bg-white py-6 dark:bg-dark-secondary">
-                  <div className="container mx-auto px-4">
+                  <div className="mx-[110px] md:mx-[110px] mx-0">
                     <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                       <div className="flex items-center gap-2">
                         <span className="text-lg font-bold">DealHunter</span>

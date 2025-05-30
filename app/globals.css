@@ -71,6 +71,66 @@
   @apply text-dealhunter-red;
 }
 
+.text--h {
+  font-family: monospace;
+  font-size: 16px;
+  line-height: normal;
+  font-weight: 400;
+  letter-spacing: -16px;
+  color: #000000;
+  text-indent: -500px;
+  overflow: hidden;
+}
+
+.menu-button {
+  -webkit-text-size-adjust: 100%;
+  --border-radius: 8px;
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  vertical-align: initial;
+  text-align: inherit;
+  background: transparent;
+  -webkit-appearance: button;
+  -webkit-font-smoothing: inherit;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  user-select: none;
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  font-size: .875rem;
+  transition: background-color, border-color, color, stroke, opacity, box-shadow;
+  transition-duration: .2s;
+  transition-timing-function: ease-out;
+  color: var(--text-default);
+  background-color: var(--background-default);
+  border-color: var(--border-default);
+  --background-default: var(--bgNeutralPrimary);
+  --text-disabled: var(--textNeutralTertiary);
+  --background-disabled: var(--bgNeutralPrimary);
+  --border-disabled: var(--borderNeutralPrimary);
+  height: 40px;
+  padding: 0 12px;
+  border-width: 1px;
+  border-style: solid;
+  overflow: visible;
+  cursor: pointer;
+  --text-default: var(--textTranslucentPrimary);
+  --border-default: var(--borderNeutralSecondary);
+  --text-hover: var(--textTranslucentPrimaryHover);
+  --border-hover: var(--borderNeutralSecondary);
+  --background-hover: var(--bgNeutralPrimaryHover);
+  --text-active: var(--textTranslucentPrimaryPressed);
+  --border-active: var(--borderNeutralSecondary);
+  --background-active: var(--bgTranslucentPrimaryPressed);
+  border-radius: 50vh;
+}
+
 .deal-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
