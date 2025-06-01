@@ -268,7 +268,7 @@ export function Navbar() {
           <div className={cn("flex items-center justify-between h-14")}>
             {isMobile ? (
               <>
-                <div className="flex w-full items-center justify-between gap-4">
+                <div className="flex w-full items-center justify-between gap-4 px-1">
                   <Link href="/" className="flex items-center gap-1">
                     <Flame className="h-6 w-6 text-dealhunter-red" />
                     <span className="text-xl font-bold">DealHunter</span>
@@ -278,7 +278,7 @@ export function Navbar() {
                     <Input
                       type="search"
                       placeholder="Search..."
-                      className="w-full pl-12 pr-4 h-11 rounded-full border-gray-200 bg-gray-50"
+                      className="w-full pl-12 pr-4 h-11 rounded-full border-gray-200"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -405,7 +405,7 @@ export function Navbar() {
 
           {/* Secondary Navigation - Categories */}
           {isMobile ? (
-            <div className="flex overflow-x-auto scrollbar-hide">
+            <div className="flex overflow-x-auto scrollbar-hide px-1 ">
               <div className="flex items-center py-2.5 space-x-3 whitespace-nowrap">
                 <Button
                   variant="ghost"
@@ -451,27 +451,27 @@ export function Navbar() {
           ) : (
             <div className="flex border-border overflow-x-auto scrollbar-hide">
               <div className="flex items-center py-2 space-x-1 gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
-                    onClick={() => {
-                      setIsSidebarOpen(true)
-                      setView("categories")
-                    }}
-                  >
-                    <LayoutGrid className="h-4 w-4 mr-1" />
-                    Categories
-                    <ChevronDown className="h-3 w-3 ml-1" />
-                  </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                  onClick={() => {
+                    setIsSidebarOpen(true)
+                    setView("categories")
+                  }}
+                >
+                  <LayoutGrid className="h-4 w-4 mr-1" />
+                  Categories
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]">
-                        <Tag className="h-4 w-4 mr-1" />
-                        Discount codes
-                        <ChevronDown className="h-3 w-3 ml-1" />
-                      </Button>
+                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]">
+                      <Tag className="h-4 w-4 mr-1" />
+                      Discount codes
+                      <ChevronDown className="h-3 w-3 ml-1" />
+                    </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start">
                     <DropdownMenuItem asChild>
@@ -486,26 +486,26 @@ export function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                  <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
-                    <Link href="/deals">
-                      <TagIcon className="h-4 w-4 mr-1" />
-                      Deals
-                    </Link>
-                  </Button>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                  <Link href="/deals">
+                    <TagIcon className="h-4 w-4 mr-1" />
+                    Deals
+                  </Link>
+                </Button>
 
-                  <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
-                    <Link href="/freebies">
-                      <Gift className="h-4 w-4 mr-1" />
-                      Freebies
-                    </Link>
-                  </Button>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                  <Link href="/freebies">
+                    <Gift className="h-4 w-4 mr-1" />
+                    Freebies
+                  </Link>
+                </Button>
 
-                  <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
-                    <Link href="/discussion">
-                      <MessagesSquare className="h-4 w-4 mr-1" />
-                      Discussion
-                    </Link>
-                  </Button>
+                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                  <Link href="/discussion">
+                    <MessagesSquare className="h-4 w-4 mr-1" />
+                    Discussion
+                  </Link>
+                </Button>
               </div>
             </div>
           )}
@@ -518,7 +518,7 @@ export function Navbar() {
                   value="for-you"
                   className={cn(
                     "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                    activeTab === "for-you" ? "text-dealhunter-red font-medium" : "text-gray-600",
+                    activeTab === "for-you" ? "font-medium" : "",
                   )}
                 >
                   For you
@@ -526,8 +526,8 @@ export function Navbar() {
                 <TabsTrigger
                   value="hottest"
                   className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none hover:text-dealhunter-red",
-                    activeTab === "hottest" ? "text-dealhunter-red font-medium" : "text-gray-600",
+                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
+                    activeTab === "hottest" ? "font-medium" : "",
                   )}
                 >
                   Hottest
@@ -535,8 +535,8 @@ export function Navbar() {
                 <TabsTrigger
                   value="is-called"
                   className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none hover:text-dealhunter-red",
-                    activeTab === "is-called" ? "text-dealhunter-red font-medium" : "text-gray-600",
+                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
+                    activeTab === "is-called" ? "font-medium" : "",
                   )}
                 >
                   Is called
@@ -544,8 +544,8 @@ export function Navbar() {
                 <TabsTrigger
                   value="new"
                   className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none hover:text-dealhunter-red",
-                    activeTab === "new" ? "text-dealhunter-red font-medium" : "text-gray-600",
+                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
+                    activeTab === "new" ? "font-medium" : "",
                   )}
                 >
                   New
@@ -554,7 +554,7 @@ export function Navbar() {
             </Tabs>
 
             {isMobile ? (
-              <div className="flex items-center justify-center w-8 h-8 p-2 rounded-full border border-gray-200 bg-white ml-2">
+              <div className="flex items-center justify-center w-8 h-8 p-2 rounded-full border border-gray-200 bg-white ml-2 dark:bg-transparent">
 
                 <Sliders className="h-4 w-4" />
                 {/* <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
