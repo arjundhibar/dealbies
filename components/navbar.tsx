@@ -263,7 +263,7 @@ export function Navbar() {
       <header
         className={cn("sticky top-0 z-40 w-full bg-background text-foreground border-b", isScrolled && "shadow-sm")}
       >
-        <div className={cn("mx-[110px]", isMobile && "mx-0")}>
+        <div className={cn("mx-[110px] max-w-6xl", isMobile && "mx-0")}>
           {/* Top Navigation Bar */}
           <div className={cn("flex items-center justify-between h-14")}>
             {isMobile ? (
