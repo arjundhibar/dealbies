@@ -152,7 +152,7 @@ export function AppSidebar({ onClose, initialView = "main", onLoginClick }: AppS
           </button>
 
           <Link href="/discussion" className="flex items-center py-3 text-base" onClick={onClose}>
-            <MessageSquare className="h-6 w-6 text-orange-500 mr-3" />
+            <MessageSquare className="h-6 w-6  mr-3" />
             <span>Discussion</span>
           </Link>
         </div>

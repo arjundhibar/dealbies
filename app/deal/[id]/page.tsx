@@ -62,7 +62,7 @@ export default function DealPage() {
         description: error.message || "You must be logged in to vote.",
         variant: "destructive",
       })
-      
+
     } finally {
       setIsVoting(false)
     }
@@ -126,7 +126,7 @@ export default function DealPage() {
   const postedAtDate = new Date(createdAt)
 
   return (
-    <div className="container mx-auto py-0 sm:py-2 px-0 sm:px-4 max-w-6xl">
+    <div className="mx-auto max-w-[82.5rem] px-4 w-full box-border">
       {/* Main Deal Card */}
       <Card className="mb-6 overflow-hidden dark:bg-dark-secondary">
         <div className="flex flex-col lg:flex-row">
@@ -156,30 +156,30 @@ export default function DealPage() {
               <div className="flex items-center gap-3">
                 {/* Voting buttons */}
                 <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary">
-              <Button
-                variant="outline"
-                size="icon"
-                className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "down" && "text-blue-500")}
-                onClick={() => handleVote("down")}
-                disabled={isVoting}
-              >
-                <ChevronDown className="h-5 w-5" />
-                <span className="sr-only">Downvote</span>
-              </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "down" && "text-blue-500")}
+                    onClick={() => handleVote("down")}
+                    disabled={isVoting}
+                  >
+                    <ChevronDown className="h-5 w-5" />
+                    <span className="sr-only">Downvote</span>
+                  </Button>
 
-              <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
+                  <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
 
-              <Button
-                variant="outline"
-                size="icon"
-                className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "up" && "text-dealhunter-red")}
-                onClick={() => handleVote("up")}
-                disabled={isVoting}
-              >
-                <ChevronUp className="h-5 w-5" />
-                <span className="sr-only">Upvote</span>
-              </Button>
-            </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "up" && "text-dealhunter-red")}
+                    onClick={() => handleVote("up")}
+                    disabled={isVoting}
+                  >
+                    <ChevronUp className="h-5 w-5" />
+                    <span className="sr-only">Upvote</span>
+                  </Button>
+                </div>
               </div>
 
               {/* Action buttons */}

@@ -35,7 +35,7 @@ const hottestDeals = [
 export default function Home() {
   return (
     <div className="mx-auto max-w-[82.5rem] px-4 w-full box-border">
-      <div className="space-y-4 lg:m-5">
+      <div className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className="lg:col-span-3">
             <Tabs defaultValue="all" className="w-full">
