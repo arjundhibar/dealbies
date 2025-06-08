@@ -169,11 +169,11 @@ export function DealCard({ deal }: DealCardProps) {
               variant="default"
               size="sm"
               asChild
-              className="bg-dealhunter-red hover:bg-dealhunter-redHover mt-4 rounded-full"
+              className="bg-[#f7641b] hover:bg-[#eb611f] active:bg-[#da5a1c] shadow-[#f7641b] hover:shadow-[#eb611f] rounded-[50vh] min-w-[12.375rem] h-9 px-4"
             >
               <a href={dealUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
-                <span>Get Deal</span>
-                <ExternalLink className="ml-1 h-3 w-3" />
+                <span className="text-[0.875rem] font-bold text-white">Get Deal</span>
+                <ExternalLink className="ml-1 h-3 w-3 text-white" />
               </a>
             </Button>
           </div>
@@ -184,10 +184,10 @@ export function DealCard({ deal }: DealCardProps) {
 
   // Desktop layout (your existing layout)
   return (
-    <Card className="overflow-hidden shadow-sm hover:shadow-md h-62 dark:bg-dark-secondary">
+    <Card className="overflow-hidden shadow-sm hover:shadow-md dark:bg-dark-secondary cursor-pointer min-h-[14.25rem]">
       <div className="flex">
         {/* Left side - Product image */}
-        <div className="w-[30%] relative p-3 bg-[#0f375f0d] dark:bg-dark-tertiary">
+        <div className="w-[14.125rem] relative bg-[#0f375f0d] dark:bg-dark-tertiary">
           <div className="relative h-full">
             <Image
               src={imageUrl || "/placeholder.svg?height=400&width=600&query=product"}
@@ -206,7 +206,7 @@ export function DealCard({ deal }: DealCardProps) {
         </div>
 
         {/* Right side - Content */}
-        <div className="w-[70%] p-4 flex flex-col">
+        <div className="w-[78%] p-4 flex flex-col">
           {/* Top section with voting and posted time */}
           <div className="flex justify-between items-center mb-2 ">
             {/* Voting buttons */}
@@ -247,31 +247,31 @@ export function DealCard({ deal }: DealCardProps) {
 
           {/* Price section */}
           {/* Price, Merchant, Posted By - All in one line */}
-<div className="flex items-center gap-2 my-2 flex-wrap">
-  <div className="flex items-center gap-2">
-    <span className="text-2xl font-bold text-dealhunter-red">{formatCurrency(Number(price))}</span>
-    {originalPrice && (
-      <>
-        <span className="text-xl text-muted-foreground line-through">
-          {formatCurrency(Number(originalPrice))}
-        </span>
-        <span className="text-green-600 font-bold">-{discount}%</span>
-      </>
-    )}
-  </div>
-    <span className="text-gray-500">|</span>
-  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-    <span>Available at</span>
-    <Badge variant="outline" className="bg-white dark:text-white dark:bg-dark-secondary">
-      {merchant}
-    </Badge>
-  </div>
+          <div className="flex items-center gap-2 my-2 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold text-dealhunter-red">{formatCurrency(Number(price))}</span>
+              {originalPrice && (
+                <>
+                  <span className="text-xl text-muted-foreground line-through">
+                    {formatCurrency(Number(originalPrice))}
+                  </span>
+                  <span className="text-green-600 font-bold">-{discount}%</span>
+                </>
+              )}
+            </div>
+            <span className="text-gray-500">|</span>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <span>Available at</span>
+              <Badge variant="outline" className="bg-white dark:text-white dark:bg-dark-secondary">
+                {merchant}
+              </Badge>
+            </div>
 
-  <div className="flex items-center gap-1 text-sm text-muted-foreground">
-    <span>Posted by</span>
-    <span className="font-medium">{postedBy.name}</span>
-  </div>
-</div>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <span>Posted by</span>
+              <span className="font-medium">{postedBy.name}</span>
+            </div>
+          </div>
 
 
           {/* Description */}
@@ -281,7 +281,7 @@ export function DealCard({ deal }: DealCardProps) {
           <div className="flex items-center justify-between mt-4 pt-1">
             <div className="flex items-center gap-3 ">
               {/* Comments */}
-              <Button variant="ghost" size="sm" className="gap-1 p-0 hover:text-dealhunter-red" asChild>
+              <Button variant="ghost" size="sm" className="gap-1 p-0 hover:text-dealhunter-red shadow-none focus:outline-none focus:ring-0" asChild>
                 <Link href={`/deal/${id}#comments`}>
                   <MessageSquare className="h-4 w-4" />
                   <span className="ml-1">{commentCount}</span>
@@ -289,7 +289,7 @@ export function DealCard({ deal }: DealCardProps) {
               </Button>
 
               {/* Share */}
-              <Button variant="ghost" size="sm" className="gap-1 p-0 hover:text-dealhunter-red">
+              <Button variant="ghost" size="sm" className="gap-1 p-0 hover:text-dealhunter-red shadow-none focus:outline-none focus:ring-0">
                 <Share2 className="h-4 w-4" />
               </Button>
 
@@ -302,11 +302,11 @@ export function DealCard({ deal }: DealCardProps) {
               variant="default"
               size="sm"
               asChild
-              className="bg-dealhunter-red hover:bg-dealhunter-redHover rounded-full px-8"
+              className="bg-[#f7641b] hover:bg-[#eb611f] active:bg-[#da5a1c] shadow-[#f7641b] hover:shadow-[#eb611f] rounded-[50vh] min-w-[12.375rem] h-9 px-4"
             >
-              <a href={dealUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
-                <span className="text-md">Get Deal</span>
-                <ExternalLink className="ml-1 h-3 w-3" />
+              <a href={dealUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
+                <span className="text-[0.875rem] font-bold text-white">Get Deal</span>
+                <ExternalLink className="ml-1 h-3 w-3 text-white" />
               </a>
             </Button>
           </div>
