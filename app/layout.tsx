@@ -30,7 +30,7 @@ export default function RootLayout({
               <div className="flex min-h-screen flex-col">
                 <Navbar />
                 <main className="flex-1 py-4">
-                  <div className="mx-[110px] md:mx-[110px] mx-0">{children}</div>
+                  <div className=" md:mx-[110px] mx-0">{children}</div>
                 </main>
                 <footer className="border-t bg-white py-6 dark:bg-dark-secondary">
                   <div className="mx-[110px] md:mx-[110px] mx-0">

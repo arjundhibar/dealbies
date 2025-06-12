@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MessageSquare, ExternalLink, ChevronUp, ChevronDown, Share2 } from "lucide-react"
+import { MessageSquare, ExternalLink, ChevronUp, ChevronDown, Share2, MessagesSquare } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { isPast } from "date-fns"
@@ -75,11 +75,11 @@ export function DealCard({ deal }: DealCardProps) {
   if (isMobile) {
     return (
       <Card className="overflow-hidden shadow-sm">
-        <div className="flex w-full">
+        <div className="flex flex-grow-0 w-full ">
           {/* Left side - Image with overlay controls */}
-          <div className="relative w-1/3">
+          <div className="relative w-[7rem] bg-[#f3f5f7] dark:bg-[#28292a] flex items-center">
             {/* Product Image */}
-            <div className="relative aspect-[2/4]">
+            <div className="relative w-[7rem] h-[7rem]">
               <Image
                 src={imageUrl || "/placeholder.svg?height=400&width=400&query=product"}
                 alt={title}
@@ -89,25 +89,25 @@ export function DealCard({ deal }: DealCardProps) {
             </div>
 
             {/* Top overlay - Voting */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 bg-white/80 rounded-full px-1 py-1 flex items-center ">
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 flex items-center  bg-[#fff] rounded-full p-1 gap-1 dark:bg-dark-tertiary ">
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("h-8 w-8 p-0 rounded-full", userVote === "down" && "text-blue-500")}
+                className={cn("h-7 w-7 p-0 rounded-full border", userVote === "down" && "text-blue-500")}
                 onClick={() => handleVote("down")}
                 disabled={isVoting}
               >
-                <ChevronDown className="h-5 w-5" />
+                <ChevronDown className="h-3 w-3" />
               </Button>
               <span className="text-lg font-bold text-vote-red">{score}°</span>
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("h-8 w-8 p-0 rounded-full", userVote === "up" && "text-dealhunter-red")}
+                className={cn("h-7 w-7 p-0 rounded-full border", userVote === "up" && "text-dealhunter-red")}
                 onClick={() => handleVote("up")}
                 disabled={isVoting}
               >
-                <ChevronUp className="h-5 w-5" />
+                <ChevronUp className="h-3 w-3" />
               </Button>
             </div>
 
@@ -115,7 +115,7 @@ export function DealCard({ deal }: DealCardProps) {
             <div className="absolute bottom-1 text-gray-500 left-[40%] -translate-x-1/2 z-10 flex rounded-full">
               <Link href={`/deal/${id}#comments`}>
                 <Button variant="ghost" size="icon" className="p-0 font-semibold">
-                  <MessageSquare className="h-5 w-5 " />
+                  <MessagesSquare className="h-5 w-5 " />
                 </Button>
               </Link>
               <Button variant="ghost" size="icon" className="p-0">
@@ -126,17 +126,19 @@ export function DealCard({ deal }: DealCardProps) {
           </div>
 
           {/* Right side - Deal Info */}
-          <div className="w-2/3 p-2 flex flex-col justify-between">
-            <div>
-              <Badge variant="outline" className="bg-gray-100 text-gray-600 font-normal mb-6 ml-20">
-                Posted {formatRelativeTime(postedAtDate)}
-              </Badge>
+          <div className="w-2/3 p-2 flex flex-col">
+            <div className="flex-grow">
+              <div className="flex justify-end mb-6">
+                <Badge variant="outline" className="bg-gray-100 text-gray-600 rounded-none text-nowrap font-normal">
+                  Posted {formatRelativeTime(postedAtDate)}
+                </Badge>
+              </div>
 
               <Link href={`/deal/${id}`} className="hover:text-dealhunter-red">
-                <h3 className="text-base font-bold line-clamp-2 mb-1">{title}</h3>
+                <h3 className="text-base font-bold mb-1 leading-none">{title}</h3>
               </Link>
 
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 leading-none">
                 <span className="text-base font-bold text-dealhunter-red">{formatCurrency(Number(price))}</span>
                 {originalPrice && (
                   <>
@@ -148,11 +150,11 @@ export function DealCard({ deal }: DealCardProps) {
                 )}
               </div>
 
-              <div className="text-[12px] text-muted-foreground mb-1">
+              <div className="text-[12px] text-muted-foreground mb-1 leading-none">
                 Available at <span className="font-medium">{merchant}</span>
               </div>
 
-              <div className="flex items-center gap-1 text-[12px] text-muted-foreground">
+              <div className="flex items-center text-[12px] text-muted-foreground leading-none">
                 <Avatar className="h-5 w-5">
                   <AvatarImage
                     src={postedBy.avatar || "/placeholder.svg?height=40&width=40&text=U"}
@@ -169,7 +171,7 @@ export function DealCard({ deal }: DealCardProps) {
               variant="default"
               size="sm"
               asChild
-              className="bg-[#f7641b] hover:bg-[#eb611f] active:bg-[#da5a1c] shadow-[#f7641b] hover:shadow-[#eb611f] rounded-[50vh] min-w-[12.375rem] h-9 px-4"
+              className="bg-[#f7641b] hover:bg-[#eb611f] active:bg-[#da5a1c] shadow-[#f7641b] hover:shadow-[#eb611f] rounded-[50vh] min-w-[12.375rem] h-9 px-4 mt-2"
             >
               <a href={dealUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
                 <span className="text-[0.875rem] font-bold text-white">Get Deal</span>
@@ -182,7 +184,7 @@ export function DealCard({ deal }: DealCardProps) {
     )
   }
 
-  // Desktop layout (your existing layout)
+  // Desktop layout 
   return (
     <Card className="overflow-hidden shadow-sm hover:shadow-md dark:bg-dark-secondary cursor-pointer min-h-[14.25rem]">
       <div className="flex">
@@ -283,13 +285,13 @@ export function DealCard({ deal }: DealCardProps) {
               {/* Comments */}
               <Button variant="ghost" size="sm" className="gap-1 p-0 hover:text-dealhunter-red shadow-none focus:outline-none focus:ring-0" asChild>
                 <Link href={`/deal/${id}#comments`}>
-                  <MessageSquare className="h-4 w-4" />
+                  <MessagesSquare className="h-4 w-4" />
                   <span className="ml-1">{commentCount}</span>
                 </Link>
               </Button>
 
               {/* Share */}
-              <Button variant="ghost" size="sm" className="gap-1 p-0 hover:text-dealhunter-red shadow-none focus:outline-none focus:ring-0">
+              <Button variant="ghost" size="sm" className="gap-1 p-0 hover:text-dealhunter-red">
                 <Share2 className="h-4 w-4" />
               </Button>
 
