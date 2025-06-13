@@ -77,33 +77,33 @@ export function DealCard({ deal }: DealCardProps) {
       <Card className="overflow-hidden shadow-sm">
         <div className="flex flex-grow-0 w-full ">
           {/* Left side - Image with overlay controls */}
-          <div className="relative w-[7rem] bg-[#f3f5f7] dark:bg-[#28292a] flex items-center">
+          <div className="relative w-[8rem] bg-[#f3f5f7] dark:bg-[#28292a] flex items-center justify-center">
             {/* Product Image */}
             <div className="relative w-[7rem] h-[7rem]">
               <Image
                 src={imageUrl || "/placeholder.svg?height=400&width=400&query=product"}
                 alt={title}
                 fill
-                className="object-cover z-5"
+                className="object-cover z-5 rounded-lg"
               />
             </div>
 
             {/* Top overlay - Voting */}
-            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 flex items-center  bg-[#fff] rounded-full p-1 gap-1 dark:bg-dark-tertiary ">
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 flex items-center  bg-[#fff] rounded-full p-1 gap-2 dark:bg-[#1d1f20] ">
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("h-7 w-7 p-0 rounded-full border", userVote === "down" && "text-blue-500")}
+                className={cn("h-7 w-7 p-0 rounded-full border border-[hsla(0,0%,100%,0.35)]", userVote === "down" && "text-blue-500")}
                 onClick={() => handleVote("down")}
                 disabled={isVoting}
               >
-                <ChevronDown className="h-3 w-3" />
+                <ChevronDown className="h-6 w-6" />
               </Button>
-              <span className="text-lg font-bold text-vote-red">{score}°</span>
+              <span className="text-lg font-bold text-vote-lightOrange">{score}°</span>
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("h-7 w-7 p-0 rounded-full border", userVote === "up" && "text-dealhunter-red")}
+                className={cn("h-7 w-7 p-0 rounded-full border border-[hsla(0,0%,100%,0.35)]", userVote === "up" && "text-dealhunter-red")}
                 onClick={() => handleVote("up")}
                 disabled={isVoting}
               >
@@ -115,23 +115,24 @@ export function DealCard({ deal }: DealCardProps) {
             <div className="absolute bottom-1 text-gray-500 left-[40%] -translate-x-1/2 z-10 flex rounded-full">
               <Link href={`/deal/${id}#comments`}>
                 <Button variant="ghost" size="icon" className="p-0 font-semibold">
-                  <MessagesSquare className="h-5 w-5 " />
+                  <MessagesSquare className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)]" />
                 </Button>
               </Link>
               <Button variant="ghost" size="icon" className="p-0">
-                <Share2 className="h-5 w-5" />
+                <Share2 className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)]" />
               </Button>
               {/* <DealCardSaveButton dealId={id} /> */}
             </div>
           </div>
 
           {/* Right side - Deal Info */}
-          <div className="w-2/3 p-2 flex flex-col">
+          <div className="w-[75%] p-2 flex flex-col dark:bg-[#1d1f20]">
             <div className="flex-grow">
               <div className="flex justify-end mb-6">
-                <Badge variant="outline" className="bg-gray-100 text-gray-600 rounded-none text-nowrap font-normal">
+                {/* <Badge variant="dark" className="">
                   Posted {formatRelativeTime(postedAtDate)}
-                </Badge>
+                </Badge> */}
+                <div className="text-sm text-muted-foreground pl-[0.5rem] pr-[0.5rem] pb-[0.25rem] pt-[0.25rem] rounded-md dark:bg-[hsla(0,0%,100%,0.11)] dark:text-[hsla(0,0%,100%,0.75)] bg-[#0f375f0d] ">Posted {formatRelativeTime(postedAtDate)}</div>
               </div>
 
               <Link href={`/deal/${id}`} className="hover:text-dealhunter-red">
@@ -151,10 +152,10 @@ export function DealCard({ deal }: DealCardProps) {
               </div>
 
               <div className="text-[12px] text-muted-foreground mb-1 leading-none">
-                Available at <span className="font-medium">{merchant}</span>
+                Available at <span className="font-medium text-black">{merchant}</span>
               </div>
 
-              <div className="flex items-center text-[12px] text-muted-foreground leading-none">
+              <div className="flex items-center text-[12px] gap-1 text-muted-foreground leading-none">
                 <Avatar className="h-5 w-5">
                   <AvatarImage
                     src={postedBy.avatar || "/placeholder.svg?height=40&width=40&text=U"}
@@ -189,13 +190,13 @@ export function DealCard({ deal }: DealCardProps) {
     <Card className="overflow-hidden shadow-sm hover:shadow-md dark:bg-dark-secondary cursor-pointer min-h-[14.25rem]">
       <div className="flex">
         {/* Left side - Product image */}
-        <div className="w-[14.125rem] relative bg-[#0f375f0d] dark:bg-dark-tertiary">
+        <div className="w-[14.125rem] p-[0.75rem] relative bg-[#0f375f0d] dark:bg-dark-tertiary">
           <div className="relative h-full">
             <Image
               src={imageUrl || "/placeholder.svg?height=400&width=600&query=product"}
               alt={title}
               fill
-              className="object-cover"
+              className="object-cover rounded-lg"
             />
             {isExpired && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
@@ -239,7 +240,7 @@ export function DealCard({ deal }: DealCardProps) {
             </div>
 
             {/* Posted time */}
-            <div className="text-sm text-muted-foreground bg-[#0f375f0d] p-1">Posted {formatRelativeTime(postedAtDate)}</div>
+            <div className="text-sm text-muted-foreground pl-[0.5rem] pr-[0.5rem] pb-[0.25rem] pt-[0.25rem] rounded-sm dark:bg-[hsla(0,0%,100%,0.11)] dark:text-[hsla(0,0%,100%,0.75)] bg-[#0f375f0d] ">Posted {formatRelativeTime(postedAtDate)}</div>
           </div>
 
           {/* Title */}
@@ -262,14 +263,14 @@ export function DealCard({ deal }: DealCardProps) {
               )}
             </div>
             <span className="text-gray-500">|</span>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1 text-sm text-muted-foreground dark:text-[hsla(0,0%,100%,0.75)]">
               <span>Available at</span>
               <Badge variant="outline" className="bg-white dark:text-white dark:bg-dark-secondary">
                 {merchant}
               </Badge>
             </div>
 
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1 text-sm text-muted-foreground dark:text-[hsla(0,0%,100%,0.75)]">
               <span>Posted by</span>
               <span className="font-medium">{postedBy.name}</span>
             </div>
