@@ -136,11 +136,11 @@ export function DealCard({ deal }: DealCardProps) {
               </div>
 
               <Link href={`/deal/${id}`} className="hover:text-dealhunter-red">
-                <h3 className="text-base font-bold mb-1 leading-none">{title}</h3>
+                <h3 className="text-base font-bold mb-1 leading-[1.5rem]">{title}</h3>
               </Link>
 
               <div className="flex items-center gap-2 mb-1 leading-none">
-                <span className="text-base font-bold text-[#f7641b] dark:text-[#f97936]">{formatCurrency(Number(price))}</span>
+                <span className="text-xl font-bold text-[#f7641b] dark:text-[#f97936]">{formatCurrency(Number(price))}</span>
                 {originalPrice && (
                   <>
                     <span className="text-base text-muted-foreground line-through">
@@ -255,7 +255,7 @@ export function DealCard({ deal }: DealCardProps) {
               <span className="text-2xl font-bold text-[#f7641b] dark:text-[#f97936]">{formatCurrency(Number(price))}</span>
               {originalPrice && (
                 <>
-                  <span className="text-xl text-muted-foreground line-through">
+                  <span className="text-base text-muted-foreground line-through">
                     {formatCurrency(Number(originalPrice))}
                   </span>
                   <span className="text-green-600 font-bold">-{discount}%</span>
