@@ -33,7 +33,7 @@ export default function RootLayout({
                   <div className=" md:mx-[110px] mx-0">{children}</div>
                 </main>
                 <footer className="border-t bg-white py-6 dark:bg-dark-secondary">
-                  <div className="mx-[110px] md:mx-[110px] mx-0">
+                  <div className="mx-[110px] md:mx-[110px]">
                     <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                       <div className="flex items-center gap-2">
                         <span className="text-lg font-bold">DealHunter</span>

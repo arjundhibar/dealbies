@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MessageSquare, ExternalLink, ChevronUp, ChevronDown, Share2, MessagesSquare } from "lucide-react"
+import { MessageSquare, ExternalLink, ChevronUp, ChevronDown, Share2, MessagesSquare, ArrowBigDown, ArrowBigUp } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { isPast } from "date-fns"
@@ -74,10 +74,10 @@ export function DealCard({ deal }: DealCardProps) {
   // Mobile layout
   if (isMobile) {
     return (
-      <Card className="overflow-hidden shadow-sm">
+      <Card className="overflow-hidden shadow-sm border-none">
         <div className="flex flex-grow-0 w-full ">
           {/* Left side - Image with overlay controls */}
-          <div className="relative w-[8rem] bg-[#f3f5f7] dark:bg-[#28292a] flex items-center justify-center">
+          <div className="relative w-[8rem] bg-[#f3f5f7] dark:bg-[#28292a] flex items-center justify-center pl-3 pr-3">
             {/* Product Image */}
             <div className="relative w-[7rem] h-[7rem]">
               <Image
@@ -97,7 +97,7 @@ export function DealCard({ deal }: DealCardProps) {
                 onClick={() => handleVote("down")}
                 disabled={isVoting}
               >
-                <ChevronDown className="h-6 w-6" />
+                <ArrowBigDown className="h-5 w-5 scale-[1.5] text-[#5aa4f1]" strokeWidth={1} />
               </Button>
               <span className="text-lg font-bold text-vote-lightOrange">{score}°</span>
               <Button
@@ -107,7 +107,7 @@ export function DealCard({ deal }: DealCardProps) {
                 onClick={() => handleVote("up")}
                 disabled={isVoting}
               >
-                <ChevronUp className="h-3 w-3" />
+                <ArrowBigUp className="h-5 w-5 scale-[1.5] text-[#f97778]" strokeWidth={1} />
               </Button>
             </div>
 
@@ -152,7 +152,7 @@ export function DealCard({ deal }: DealCardProps) {
               </div>
 
               <div className="text-[12px] text-muted-foreground mb-1 leading-none">
-                Available at <span className="font-medium text-black">{merchant}</span>
+                Available at <span className="font-medium text-black dark:text-white">{merchant}</span>
               </div>
 
               <div className="flex items-center text-[12px] gap-1 text-muted-foreground leading-none">
@@ -187,10 +187,10 @@ export function DealCard({ deal }: DealCardProps) {
 
   // Desktop layout 
   return (
-    <Card className="overflow-hidden shadow-sm hover:shadow-md dark:bg-dark-secondary cursor-pointer min-h-[14.25rem]">
+    <Card className="overflow-hidden shadow-sm hover:shadow-md dark:bg-dark-secondary cursor-pointer min-h-[14.25rem] border-none">
       <div className="flex">
         {/* Left side - Product image */}
-        <div className="w-[14.125rem] p-[0.75rem] relative bg-[#0f375f0d] dark:bg-dark-tertiary">
+        <div className="w-[14.125rem] p-[0.75rem]  relative bg-[#0f375f0d] dark:bg-dark-tertiary">
           <div className="relative h-full">
             <Image
               src={imageUrl || "/placeholder.svg?height=400&width=600&query=product"}
@@ -217,11 +217,11 @@ export function DealCard({ deal }: DealCardProps) {
               <Button
                 variant="outline"
                 size="icon"
-                className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "down" && "text-blue-500")}
+                className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "down" && "text-blue-500")}
                 onClick={() => handleVote("down")}
                 disabled={isVoting}
               >
-                <ChevronDown className="h-5 w-5" />
+                <ArrowBigDown className="h-6 w-6 scale-[1.5] text-[#5aa4f1]" strokeWidth={1} />
                 <span className="sr-only">Downvote</span>
               </Button>
 
@@ -230,11 +230,11 @@ export function DealCard({ deal }: DealCardProps) {
               <Button
                 variant="outline"
                 size="icon"
-                className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "up" && "text-dealhunter-red")}
+                className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "up" && "text-dealhunter-red")}
                 onClick={() => handleVote("up")}
                 disabled={isVoting}
               >
-                <ChevronUp className="h-5 w-5" />
+                <ArrowBigUp className="h-6 w-6 scale-[1.5] text-[#f97778]" strokeWidth={1} />
                 <span className="sr-only">Upvote</span>
               </Button>
             </div>
