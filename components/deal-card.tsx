@@ -93,21 +93,21 @@ export function DealCard({ deal }: DealCardProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("h-7 w-7 p-0 rounded-full border border-[hsla(0,0%,100%,0.35)]", userVote === "down" && "text-blue-500")}
+                className={cn("h-7 w-7 p-0 rounded-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]", userVote === "down" && "text-blue-500")}
                 onClick={() => handleVote("down")}
                 disabled={isVoting}
               >
-                <ArrowBigDown className="h-5 w-5 scale-[1.5] text-[#5aa4f1]" strokeWidth={1} />
+                <ArrowBigDown className="h-6 w-6 scale-[1.5] scale-x-[1] text-[#005498] dark:text-[#5aa4f1]" strokeWidth={1.5} />
               </Button>
               <span className="text-lg font-bold text-vote-lightOrange">{score}°</span>
               <Button
                 variant="ghost"
                 size="sm"
-                className={cn("h-7 w-7 p-0 rounded-full border border-[hsla(0,0%,100%,0.35)]", userVote === "up" && "text-dealhunter-red")}
+                className={cn("h-7 w-7 p-0 rounded-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]", userVote === "up" && "text-dealhunter-red")}
                 onClick={() => handleVote("up")}
                 disabled={isVoting}
               >
-                <ArrowBigUp className="h-5 w-5 scale-[1.5] text-[#f97778]" strokeWidth={1} />
+                <ArrowBigUp className="h-6 w-6 scale-[1.5] scale-x-[1] text-[#ce1734] dark:text-[#f97778]" strokeWidth={1.5} />
               </Button>
             </div>
 
@@ -221,7 +221,7 @@ export function DealCard({ deal }: DealCardProps) {
                 onClick={() => handleVote("down")}
                 disabled={isVoting}
               >
-                <ArrowBigDown className="h-6 w-6 scale-[1.5] text-[#5aa4f1]" strokeWidth={1} />
+                <ArrowBigDown className="h-6 w-6 scale-[1.5] scale-x-[1.1]  text-[#005498] dark:text-[#5aa4f1]" strokeWidth={1.5} />
                 <span className="sr-only">Downvote</span>
               </Button>
 
@@ -234,7 +234,7 @@ export function DealCard({ deal }: DealCardProps) {
                 onClick={() => handleVote("up")}
                 disabled={isVoting}
               >
-                <ArrowBigUp className="h-6 w-6 scale-[1.5] text-[#f97778]" strokeWidth={1} />
+                <ArrowBigUp className="h-6 w-6 scale-[1.5] scale-x-[1.1] text-[#ce1734] dark:text-[#f97778]" strokeWidth={1.5} />
                 <span className="sr-only">Upvote</span>
               </Button>
             </div>
