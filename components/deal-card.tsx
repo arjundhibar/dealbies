@@ -159,6 +159,7 @@ export function DealCard({ deal }: DealCardProps) {
                     <AvatarImage
                       src={postedBy.avatar || "/placeholder.svg?height=40&width=40&text=U"}
                       alt={postedBy.name}
+                      className="h-5 w-5 object-cover"
                     />
                     <AvatarFallback>{postedBy.name.charAt(0).toUpperCase()}</AvatarFallback>
                   </Avatar>
@@ -272,6 +273,14 @@ export function DealCard({ deal }: DealCardProps) {
               </div>
 
               <div className="flex items-center gap-1 text-sm text-muted-foreground dark:text-[hsla(0,0%,100%,0.75)]">
+                <Avatar className="h-5 w-5">
+                  <AvatarImage
+                    src={postedBy.avatar || "./kishan.jpeg?height=40&width=40&text=U"}
+                    alt={postedBy.name}
+                    className="h-5 w-5 object-cover"
+                  />
+                  <AvatarFallback>{postedBy.name.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
                 <span>Posted by</span>
                 <span className="font-medium">{postedBy.name}</span>
               </div>
