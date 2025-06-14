@@ -23,14 +23,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-dealhunter-gray dark:bg-dark-primary`}>
+      <body className={`${inter.className} bg-[#e9eaec] dark:bg-dark-primary`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
           <AuthProvider>
             <DataProvider>
               <div className="flex min-h-screen flex-col">
                 <Navbar />
                 <main className="flex-1 py-4">
-                  <div className=" md:mx-[110px] mx-0">{children}</div>
+                  <div className=" md:mx-[110px] mx-0 ">{children}</div>
                 </main>
                 <footer className="border-t bg-white py-6 dark:bg-dark-secondary">
                   <div className="mx-[110px] md:mx-[110px]">
