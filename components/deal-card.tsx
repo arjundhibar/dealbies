@@ -116,11 +116,11 @@ export function DealCard({ deal }: DealCardProps) {
               <div className="absolute bottom-1 text-gray-500 left-[40%] -translate-x-1/2 z-10 flex rounded-full" onClick={(e) => e.stopPropagation()}>
                 <Link href={`/deal/${id}#comments`}>
                   <Button variant="ghost" size="icon" className="p-0 font-semibold">
-                    <MessagesSquare className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)]" />
+                    <MessagesSquare className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)] dark:hover:text-dealhunter-red" />
                   </Button>
                 </Link>
                 <Button variant="ghost" size="icon" className="p-0">
-                  <Share2 className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)]" />
+                  <Share2 className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)] dark:hover:text-dealhunter-red" />
                 </Button>
                 {/* <DealCardSaveButton dealId={id} /> */}
               </div>
