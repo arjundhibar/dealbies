@@ -140,7 +140,7 @@ export function DealCard({ deal }: DealCardProps) {
               </Link>
 
               <div className="flex items-center gap-2 mb-1 leading-none">
-                <span className="text-base font-bold text-dealhunter-red">{formatCurrency(Number(price))}</span>
+                <span className="text-base font-bold text-[#f7641b] dark:text-[#f97936]">{formatCurrency(Number(price))}</span>
                 {originalPrice && (
                   <>
                     <span className="text-base text-muted-foreground line-through">
@@ -252,7 +252,7 @@ export function DealCard({ deal }: DealCardProps) {
           {/* Price, Merchant, Posted By - All in one line */}
           <div className="flex items-center gap-2 my-2 flex-wrap">
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-dealhunter-red">{formatCurrency(Number(price))}</span>
+              <span className="text-2xl font-bold text-[#f7641b] dark:text-[#f97936]">{formatCurrency(Number(price))}</span>
               {originalPrice && (
                 <>
                   <span className="text-xl text-muted-foreground line-through">
