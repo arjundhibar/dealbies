@@ -7,6 +7,7 @@ import Link from "next/link"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +62,7 @@ export function Navbar() {
   const isMobile = useIsMobile()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [view, setView] = useState<"main" | "categories">("main")
+  const isSubmissionPage = pathname === '/submission/add'
 
   useEffect(() => {
     const handleScroll = () => {
@@ -318,24 +320,68 @@ export function Navbar() {
                 </form>
 
                 <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md"
-                  >
-                    <AlarmClockCheck className="h-4 w-4 mr-1" />
-                    Create DealAlert
-                  </Button>
+                  {isSubmissionPage ? (
+                    <>
+                      
+                      <Button
+                        variant="navbar"
+                        size="sm"
+                        className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md"
+                      >
+                        <AlarmClockCheck className="h-4 w-4" />
+                        Alerts
+                        </Button>
+                        <Button
+                          variant="navbar"
+                          size="sm"
+                          className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md"
+                        >
+                          <Bell className="h-4 w-4 mr-1" />
+                          Notifications
+                        </Button>
+                    </>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md"
+                    >
+                      <AlarmClockCheck className="h-4 w-4" />
+                      Create DealAlert
+                    </Button>
+                  )}
 
 
                   {user ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="font-medium">
-                          <User className="h-4 w-4 mr-1" />
-                          <span className="hidden md:inline">
-                            {user.user_metadata?.username || user.email?.split("@")[0]}
-                          </span>
+                          {isSubmissionPage ? (
+                            <>
+                              <Button
+                                variant="navbar"
+                                size="sm"
+                                className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md border-[#c5c7ca] hover:text-[rgba(1,3,4,0.89)] hover:border-[#c5c7ca] hover:bg-[#f3f5f7]"
+                              >
+                                <Avatar className="h-5 w-5 mr-0.5">
+                                  <AvatarImage
+                                    src={user.user_metadata?.avatar_url || "/placeholder.svg?height=40&width=40&text=U"}
+                                    alt={user.user_metadata?.username || user.email}
+                                    className="h-5 w-5 object-cover"
+                                  />
+                                  <AvatarFallback>{(user.user_metadata?.username || user.email?.split("@")[0])?.charAt(0).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <span className="text-[#000] font-semibold text-base">Profile</span>
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <User className="h-4 w-4 mr-1" />
+                              <span className="hidden md:inline">
+                                {user.user_metadata?.username || user.email?.split("@")[0]}
+                              </span>
+                            </>
+                          )}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -370,7 +416,7 @@ export function Navbar() {
                     size="sm"
                     onClick={() => {
                       if (user) {
-                        setIsPostDealOpen(true);
+                        router.push('/submission/add');
                       } else {
                         setIsLoginOpen(true);
                       }
@@ -404,178 +450,182 @@ export function Navbar() {
           </div>
 
           {/* Secondary Navigation - Categories */}
-          {isMobile ? (
-            <div className="flex overflow-x-auto scrollbar-hide px-1 ">
-              <div className="flex items-center py-2.5 space-x-3 whitespace-nowrap">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
-                  onClick={() => {
-                    setIsSidebarOpen(true)
-                    setView("categories")
-                  }}
-                >
-                  <LayoutGrid className="h-4 w-4 mr-1" />
-                  Categories
-                  <ChevronDown className="h-3 w-3 ml-1" />
-                </Button>
+          {!isSubmissionPage && (
+            <>
+              {isMobile ? (
+                <div className="flex overflow-x-auto scrollbar-hide px-1 ">
+                  <div className="flex items-center py-2.5 space-x-3 whitespace-nowrap">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                      onClick={() => {
+                        setIsSidebarOpen(true)
+                        setView("categories")
+                      }}
+                    >
+                      <LayoutGrid className="h-4 w-4 mr-1" />
+                      Categories
+                      <ChevronDown className="h-3 w-3 ml-1" />
+                    </Button>
 
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]">
-                  <Tag className="h-4 w-4 mr-1" />
-                  Discount codes
-                  <ChevronDown className="h-3 w-3 ml-1" />
-                </Button>
-
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
-                  <Link href="/deals">
-                    <TagIcon className="h-4 w-4 mr-1" />
-                    Deals
-                  </Link>
-                </Button>
-
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
-                  <Link href="/freebies">
-                    <Gift className="h-4 w-4 mr-1" />
-                    Freebies
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
-                  <Link href="/discussion">
-                    <MessagesSquare className="h-4 w-4 mr-1" />
-                    Discussion
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="flex border-border overflow-x-auto scrollbar-hide">
-              <div className="flex items-center py-2 space-x-1 gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
-                  onClick={() => {
-                    setIsSidebarOpen(true)
-                    setView("categories")
-                  }}
-                >
-                  <LayoutGrid className="h-4 w-4 mr-1" />
-                  Categories
-                  <ChevronDown className="h-3 w-3 ml-1" />
-                </Button>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]">
                       <Tag className="h-4 w-4 mr-1" />
                       Discount codes
                       <ChevronDown className="h-3 w-3 ml-1" />
                     </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start">
-                    <DropdownMenuItem asChild>
-                      <Link href="/coupons/popular">Popular</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/coupons/new">New</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/coupons/expiring">Expiring Soon</Link>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
 
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
-                  <Link href="/deals">
-                    <TagIcon className="h-4 w-4 mr-1" />
-                    Deals
-                  </Link>
-                </Button>
+                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                      <Link href="/deals">
+                        <TagIcon className="h-4 w-4 mr-1" />
+                        Deals
+                      </Link>
+                    </Button>
 
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
-                  <Link href="/freebies">
-                    <Gift className="h-4 w-4 mr-1" />
-                    Freebies
-                  </Link>
-                </Button>
+                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                      <Link href="/freebies">
+                        <Gift className="h-4 w-4 mr-1" />
+                        Freebies
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                      <Link href="/discussion">
+                        <MessagesSquare className="h-4 w-4 mr-1" />
+                        Discussion
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex border-border overflow-x-auto scrollbar-hide">
+                  <div className="flex items-center py-2 space-x-1 gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                      onClick={() => {
+                        setIsSidebarOpen(true)
+                        setView("categories")
+                      }}
+                    >
+                      <LayoutGrid className="h-4 w-4 mr-1" />
+                      Categories
+                      <ChevronDown className="h-3 w-3 ml-1" />
+                    </Button>
 
-                <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
-                  <Link href="/discussion">
-                    <MessagesSquare className="h-4 w-4 mr-1" />
-                    Discussion
-                  </Link>
-                </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]">
+                          <Tag className="h-4 w-4 mr-1" />
+                          Discount codes
+                          <ChevronDown className="h-3 w-3 ml-1" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        <DropdownMenuItem asChild>
+                          <Link href="/coupons/popular">Popular</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/coupons/new">New</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/coupons/expiring">Expiring Soon</Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                      <Link href="/deals">
+                        <TagIcon className="h-4 w-4 mr-1" />
+                        Deals
+                      </Link>
+                    </Button>
+
+                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                      <Link href="/freebies">
+                        <Gift className="h-4 w-4 mr-1" />
+                        Freebies
+                      </Link>
+                    </Button>
+
+                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                      <Link href="/discussion">
+                        <MessagesSquare className="h-4 w-4 mr-1" />
+                        Discussion
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Tabs Navigation */}
+              <div className="flex border-border justify-between items-center">
+                <Tabs defaultValue="for-you" className="w-full" value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="bg-transparent h-10 p-0">
+                    <TabsTrigger
+                      value="for-you"
+                      className={cn(
+                        "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
+                        activeTab === "for-you" ? "font-medium" : "",
+                      )}
+                    >
+                      For you
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="hottest"
+                      className={cn(
+                        "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
+                        activeTab === "hottest" ? "font-medium" : "",
+                      )}
+                    >
+                      Hottest
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="is-called"
+                      className={cn(
+                        "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
+                        activeTab === "is-called" ? "font-medium" : "",
+                      )}
+                    >
+                      Is called
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="new"
+                      className={cn(
+                        "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
+                        activeTab === "new" ? "font-medium" : "",
+                      )}
+                    >
+                      New
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+
+                {isMobile ? (
+                  <div className="flex items-center justify-center w-8 h-8 p-2 rounded-full border border-gray-200 bg-white ml-2 dark:bg-transparent">
+
+                    <Sliders className="h-4 w-4" />
+                    {/* <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
+                      1
+                    </span> */}
+                  </div>
+                ) : (
+                  <Button variant="outline" size="sm" className="flex items-center rounded-full gap-1 mb-2 ml-auto">
+                    <Sliders className="h-5 w-5" />
+                    Filter
+                    <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
+                      1
+                    </span>
+                  </Button>
+                )}
               </div>
-            </div>
+            </>
           )}
-
-          {/* Tabs Navigation */}
-          <div className="flex border-border justify-between items-center">
-            <Tabs defaultValue="for-you" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="bg-transparent h-10 p-0">
-                <TabsTrigger
-                  value="for-you"
-                  className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                    activeTab === "for-you" ? "font-medium" : "",
-                  )}
-                >
-                  For you
-                </TabsTrigger>
-                <TabsTrigger
-                  value="hottest"
-                  className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                    activeTab === "hottest" ? "font-medium" : "",
-                  )}
-                >
-                  Hottest
-                </TabsTrigger>
-                <TabsTrigger
-                  value="is-called"
-                  className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                    activeTab === "is-called" ? "font-medium" : "",
-                  )}
-                >
-                  Is called
-                </TabsTrigger>
-                <TabsTrigger
-                  value="new"
-                  className={cn(
-                    "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                    activeTab === "new" ? "font-medium" : "",
-                  )}
-                >
-                  New
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            {isMobile ? (
-              <div className="flex items-center justify-center w-8 h-8 p-2 rounded-full border border-gray-200 bg-white ml-2 dark:bg-transparent">
-
-                <Sliders className="h-4 w-4" />
-                {/* <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
-                  1
-                </span> */}
-              </div>
-            ) : (
-              <Button variant="outline" size="sm" className="flex items-center rounded-full gap-1 mb-2 ml-auto">
-                <Sliders className="h-5 w-5" />
-                Filter
-                <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
-                  1
-                </span>
-              </Button>
-            )}
-          </div>
         </div>
       </header>
 
       {/* Add padding at the bottom to account for the fixed mobile nav */}
-      {isMobile && <div className="h-14"></div>}
+      {isMobile && !isSubmissionPage && <div className="h-14"></div>}
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
