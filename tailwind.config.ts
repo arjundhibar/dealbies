@@ -19,6 +19,9 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        averta: ['Averta CY', 'Helvetica Neue', 'Helvetica', 'Arial', 'Lucida Grande', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -75,14 +78,14 @@ const config = {
         dark: {
           primary: "#000",
           secondary: "#1d1f20",
-          tertiary:"#28292a",
+          tertiary: "#28292a",
         },
         vote: {
-        blue: "#005498",
-        yellow : "#f3a21c",
-        lightOrange: "#f7641b",
-        lightRed: "#f03648",
-        red: "#ce1734",
+          blue: "#005498",
+          yellow: "#f3a21c",
+          lightOrange: "#f7641b",
+          lightRed: "#f03648",
+          red: "#ce1734",
         }
       },
       borderRadius: {

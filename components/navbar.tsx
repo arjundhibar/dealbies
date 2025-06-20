@@ -263,7 +263,7 @@ export function Navbar() {
         </SheetContent>
       </Sheet>
       <header
-        className={cn("sticky top-0 z-40 w-full bg-background text-foreground border-b", isScrolled && "shadow-sm")}
+        className={cn("sticky top-0 z-40 w-full bg-background text-foreground border-b dark:bg-[#1d1f20]", isScrolled && "shadow-sm")}
       >
         <div className={cn("mx-auto max-w-[82.5rem] px-4 w-full box-border", isMobile && "px-1")}>
           {/* Top Navigation Bar */}
@@ -298,10 +298,10 @@ export function Navbar() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border rounded-full flex items-center gap-1 h-10"
+                    className="border rounded-full flex items-center gap-2 h-10"
                     onClick={() => setIsSidebarOpen(true)}
                   >
-                    <Menu className="h-4 w-4" />
+                    <Menu className="h-4 w-4 scale-[1.4]" />
                     <span className="font-medium">Menu</span>
                   </Button>
                 </div>
@@ -322,7 +322,7 @@ export function Navbar() {
                 <div className="flex items-center gap-4">
                   {isSubmissionPage ? (
                     <>
-                      
+
                       <Button
                         variant="navbar"
                         size="sm"
@@ -330,19 +330,19 @@ export function Navbar() {
                       >
                         <AlarmClockCheck className="h-4 w-4" />
                         Alerts
-                        </Button>
-                        <Button
-                          variant="navbar"
-                          size="sm"
-                          className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md"
-                        >
-                          <Bell className="h-4 w-4 mr-1" />
-                          Notifications
-                        </Button>
+                      </Button>
+                      <Button
+                        variant="navbar"
+                        size="sm"
+                        className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md"
+                      >
+                        <Bell className="h-4 w-4 mr-1" />
+                        Notifications
+                      </Button>
                     </>
                   ) : (
                     <Button
-                      variant="ghost"
+                      variant="navbar"
                       size="sm"
                       className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md"
                     >
@@ -500,7 +500,7 @@ export function Navbar() {
                 <div className="flex border-border overflow-x-auto scrollbar-hide">
                   <div className="flex items-center py-2 space-x-1 gap-2">
                     <Button
-                      variant="ghost"
+                      variant="navbar"
                       size="sm"
                       className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
                       onClick={() => {
@@ -515,7 +515,7 @@ export function Navbar() {
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]">
+                        <Button variant="navbar" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]">
                           <Tag className="h-4 w-4 mr-1" />
                           Discount codes
                           <ChevronDown className="h-3 w-3 ml-1" />
@@ -534,21 +534,21 @@ export function Navbar() {
                       </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                    <Button variant="navbar" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
                       <Link href="/deals">
                         <TagIcon className="h-4 w-4 mr-1" />
                         Deals
                       </Link>
                     </Button>
 
-                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                    <Button variant="navbar" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
                       <Link href="/freebies">
                         <Gift className="h-4 w-4 mr-1" />
                         Freebies
                       </Link>
                     </Button>
 
-                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                    <Button variant="navbar" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica] rounded-lg" asChild>
                       <Link href="/discussion">
                         <MessagesSquare className="h-4 w-4 mr-1" />
                         Discussion
