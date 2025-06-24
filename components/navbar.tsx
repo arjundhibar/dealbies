@@ -280,7 +280,7 @@ export function Navbar() {
                     <Input
                       type="search"
                       placeholder="Search..."
-                      className="w-full pl-12 pr-4 h-11 rounded-full border-gray-200"
+                      className="w-full pl-12 pr-4 h-11 rounded-full border-gray-200 dark:border-[hsla(0,0%,100%,0.35)]"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -312,7 +312,7 @@ export function Navbar() {
                     <Input
                       type="search"
                       placeholder="Search..."
-                      className="w-full pl-10 pr-4 h-10 rounded-full border-gray-300"
+                      className="w-full pl-10 pr-4 h-10 rounded-full border-gray-300 dark:border-[hsla(0,0%,100%,0.35)]"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />

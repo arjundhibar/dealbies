@@ -102,10 +102,30 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        'bounce-custom': {
+          '0%, 100%': { transform: 'translateY(5px)' },
+          '50%': { transform: 'translateY(0)' },
+        },
+        'voucher-tilt': {
+          '0%, 100%': { transform: 'rotate(0)' },
+          '50%': { transform: 'rotate(-25deg)' },
+        },
+        'voucher-tilt-reverse': {
+          '0%, 100%': { transform: 'rotate(0)' },
+          '50%': { transform: 'rotate(25deg)' },
+        },
+        'discussion-bounce': {
+          '0%, 100%': { transform: 'translateY(5px)' },
+          '50%': { transform: 'translateY(0)' },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        'bounce-custom': 'bounce-custom 3s cubic-bezier(.5,0,.5,1) infinite normal forwards',
+        'voucher-tilt': 'voucher-tilt 3s cubic-bezier(.5,0,.5,1) infinite normal forwards',
+        'voucher-tilt-reverse': 'voucher-tilt-reverse 3s cubic-bezier(.5,0,.5,1) infinite normal forwards',
+        'discussion-bounce': 'discussion-bounce 3s cubic-bezier(.5,0,.5,1) infinite normal forwards',
       },
     },
   },
