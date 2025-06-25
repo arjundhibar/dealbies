@@ -361,17 +361,17 @@ export function Navbar() {
                               <Button
                                 variant="navbar"
                                 size="sm"
-                                className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md border-[#c5c7ca] hover:text-[rgba(1,3,4,0.89)] hover:border-[#c5c7ca] hover:bg-[#f3f5f7]"
+                                className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md "
                               >
                                 <Avatar className="h-5 w-5 mr-0.5">
                                   <AvatarImage
-                                    src={user.user_metadata?.avatar_url || "/placeholder.svg?height=40&width=40&text=U"}
+                                    src={user.user_metadata?.avatar || ""}
                                     alt={user.user_metadata?.username || user.email}
                                     className="h-5 w-5 object-cover"
                                   />
                                   <AvatarFallback>{(user.user_metadata?.username || user.email?.split("@")[0])?.charAt(0).toUpperCase()}</AvatarFallback>
                                 </Avatar>
-                                <span className="text-[#000] font-semibold text-base">Profile</span>
+                                  <span className="text-[#000] font-semibold text-base dark:text-white"> {user.user_metadata?.username || user.email?.split("@")[0]}</span>
                               </Button>
                             </>
                           ) : (
