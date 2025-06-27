@@ -62,7 +62,7 @@ export function Navbar() {
   const isMobile = useIsMobile()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [view, setView] = useState<"main" | "categories">("main")
-  const isSubmissionPage = pathname === '/submission/add'
+  const isSubmissionPage = pathname.startsWith('/submission/');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -371,7 +371,7 @@ export function Navbar() {
                                   />
                                   <AvatarFallback>{(user.user_metadata?.username || user.email?.split("@")[0])?.charAt(0).toUpperCase()}</AvatarFallback>
                                 </Avatar>
-                                  <span className="text-[#000] font-semibold text-base dark:text-white"> {user.user_metadata?.username || user.email?.split("@")[0]}</span>
+                                <span className="text-[#000] font-semibold text-base dark:text-white"> {user.user_metadata?.username || user.email?.split("@")[0]}</span>
                               </Button>
                             </>
                           ) : (

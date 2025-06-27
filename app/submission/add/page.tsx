@@ -23,7 +23,7 @@ export default function PostDealPage() {
                 bottomAnimation: "",
             },
             icon: Tag,
-            href: "/post/offer",
+            href: "/submission/offer",
             available: true,
         },
         {
