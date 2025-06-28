@@ -20,7 +20,9 @@ const config = {
     },
     extend: {
       fontFamily: {
-        averta: ['Averta CY', 'Helvetica Neue', 'Helvetica', 'Arial', 'Lucida Grande', 'sans-serif'],
+        // averta: ['Averta CY', 'Helvetica Neue', 'Helvetica', 'Arial', 'Lucida Grande', 'sans-serif'],
+          poppins: ['Poppins', 'sans-serif'],
+        
       },
       colors: {
         border: "hsl(var(--border))",
