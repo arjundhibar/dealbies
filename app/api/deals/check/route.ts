@@ -18,12 +18,19 @@ export async function GET(req: NextRequest) {
                 title: true,
                 dealUrl: true,
                 createdAt: true,
+                imageUrl: true,
+                price: true,
+                merchant: true,
             }
         })
         if (existingDeal) {
-            return NextResponse.json({exists: true, deal: existingDeal})
+            const deal = { ...existingDeal, image: existingDeal.imageUrl };
+            if ('imageUrl' in deal) {
+                delete (deal as any).imageUrl;
+            }
+            return NextResponse.json({ exists: true, deal })
         } else {
-            return NextResponse.json({exists:false})
+            return NextResponse.json({ exists: false })
         }
     } catch (error) {
         return NextResponse.json({ error: "Failed to check deal" }, { status: 500 });

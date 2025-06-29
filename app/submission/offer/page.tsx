@@ -1,17 +1,28 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Link2, Sparkles, ImageIcon, FileText, Eye, ListCheck } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { url } from "inspector"
 import { NextResponse } from "next/server"
+import { formatDistanceStrict } from "date-fns"
+
+interface DuplicateDeal {
+    title: string;
+    image: string;
+    price?: string;
+    merchant?: string;
+    createdAt?: string;
+}
 
 export default function PostOfferPage() {
     const [currentStep, setCurrentStep] = useState(0)
     const [linkValue, setLinkValue] = useState("")
     const [isLoading, setIsLoading] = useState(false)
+    const [duplicateDeal, setDuplicateDeal] = useState<DuplicateDeal | null>(null)
+    const [progressWidth, setProgressWidth] = useState(0)
 
     const steps = [
         {
@@ -52,6 +63,18 @@ export default function PostOfferPage() {
         },
     ]
 
+    useEffect(() => {
+        if (isLoading) {
+            setProgressWidth(0)
+            const timer = window.setTimeout(() => {
+                setProgressWidth(100)
+            }, 100)
+            return () => window.clearTimeout(timer)
+        } else {
+            setProgressWidth(0)
+        }
+    }, [isLoading])
+
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
             setCurrentStep(currentStep + 1)
@@ -64,15 +87,32 @@ export default function PostOfferPage() {
         }
     }
 
+    const handleProceedAnyway = () => {
+        setDuplicateDeal(null)
+        handleNext()
+    }
+
+    const handleCancelSubmission = () => {
+        setDuplicateDeal(null)
+        setLinkValue("")
+    }
+
     const handleContinue = async () => {
         setIsLoading(true)
+        setDuplicateDeal(null)
         const encodedUrl = encodeURIComponent(linkValue.trim());
         try {
             const res = await fetch(`/api/deals/check?url=${encodedUrl}`);
             const result = await res.json();
 
             if (result.exists) {
-                alert("This deal already exists")
+                setDuplicateDeal({
+                    title: result.deal.title || "Deal Title",
+                    image: result.deal.image || "/placeholder.jpg",
+                    price: result.deal.price,
+                    merchant: result.deal.merchant,
+                    createdAt: result.deal.createdAt
+                })
             } else {
                 handleNext();
             }
@@ -91,20 +131,13 @@ export default function PostOfferPage() {
                     <div className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
                         <div className="w-full max-w-2xl text-center space-y-8">
                             <div className="space-y-4">
-                                <h1 className="text-[32px] leading-[2.625rem] font-poppins font-medium text-white dark:text-[#fff]">Share an offer with millions of people</h1>
-                                <p className="text-2xl font-poppins text-gray-300 dark:text-[hsla(0,0%,100%,0.75)]">
+                                <h1 className="text-[32px] leading-[2.625rem] font-poppins font-medium text-[#000] dark:text-[#fff]">Share an offer with millions of people</h1>
+                                <p className="text-2xl font-poppins text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)]">
                                     Paste the link where other people can buy the deal or find more information
                                 </p>
                             </div>
 
                             <div className="space-y-6">
-                                {/* Progress Bar */}
-                                {isLoading && (
-                                    <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                                        <div className="bg-[#f7641b] h-2 rounded-full animate-pulse transition-all duration-1000 ease-out" style={{ width: '100%' }}></div>
-                                    </div>
-                                )}
-
                                 {/* Flex container for input + button */}
                                 <div className="flex items-center space-x-3">
                                     {/* Input with icon */}
@@ -115,7 +148,7 @@ export default function PostOfferPage() {
                                             placeholder="https://www.example.com/greatdeal..."
                                             value={linkValue}
                                             onChange={(e) => setLinkValue(e.target.value)}
-                                            className="w-full h-auto text-sm leading-5 bg-[#1d1f20] border border-[hsla(0,0%,100%,0.35)] text-white placeholder:text-gray-400 focus:border-[#f97936] focus:shadow-none rounded-lg transition-all duration-200 ease-out py-[9px] pl-10 text-ellipsis"
+                                            className="w-full h-auto text-sm leading-5 bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] dark:text-white text-[#000] placeholder:text-gray-400 focus:border-[#f97936] focus:shadow-none rounded-lg transition-all duration-200 ease-out py-[9px] pl-10 text-ellipsis"
                                         />
                                     </div>
 
@@ -123,16 +156,79 @@ export default function PostOfferPage() {
                                     <Button
                                         onClick={handleContinue}
                                         disabled={!linkValue.trim() || isLoading}
-                                        className="h-9 px-4 text-sm rounded-full bg-[#f7641b] hover:bg-[#eb611f] text-white disabled:bg-[#363739] disabled:text-[#8b8d90]"
+                                        className="h-9 px-4 text-sm rounded-full bg-[#f7641b] hover:bg-[#eb611f] text-white disabled:text-[#a7a9ac] dark:disabled:text-[#8b8d90] disabled:bg-[#f3f5f7]"
                                     >
                                         {isLoading ? "Checking..." : "Continue"}
                                     </Button>
                                 </div>
 
+                                {/* Progress Bar - moved below textbox */}
+                                {isLoading && (
+                                    <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                        <div className="bg-[#f7641b] h-2 rounded-full transition-all duration-2000 ease-out" style={{ width: `${progressWidth}%` }}></div>
+                                    </div>
+                                )}
+
+                                {/* Duplicate Deal Warning */}
+                                {duplicateDeal && (
+                                    <div className="bg-[#28292a] rounded-lg p-4 space-y-4">
+                                        <div className=" space-y-2 text-left">
+                                            <h3 className="text-lg font-bold text-white">Has this been posted before?</h3>
+                                            <p className="text-gray-300 text-base text-left">
+                                                It looks like this offer has already been posted or is being reviewed. Duplicate deals are usually removed.
+                                            </p>
+                                        </div>
+
+                                        {/* Deal Preview */}
+                                        <div className="dark:bg-[#1d1f20] p-2 rounded-lg flex items-center space-x-4 relative">
+                                            <div className="relative w-16 h-16">
+                                                <img
+                                                    src={duplicateDeal.image}
+                                                    alt={duplicateDeal.title}
+                                                    className="absolute top-0 left-0 right-0 bottom-0 max-w-full max-h-full m-auto align-top box-content object-fill rounded-lg h-12 w-12"
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="text-white font-medium text-base text-left">{duplicateDeal.title}</h4>
+                                                <div className="flex items-center space-x-2 mt-1 gap-1">
+                                                    {duplicateDeal.price && (
+                                                        <span className="dark:text-[#f97936] text-base font-medium">₹{duplicateDeal.price}</span>
+                                                    )}
+                                                    {duplicateDeal.merchant && (
+                                                        <span className="dark:text-[#f97936] text-base">{duplicateDeal.merchant}</span>
+                                                    )}
+                                                    {duplicateDeal.createdAt && (
+                                                        <span className="dark:text-[hsla(0,0%,100%,0.75)] text-base">{formatDistanceStrict(new Date(duplicateDeal.createdAt), new Date(), { addSuffix: true })}</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Action Buttons */}
+                                        <div className="flex justify-end">
+                                            <Button
+                                                onClick={handleProceedAnyway}
+                                                className=" h-9 text-sm dark:bg-transparent dark:hover:bg-[hsla(0,0%,100%,0.05)] dark:text-[#c5c7ca] mr-2 pl-3 pr-3 rounded-full"
+                                            >
+                                                No, proceed to the next step
+                                            </Button>
+                                            <Button
+                                                onClick={handleCancelSubmission}
+                                                variant="outline"
+                                                className=" h-9 text-sm border dark:border-[#fd9997] dark:hover:border-[#fc8988]  dark:bg-[#1d1f20] dark:text-[#fd9997] dark:hover:text-[#fc8988] dark:hover:bg-[#4c0a11] mr-2 pl-[1em] pr-3 rounded-full"
+                                            >
+                                                Yes, cancel the submission
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Link below input */}
-                                <button className="text-[#c5c7ca] h-9 px-4 hover:text-[#babcbf] hover:bg-[hsla(0,0%,100%,0.05)] hover:rounded-full text-sm font-semibold">
-                                    I have no link
-                                </button>
+                                {currentStep === 0 && !isLoading && !duplicateDeal && (
+                                    <button className="text-[#6b6d70] hover:text-[#76787b] dark:text-[#c5c7ca] h-9 px-4 dark:hover:text-[#babcbf] hover:bg-[rgba(15,55,95,0.05)] dark:hover:bg-[hsla(0,0%,100%,0.05)] hover:rounded-full text-sm font-semibold">
+                                        I have no link
+                                    </button>
+                                )}
                             </div>
 
                         </div>
@@ -204,11 +300,11 @@ export default function PostOfferPage() {
     }
 
     return (
-        <div className="fixed inset-0 w-screen h-screen min-h-screen bg-[#1d1f20] flex z-30">
+        <div className="fixed inset-0 w-screen h-screen min-h-screen bg-[#fff] dark:bg-[#1d1f20] flex z-30">
             {/* Left Sidebar */}
-            <div className="w-[272px] mt-14 bg-[#28292a] flex flex-col">
+            <div className="w-[272px] mt-14 bg-[#f3f5f7] dark:bg-[#28292a] flex flex-col">
                 <div className="p-6 pt-6  border-gray-700">
-                    <h2 className="text-2xl font-semibold  text-[#fff]">Place an offer</h2>
+                    <h2 className="text-2xl font-semibold text-[#000] dark:text-[#fff]">Place an offer</h2>
                 </div>
 
                 <nav className="flex-1 p-4 space-y-2">
@@ -225,10 +321,10 @@ export default function PostOfferPage() {
                                     "w-full flex items-center gap-3 pb-4 px-4 py-4 rounded-full text-left transition-colors",
                                     step.id === "check" && "border-t rounded-none border-gray-700 pt-6 mt-4",
                                     isActive
-                                        ? "bg-[#1d1f20] text-white"
+                                        ? "dark:bg-[#1d1f20] bg-[#fff] dark:text-white text-[#000]"
                                         : isCompleted
                                             ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                                            : "text-[hsla(0,0%,100%,0.49)] hover:bg-gray-700 hover:text-gray-300",
+                                            : "dark:text-[hsla(0,0%,100%,0.49)] text-[rgba(4,9,18,0.35)] hover:bg-gray-700 hover:text-gray-300",
                                 )}
                             >
                                 <IconComponent className="h-5 w-5 flex-shrink-0" />
