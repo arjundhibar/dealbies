@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Link2, Sparkles, ImageIcon, FileText, Eye, ListCheck } from "lucide-react"
+import { Link2, Sparkles, ImageIcon, FileText, Eye, ListCheck, CircleCheck, Pencil, MapPin, Info, Scissors } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { url } from "inspector"
 import { NextResponse } from "next/server"
@@ -23,6 +23,16 @@ export default function PostOfferPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [duplicateDeal, setDuplicateDeal] = useState<DuplicateDeal | null>(null)
     const [progressWidth, setProgressWidth] = useState(0)
+    const [hoveredStep, setHoveredStep] = useState<number | null>(null)
+
+    const [title, setTitle] = useState("")
+    const [titleFocused, setTitleFocused] = useState(false)
+    const [priceOffer, setPriceOffer] = useState("")
+    const [lowestPrice, setLowestPrice] = useState("")
+    const [discountCode, setDiscountCode] = useState("")
+    const [availability, setAvailability] = useState("online")
+    const [postageCosts, setPostageCosts] = useState("")
+    const [shippingFrom, setShippingFrom] = useState("")
 
     const steps = [
         {
@@ -123,6 +133,14 @@ export default function PostOfferPage() {
             setIsLoading(false)
         }
     }
+    const calculateDiscount = () => {
+        const offer = Number.parseFloat(priceOffer) || 0
+        const lowest = Number.parseFloat(lowestPrice) || 0
+        if (lowest > 0) {
+            return Math.round(((lowest - offer) / lowest) * 100)
+        }
+        return 0
+    }
 
     const renderStepContent = () => {
         switch (currentStep) {
@@ -156,7 +174,7 @@ export default function PostOfferPage() {
                                     <Button
                                         onClick={handleContinue}
                                         disabled={!linkValue.trim() || isLoading}
-                                        className="h-9 px-4 text-sm rounded-full bg-[#f7641b] hover:bg-[#eb611f] text-white disabled:text-[#a7a9ac] dark:disabled:text-[#8b8d90] disabled:bg-[#f3f5f7]"
+                                        className="h-9 px-4 text-sm rounded-full bg-[#f7641b] hover:bg-[#eb611f] text-white disabled:text-[#a7a9ac] dark:disabled:text-[#8b8d90] disabled:bg-[#f3f5f7] dark:disabled:bg-[#363739]"
                                     >
                                         {isLoading ? "Checking..." : "Continue"}
                                     </Button>
@@ -236,12 +254,164 @@ export default function PostOfferPage() {
                 )
             case 1:
                 return (
-                    <div className="flex flex-col items-center justify-center flex-1 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-                        <div className="w-full max-w-2xl text-center space-y-8">
-                            <h1 className="text-4xl font-bold text-white">Essentials</h1>
-                            <p className="text-xl text-gray-300">Add the essential information about your offer</p>
-                            <div className="h-40 flex items-center justify-center border border-dashed border-gray-600 rounded-xl text-gray-400">
-                                Essentials form content goes here
+                    <div
+                        className="flex flex-col justify-start flex-1 animate-fade-in-up px-8 py-8"
+                        style={{ animationDelay: "0.1s", animationFillMode: "both" }}
+                    >
+                        <div className="w-full max-w-2xl mx-auto space-y-8">
+                            <h1 className="text-3xl font-semibold text-[#000] dark:text-[#fff] text-center mb-8">
+                                Let's start with the essential information
+                            </h1>
+
+                            {/* Title Section */}
+                            <div className="">
+                                <div className="flex justify-between items-center">
+                                    <label className="text-white text-sm font-semibold pb-[1.75px]">
+                                        Title of offer <span className="dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span>
+                                    </label>
+                                    <span className="dark:text-[hsla(0,0%,100%,0.75)] text-sm">{140 - title.length}</span>
+                                </div>
+                                <Input
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    placeholder="A short, clear title of your offer"
+                                    className="w-full border text-white dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]"
+                                    onFocus={() => setTitleFocused(true)}
+                                    onBlur={() => setTitleFocused(false)}
+                                />
+
+                                {/* Help Section - styled to match provided HTML, with expand animation */}
+                                <div
+                                    className={cn(
+                                        'transition-[height] duration-300 ease-in-out overflow-hidden',
+                                        !titleFocused && 'expand-leave-to'
+                                    )}
+                                    style={{ height: titleFocused ? 110 : 0 }}
+                                >
+                                    <div className="mt-2 dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1">
+                                        <div className="flex items-center">
+                                            <div className="flex items-center mr-1">
+                                                <Info className="w-[18px] h-[18px] text-[hsla(0,0%,100%,0.75)]" />
+                                            </div>
+                                            <span className="font-semibold text-base text-[#e3e4e8] dark:text-[#e3e4e8]">Make your title stand out</span>
+                                        </div>
+                                        <div className="text-sm leading-5 text-[hsla(0,0%,100%,0.75)] mt-1">
+                                            Please include the brand, product type, color and model in the title (e.g. adidas UltraBoost (black))
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Price Details Section */}
+                            <div className="">
+                                <h2 className="text-xl font-semibold dark:text-white text-black pb-4">Price details</h2>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="dark:text-white text-black font-semibold text-sm">Price Offer</label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">€</span>
+                                            <Input
+                                                value={priceOffer}
+                                                onChange={(e) => setPriceOffer(e.target.value)}
+                                                placeholder="15,55"
+                                                className="w-full border text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 text-sm placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 dark:focus:border-[#f97936]"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label className="dark:text-white text-black font-semibold text-sm">Lowest price elsewhere</label>
+                                        <div className="relative flex-1">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">€</span>
+                                            <Input
+                                                value={lowestPrice}
+                                                onChange={(e) => setLowestPrice(e.target.value)}
+                                                placeholder="0.00"
+                                                className="w-full border text-white dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-12 dark:focus:border-[#f97936]"
+                                            />
+                                            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs font-semibold px-2 py-0.5 rounded bg-[#f3f5f7] dark:bg-[#23272f] text-[#f7641b] dark:text-[#f97936]">{calculateDiscount()}%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Discount Code Section */}
+                            <div className="space-y-2">
+                                <label className="text-white text-sm font-semibold">Discount code</label>
+                                <div className="relative">
+                                    <Scissors className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <Input
+                                        value={discountCode}
+                                        onChange={(e) => setDiscountCode(e.target.value)}
+                                        placeholder="Enter the discount code"
+                                        className="w-full border text-white dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Availability Section */}
+                            <div className="space-y-4">
+                                <h2 className="text-xl font-semibold text-white">Availability</h2>
+                                <div className="flex w-full">
+                                    <Button
+                                        onClick={() => setAvailability("online")}
+                                        className={cn(
+                                            "flex-1 py-3 border",
+                                            availability === "online"
+                                                ? "dark:bg-[#481802] hover:bg-orange-700 dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
+                                                : "dark:bg-[#1d1f20] dark:hover:bg-[#1d1f20] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
+                                            "rounded-l-full",
+                                            "rounded-r-none",
+
+                                        )}
+                                    >
+                                        Online
+                                    </Button>
+                                    <Button
+                                        onClick={() => setAvailability("offline")}
+                                        className={cn(
+                                            "flex-1 py-3 border",
+                                            availability === "offline"
+                                                ? "dark:bg-[#481802] hover:bg-orange-700 dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
+                                                : "dark:bg-[#1d1f20] dark:hover:bg-[#1d1f20] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
+                                            "rounded-r-full",           // Right outer corner rounded
+                                            "rounded-l-none"          // Inner corner flat
+                                        )}
+                                    >
+                                        Offline
+                                    </Button>
+                                </div>
+
+                            </div>
+
+                            {/* Postage and Shipping Section */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-white font-medium">Postage costs</label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">€</span>
+                                        <Input
+                                            value={postageCosts}
+                                            onChange={(e) => setPostageCosts(e.target.value)}
+                                            placeholder="0.00"
+                                            className="pl-8 bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-orange-500 rounded-lg"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-white font-medium">Shipping from</label>
+                                    <div className="relative">
+                                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                        <Input
+                                            value={shippingFrom}
+                                            onChange={(e) => setShippingFrom(e.target.value)}
+                                            placeholder="Search..."
+                                            className="pl-10 bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 focus:border-orange-500 rounded-lg"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -309,25 +479,36 @@ export default function PostOfferPage() {
 
                 <nav className="flex-1 p-4 space-y-2">
                     {steps.map((step, index) => {
-                        const IconComponent = step.icon
-                        const isActive = index === currentStep
-                        const isCompleted = index < currentStep
+                        let IconComponent = step.icon;
+                        const isActive = index === currentStep;
+                        const isCompleted = index < currentStep;
+                        const isFuture = index > currentStep;
+
+                        if (isCompleted) {
+                            IconComponent = hoveredStep === index ? Pencil : CircleCheck;
+                        }
 
                         return (
                             <button
                                 key={step.id}
-                                onClick={() => setCurrentStep(index)}
+                                onClick={() => {
+                                    if (!isFuture) setCurrentStep(index);
+                                }}
+                                disabled={isFuture}
+                                onMouseEnter={() => setHoveredStep(index)}
+                                onMouseLeave={() => setHoveredStep(null)}
                                 className={cn(
                                     "w-full flex items-center gap-3 pb-4 px-4 py-4 rounded-full text-left transition-colors",
                                     step.id === "check" && "border-t rounded-none border-gray-700 pt-6 mt-4",
                                     isActive
                                         ? "dark:bg-[#1d1f20] bg-[#fff] dark:text-white text-[#000]"
                                         : isCompleted
-                                            ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                            ? "text-[#000] dark:text-[#fff] dark:hover:bg-[#363739] hover:bg-[#dfe1e4] bg-transparent"
                                             : "dark:text-[hsla(0,0%,100%,0.49)] text-[rgba(4,9,18,0.35)] hover:bg-gray-700 hover:text-gray-300",
+                                    isFuture && "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-inherit",
                                 )}
                             >
-                                <IconComponent className="h-5 w-5 flex-shrink-0" />
+                                <IconComponent className={cn("h-5 w-5 flex-shrink-0", isCompleted && hoveredStep !== index && "text-green-500 dark:text-green-400")} />
                                 <span className="font-medium text-sm">{step.title}</span>
                             </button>
                         )
