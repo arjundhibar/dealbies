@@ -17,6 +17,15 @@ interface DuplicateDeal {
     createdAt?: string;
 }
 
+interface UploadImage {
+    id: string,
+    url: string,
+    file?: File,
+    isCover: boolean,
+
+        
+}
+
 export default function PostOfferPage() {
     const [currentStep, setCurrentStep] = useState(0)
     const [linkValue, setLinkValue] = useState("")
@@ -37,6 +46,10 @@ export default function PostOfferPage() {
     const [priceOfferFocused, setPriceOfferFocused] = useState(false)
     const [lowestPriceFocused, setLowestPriceFocused] = useState(false)
     const [discountCodeFocused, setDiscountCodeFocused] = useState(false)
+
+    const [uploadImages, setUploadImages] = useState<UploadImage[]>([])
+    const [imageUrlInput, setImageUrlInput] = useState("")
+    const [isDragOver, setIsDragOver] = useState(false)
 
     const [showCityDropdown, setShowCityDropdown] = useState(false)
     const cityList = [
@@ -657,18 +670,18 @@ export default function PostOfferPage() {
 
                 {/* Navigation Buttons */}
                 {currentStep > 0 && (
-                    <div className="border-t border-gray-700 p-6 flex justify-between">
+                    <div className="border-t border-[#dfe1e4] dark:border-[#46484b] p-6 flex justify-between">
                         <Button
                             onClick={handleBack}
                             variant="outline"
-                            className="border-gray-600 text-gray-300 hover:bg-gray-700 bg-transparent"
+                            className="h-9 px-4 border-[#dfe1e4] rounded-full hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#363739] dark:text-[#c5c7ca] dark:hover:text-[#d7d9dd] dark:bg-[#1d1f20]"
                         >
                             Back
                         </Button>
                         <Button
                             onClick={handleNext}
                             disabled={currentStep === steps.length - 1}
-                            className="bg-orange-500 hover:bg-orange-600 text-white"
+                            className="border rounded-full h-9 px-4 border-[#f7641b] hover:border-[#eb611f] text-[#f7641b] hover:bg-[#fbf3ef] hover:text-[#eb611f] bg-[#fff] dark:border-[#f97936] dark:text-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] dark:bg-[#1d1f20]"
                         >
                             {currentStep === steps.length - 1 ? "Publish" : "Next"}
                         </Button>
