@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Link2, Sparkles, ImageIcon, FileText, Eye, ListCheck, CircleCheck, Pencil, MapPin, Info, Scissors } from "lucide-react"
+import { Link2, Sparkles, ImageIcon, FileText, Eye, ListCheck, CircleCheck, Pencil, MapPin, Info, Scissors, ArrowRight, Plus, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { url } from "inspector"
 import { NextResponse } from "next/server"
@@ -17,13 +17,13 @@ interface DuplicateDeal {
     createdAt?: string;
 }
 
-interface UploadImage {
+interface UploadedImage {
     id: string,
     url: string,
     file?: File,
     isCover: boolean,
 
-        
+
 }
 
 export default function PostOfferPage() {
@@ -47,7 +47,7 @@ export default function PostOfferPage() {
     const [lowestPriceFocused, setLowestPriceFocused] = useState(false)
     const [discountCodeFocused, setDiscountCodeFocused] = useState(false)
 
-    const [uploadImages, setUploadImages] = useState<UploadImage[]>([])
+    const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([])
     const [imageUrlInput, setImageUrlInput] = useState("")
     const [isDragOver, setIsDragOver] = useState(false)
 
@@ -109,17 +109,82 @@ export default function PostOfferPage() {
         },
     ]
 
+    const fileInputRef = useRef<HTMLInputElement>(null)
+
     useEffect(() => {
         if (isLoading) {
             setProgressWidth(0)
             const timer = window.setTimeout(() => {
                 setProgressWidth(100)
-            }, 100)
+            }, 1000)
             return () => window.clearTimeout(timer)
         } else {
             setProgressWidth(0)
         }
     }, [isLoading])
+
+    const handleFileUpload = (files: FileList | null) => {
+        if (!files) return
+
+        Array.from(files).forEach((file) => {
+            if (file.type.startsWith("image/") && uploadedImages.length < 8) {
+                const reader = new FileReader()
+                reader.onload = (e) => {
+                    const newImage: UploadedImage = {
+                        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                        url: e.target?.result as string,
+                        file,
+                        isCover: uploadedImages.length === 0, // First image becomes cover
+                    }
+                    setUploadedImages((prev) => [...prev, newImage])
+                }
+                reader.readAsDataURL(file)
+            }
+        })
+    }
+
+    const handleUrlUpload = () => {
+        if (imageUrlInput.trim() && uploadedImages.length < 8) {
+            const newImage: UploadedImage = {
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+                url: imageUrlInput.trim(),
+                isCover: uploadedImages.length === 0,
+            }
+            setUploadedImages((prev) => [...prev, newImage])
+            setImageUrlInput("")
+        }
+    }
+    const removeImage = (id: string) => {
+        setUploadedImages((prev) => {
+            const filtered = prev.filter((img) => img.id !== id)
+            // If we removed the cover image, make the first remaining image the cover
+            if (filtered.length > 0 && !filtered.some((img) => img.isCover)) {
+                filtered[0].isCover = true
+            }
+            return filtered
+        })
+    }
+
+    const setCoverImage = (id: string) => {
+        setUploadedImages((prev) => prev.map((img) => ({ ...img, isCover: img.id === id })))
+    }
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragOver(true)
+    }
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragOver(false)
+    }
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragOver(false)
+        handleFileUpload(e.dataTransfer.files)
+    }
+
 
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
@@ -565,12 +630,111 @@ export default function PostOfferPage() {
                 )
             case 2:
                 return (
-                    <div className="flex flex-col items-center justify-center flex-1 px-8 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-                        <div className="w-full max-w-2xl text-center space-y-8">
-                            <h1 className="text-4xl font-bold text-white">Image Gallery</h1>
-                            <p className="text-xl text-gray-300">Add images to make your offer more attractive</p>
-                            <div className="h-40 flex items-center justify-center border border-dashed border-gray-600 rounded-xl text-gray-400">
-                                Image gallery content goes here
+                    <div className="flex items-center justify-center flex-1 !p-0 !m-0 animate-fade-in-up " style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
+                        <div className="max-w-[682px] space-y-8">
+                            <div className="text-left mt-28 space-y-6">
+                                <h1 className="text-[32px] font-bold text-[#000] dark:text-[#fff]">
+                                    Make your deal stand out with images
+                                </h1>
+                                <p className="text-lg text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)]">
+                                    Upload up to 8 images to post your deal. You can drag and drop to reorder and choose the cover.
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto border border-dashed dark:border-[hsla(0,0%,100%,0.18)] p-4 rounded-lg">
+                                {/* Render uploaded images */}
+                                {uploadedImages.map((image, index) => (
+                                    <div key={image.id} className="relative group">
+                                        <div className="aspect-square bg-[#525457] rounded-lg overflow-hidden relative">
+                                            <img
+                                                src={image.url || "/placeholder.svg"}
+                                                alt={`Upload ${index + 1}`}
+                                                className="w-full h-full object-cover"
+                                            />
+                                            {/* Remove button */}
+                                            <button
+                                                onClick={() => removeImage(image.id)}
+                                                className="absolute top-2 right-2 w-6 h-6 bg-black bg-opacity-50 rounded-full flex items-center justify-center text-white hover:bg-opacity-70 transition-opacity"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                            {/* Cover label */}
+                                            {image.isCover && (
+                                                <div className="absolute bottom-2 left-2 bg-[#f7641b] text-white px-2 py-1 rounded text-xs font-medium">
+                                                    Cover
+                                                </div>
+                                            )}
+                                            {/* Click to set as cover */}
+                                            {!image.isCover && (
+                                                <button
+                                                    onClick={() => setCoverImage(image.id)}
+                                                    className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center"
+                                                >
+                                                    <span className="text-white opacity-0 group-hover:opacity-100 text-sm font-medium">
+                                                        Set as cover
+                                                    </span>
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+
+                                {/* Empty slots */}
+                                {Array.from({ length: Math.max(0, 8 - uploadedImages.length) }).map((_, index) => {
+                                    const isCenter = uploadedImages.length === 0 && index === 4 // Center position when no images
+                                    const showUploadButton = uploadedImages.length === 0 ? isCenter : index === 0
+
+                                    return (
+                                        <div key={`empty-${index}`} className="aspect-square">
+                                            {showUploadButton ? (
+                                                <label className="aspect-square dark:bg-[hsla(0,0%,100%,0.11)] rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-[#5a5d61] transition-colors relative">
+                                                    <input
+                                                        type="file"
+                                                        multiple
+                                                        accept="image/*"
+                                                        onChange={(e) => handleFileUpload(e.target.files)}
+                                                        className="hidden"
+                                                    />
+                                                    {uploadedImages.length === 0 ? (
+                                                        <div className="flex flex-col items-center">
+                                                            <Button className="bg-[#f7641b] hover:bg-[#eb611f] text-white rounded-full px-4 py-2 text-sm font-medium relative inline-flex mb-2">
+                                                                <Plus className="w-4 h-4 mr-2" />
+                                                                Upload images
+                                                            </Button>
+                                                            {/* <p className="dark:text-[hsla(0,0%,100%,0.75)] text-sm leading-6 font-semibold">Or drag them</p>
+                                                            <p className="dark:text-[hsla(0,0%,100%,0.75)] text-sm leading-6 font-semibold ">(6MB max file size, max dimensions 6000px. Min dimensions are 150x150px)</p> */}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-col items-center text-[#f7641b]">
+                                                            <Plus className="w-8 h-8 mb-2" />
+                                                            <span className="text-sm font-medium">Add or drag images</span>
+                                                        </div>
+                                                    )}
+                                                </label>
+                                            ) : (
+                                                <div className="aspect-square dark:bg-[hsla(0,0%,100%,0.11)] rounded-lg"></div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                            {/* Upload via URL */}
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-medium text-[#000] dark:text-[#fff]">Upload via URL</h3>
+                                <div className="flex gap-3">
+                                    <Input
+                                        value={imageUrlInput}
+                                        onChange={(e) => setImageUrlInput(e.target.value)}
+                                        placeholder="https://"
+                                        className="flex-1 bg-[#525457] border-[#525457] text-white placeholder:text-gray-400 focus:border-[#f97936] rounded-lg"
+                                    />
+                                    <Button
+                                        onClick={handleUrlUpload}
+                                        disabled={!imageUrlInput.trim() || uploadedImages.length >= 8}
+                                        className="bg-[#525457] hover:bg-[#5a5d61] text-white px-4 rounded-lg"
+                                    >
+                                        <ArrowRight className="w-4 h-4" />
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -664,7 +828,7 @@ export default function PostOfferPage() {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col overflow-auto">
                 {/* Content */}
                 <div className="flex-1 flex">{renderStepContent()}</div>
 
