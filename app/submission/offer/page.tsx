@@ -725,7 +725,7 @@ export default function PostOfferPage() {
                                         value={imageUrlInput}
                                         onChange={(e) => setImageUrlInput(e.target.value)}
                                         placeholder="https://"
-                                        className="flex-1 bg-[#525457] border-[#525457] text-white placeholder:text-gray-400 focus:border-[#f97936] rounded-lg"
+                                        className="flex-1 bg-[#525457] border-[#525457] dark:text-white placeholder:text-gray-400 focus:border-[#f97936] rounded-lg"
                                     />
                                     <Button
                                         onClick={handleUrlUpload}
