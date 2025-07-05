@@ -3,11 +3,12 @@
 import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Link2, Sparkles, ImageIcon, FileText, Eye, ListCheck, CircleCheck, Pencil, MapPin, Info, Scissors, ArrowRight, Plus, X } from "lucide-react"
+import { Link2, Sparkles, ImageIcon, FileText, Eye, ListCheck, CircleCheck, Pencil, MapPin, Info, Scissors, ArrowRight, Plus, X, Link, Smile, Minus, List, Italic, Strikethrough, Bold } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { url } from "inspector"
 import { NextResponse } from "next/server"
 import { formatDistanceStrict } from "date-fns"
+import { Textarea } from "@/components/ui/textarea"
 
 interface DuplicateDeal {
     title: string;
@@ -50,6 +51,8 @@ export default function PostOfferPage() {
     const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([])
     const [imageUrlInput, setImageUrlInput] = useState("")
     const [isDragOver, setIsDragOver] = useState(false)
+
+    const [description, setDescription] = useState("")
 
     const [showCityDropdown, setShowCityDropdown] = useState(false)
     const cityList = [
@@ -640,7 +643,7 @@ export default function PostOfferPage() {
                                     Upload up to 8 images to post your deal. You can drag and drop to reorder and choose the cover.
                                 </p>
                             </div>
-                            <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto border border-dashed dark:border-[hsla(0,0%,100%,0.18)] p-4 rounded-lg">
+                            <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto border border-dashed border-[rgba(9,24,47,0.13)] dark:border-[hsla(0,0%,100%,0.18)] p-4 rounded-lg">
                                 {/* Render uploaded images */}
                                 {uploadedImages.map((image, index) => (
                                     <div key={image.id} className="relative group">
@@ -686,7 +689,7 @@ export default function PostOfferPage() {
                                     return (
                                         <div key={`empty-${index}`} className="aspect-square">
                                             {showUploadButton ? (
-                                                <label className="aspect-square dark:bg-[hsla(0,0%,100%,0.11)] rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-[#5a5d61] transition-colors relative">
+                                                <label className="aspect-square bg-[rgba(15,55,95,0.05)] dark:bg-[hsla(0,0%,100%,0.11)] rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-[#5a5d61] transition-colors relative">
                                                     <input
                                                         type="file"
                                                         multiple
@@ -696,8 +699,18 @@ export default function PostOfferPage() {
                                                     />
                                                     {uploadedImages.length === 0 ? (
                                                         <div className="flex flex-col items-center">
-                                                            <Button className="bg-[#f7641b] hover:bg-[#eb611f] text-white rounded-full px-4 py-2 text-sm font-medium relative inline-flex mb-2">
-                                                                <Plus className="w-4 h-4 mr-2" />
+                                                            <Button
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                    const fileInput = e.currentTarget.parentElement?.parentElement?.querySelector('input[type="file"]') as HTMLInputElement;
+                                                                    if (fileInput) {
+                                                                        fileInput.click();
+                                                                    }
+                                                                }}
+                                                                className="bg-[#f7641b] hover:bg-[#eb611f] h-9 text-white rounded-full px-[14px] text-sm font-medium relative"
+                                                            >
+                                                                <Plus className="w-4 h-4" />
                                                                 Upload images
                                                             </Button>
                                                             {/* <p className="dark:text-[hsla(0,0%,100%,0.75)] text-sm leading-6 font-semibold">Or drag them</p>
@@ -711,26 +724,26 @@ export default function PostOfferPage() {
                                                     )}
                                                 </label>
                                             ) : (
-                                                <div className="aspect-square dark:bg-[hsla(0,0%,100%,0.11)] rounded-lg"></div>
+                                                <div className="aspect-square bg-[rgba(15,55,95,0.05)] dark:bg-[hsla(0,0%,100%,0.11)] rounded-lg"></div>
                                             )}
                                         </div>
                                     )
                                 })}
                             </div>
                             {/* Upload via URL */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-medium text-[#000] dark:text-[#fff]">Upload via URL</h3>
-                                <div className="flex gap-3">
+                            <div className="space-y-2">
+                                <h3 className="text-[12.25px] font-bold text-[#000] dark:text-[#fff]">Upload via URL</h3>
+                                <div className="relative pb-[40px]">
                                     <Input
                                         value={imageUrlInput}
                                         onChange={(e) => setImageUrlInput(e.target.value)}
                                         placeholder="https://"
-                                        className="flex-1 bg-[#525457] border-[#525457] dark:text-white placeholder:text-gray-400 focus:border-[#f97936] rounded-lg"
+                                        className="w-full bg-[#fff] dark:bg-[#1d1f20] text-black border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] focus:ring-0 dark:text-white placeholder:text-gray-400 rounded-lg text-sm pr-12"
                                     />
                                     <Button
                                         onClick={handleUrlUpload}
                                         disabled={!imageUrlInput.trim() || uploadedImages.length >= 8}
-                                        className="bg-[#525457] hover:bg-[#5a5d61] text-white px-4 rounded-lg"
+                                        className="absolute right-3 top-5 transform -translate-y-1/2 w-7 h-7 disabled:text-[#a7a9ac] dark:disabled:text-[#8b8d90] font-bold text-sm p-0 disabled:bg-[#f3f5f7] dark:disabled:bg-[#363739] border-none rounded-full"
                                     >
                                         <ArrowRight className="w-4 h-4" />
                                     </Button>
@@ -740,13 +753,90 @@ export default function PostOfferPage() {
                     </div>
                 )
             case 3:
+                // NEW: Complete rewrite of case 3 to match the description UI
                 return (
-                    <div className="flex flex-col items-center justify-center flex-1 px-8 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-                        <div className="w-full max-w-2xl text-center space-y-8">
-                            <h1 className="text-4xl font-bold text-white">Description</h1>
-                            <p className="text-xl text-gray-300">Describe your offer in detail</p>
-                            <div className="h-40 flex items-center justify-center border border-dashed border-gray-600 rounded-xl text-gray-400">
-                                Description form content goes here
+                    <div
+                        className="flex flex-col justify-start flex-1 animate-fade-in-up px-8 py-8"
+                        style={{ animationDelay: "0.1s", animationFillMode: "both" }}
+                    >
+                        <div className="w-full max-w-4xl mx-auto space-y-8">
+                            {/* Header */}
+                            <div className="text-center">
+                                <h1 className="text-3xl font-semibold text-[#000] dark:text-[#fff]">
+                                    Why is this offer worth sharing?
+                                </h1>
+                            </div>
+
+                            {/* Description Text Area */}
+                            <div className="space-y-4">
+                                <div className="relative">
+                                    <Textarea
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        placeholder="Describe the offer in your own words and explain to other users why it is a good offer. Please do not copy and paste marketing texts. Self-promotion is prohibited and may lead to a ban."
+                                        className="w-full min-h-[400px] bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-4 resize-none text-base leading-6"
+                                    />
+
+                                    {/* Formatting Toolbar */}
+                                    <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-[#f8f9fa] dark:bg-[#2a2b2d] rounded-lg p-2 border border-[rgba(3,12,25,0.1)] dark:border-[hsla(0,0%,100%,0.1)]">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
+                                        >
+                                            <Bold className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
+                                        >
+                                            <Strikethrough className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
+                                        >
+                                            <Italic className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
+                                        >
+                                            <List className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
+                                        >
+                                            <Minus className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
+                                        >
+                                            <Smile className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
+                                        >
+                                            <Link className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
+                                        >
+                                            <ImageIcon className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
