@@ -245,3 +245,49 @@
 .referral-arrow-btn:hover {
   background-color: var(--background-hover);
 }
+
+.icon-button {
+  -webkit-text-size-adjust: 100%;
+  -webkit-appearance: button;
+  -webkit-font-smoothing: inherit;
+  appearance: none;
+ 
+  box-sizing: border-box;
+  margin: 0;
+  border: 1px solid #dfe1e4;
+  padding: 0px;
+  outline: none;
+
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  vertical-align: initial;
+  line-height: 34.25rem;
+  /* Likely not needed */
+  text-align: inherit;
+  background-color: var(--background-default);
+  color: #6b6d70;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  user-select: none;
+
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+
+  cursor: pointer;
+  flex-shrink: 0;
+
+  transition:
+    background-color 0.2s ease-out,
+    border-color 0.2s ease-out,
+    color 0.2s ease-out,
+    stroke 0.2s ease-out,
+    opacity 0.2s ease-out,
+    box-shadow 0.2s ease-out;
+}

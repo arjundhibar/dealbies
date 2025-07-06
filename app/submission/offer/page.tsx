@@ -53,6 +53,7 @@ export default function PostOfferPage() {
     const [isDragOver, setIsDragOver] = useState(false)
 
     const [description, setDescription] = useState("")
+    const [descriptionFocused, setDescriptionFocused] = useState(false)
 
     const [showCityDropdown, setShowCityDropdown] = useState(false)
     const cityList = [
@@ -113,6 +114,7 @@ export default function PostOfferPage() {
     ]
 
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
 
     useEffect(() => {
         if (isLoading) {
@@ -246,6 +248,57 @@ export default function PostOfferPage() {
         }
         return 0;
     }
+
+    // Helper to insert/wrap text at cursor
+    function formatText(before: string, after: string = "", placeholder = "") {
+        if (!textareaRef.current) return;
+        const textarea = textareaRef.current;
+        const { selectionStart, selectionEnd, value } = textarea;
+        const selected = value.slice(selectionStart, selectionEnd) || placeholder;
+        const newValue =
+            value.slice(0, selectionStart) +
+            before +
+            selected +
+            after +
+            value.slice(selectionEnd);
+        setDescription(newValue);
+        // Move cursor after the inserted text
+        setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(
+                selectionStart + before.length,
+                selectionEnd + before.length + selected.length
+            );
+        }, 0);
+    }
+
+    // Formatting handlers
+    const handleBold = () => formatText("**", "**", "bold text");
+    const handleItalic = () => formatText("_", "_", "italic text");
+    const handleStrikethrough = () => formatText("~~", "~~", "strikethrough");
+    const handleList = () => formatText("- ", "", "list item");
+    const handleHorizontalLine = () => {
+        if (!textareaRef.current) return;
+        const textarea = textareaRef.current;
+        const { selectionStart, value } = textarea;
+        const newValue =
+            value.slice(0, selectionStart) + "\n---\n" + value.slice(selectionStart);
+        setDescription(newValue);
+        setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(
+                selectionStart + 5,
+                selectionStart + 5
+            );
+        }, 0);
+    };
+    const handleEmoji = (emoji: string) => formatText(emoji, "", "");
+    const handleLink = () => formatText("[", "](url)", "link text");
+    const handleImage = () => formatText("![", "](url)", "alt text");
+
+    // Emoji picker state
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const emojiList = ["😀", "😂", "😍", "😎", "👍", "🎉", "🔥", "🙏", "😊", "🥳"];
 
     const renderStepContent = () => {
         switch (currentStep) {
@@ -756,84 +809,93 @@ export default function PostOfferPage() {
                 // NEW: Complete rewrite of case 3 to match the description UI
                 return (
                     <div
-                        className="flex flex-col justify-start flex-1 animate-fade-in-up px-8 py-8"
+                        className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up"
                         style={{ animationDelay: "0.1s", animationFillMode: "both" }}
                     >
-                        <div className="w-full max-w-4xl mx-auto space-y-8">
+                        <div className="max-w-[682px] w-full space-y-8">
                             {/* Header */}
-                            <div className="text-center">
-                                <h1 className="text-3xl font-semibold text-[#000] dark:text-[#fff]">
+                            <div className="text-left">
+                                <h1 className="text-[32px]  leading-10 font-semibold text-[#000] dark:text-[#fff]">
                                     Why is this offer worth sharing?
                                 </h1>
                             </div>
 
                             {/* Description Text Area */}
                             <div className="space-y-4">
-                                <div className="relative">
+                                <div className="relative h-[400px]">
                                     <Textarea
+                                        ref={textareaRef}
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
                                         placeholder="Describe the offer in your own words and explain to other users why it is a good offer. Please do not copy and paste marketing texts. Self-promotion is prohibited and may lead to a ban."
-                                        className="w-full min-h-[400px] bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-4 resize-none text-base leading-6"
+                                        className={cn(
+                                            " w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-[rgba(4,9,18,0.35)] placeholder:text-opacity-5 placeholder:text-base break-normal rounded-lg p-4 pb-16 resize-none text-base leading-6 placeholder:top-4 placeholder:left-4 placeholder:right-4 transition-all duration-300 ease-in-out flex-shrink-0",
+                                            descriptionFocused ? "min-h-[510px]" : "min-h-[400px]"
+                                        )}
+                                        onFocus={() => setDescriptionFocused(true)}
+                                        onBlur={() => setDescriptionFocused(false)}
                                     />
 
+                                    {/* Help Section for Description - animated */}
+                                    <div
+                                        className={cn(
+                                            'transition-[height] duration-300 ease-in-out overflow-hidden absolute top-[353px] left-2 right-2 z-10',
+                                            !descriptionFocused && 'expand-leave-to'
+                                        )}
+                                        style={{ height: descriptionFocused ? 110 : 0 }}
+                                    >
+                                        <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1">
+                                            <div className="flex items-center">
+                                                <div className="flex items-center mr-1">
+                                                    <Info className="w-[18px] h-[18px] dark:text-[hsla(0,0%,100%,0.75)] text-black" />
+                                                </div>
+                                                <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">Tell us about your deal.</span>
+                                            </div>
+                                            <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[rgba(4,8,13,0.59)] mt-1">
+                                                Add the details about the product,links to relevant info/reviews and why you think it's a good deal
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     {/* Formatting Toolbar */}
-                                    <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-[#f8f9fa] dark:bg-[#2a2b2d] rounded-lg p-2 border border-[rgba(3,12,25,0.1)] dark:border-[hsla(0,0%,100%,0.1)]">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
-                                        >
-                                            <Bold className="h-4 w-4" />
+                                    <div className="relative -top-14 w-fit left-2 inline-flex items-center gap-1 bg-[#fff] dark:bg-[#2a2b2d] rounded-lg p-[7px] border border-[rgba(3,12,25,0.1)] dark:border-[hsla(0,0%,100%,0.1)]">
+                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleBold}>
+                                            <Bold className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
-                                        >
-                                            <Strikethrough className="h-4 w-4" />
+                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleStrikethrough}>
+                                            <Strikethrough className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
-                                        >
-                                            <Italic className="h-4 w-4" />
+                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleItalic}>
+                                            <Italic className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
-                                        >
-                                            <List className="h-4 w-4" />
+                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleList}>
+                                            <List className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
-                                        >
-                                            <Minus className="h-4 w-4" />
+                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleHorizontalLine}>
+                                            <Minus className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
-                                        >
-                                            <Smile className="h-4 w-4" />
+                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={() => setShowEmojiPicker((v) => !v)}>
+                                            <Smile className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
-                                        >
-                                            <Link className="h-4 w-4" />
+                                        {showEmojiPicker && (
+                                            <div className="absolute bottom-12 left-0 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-2 flex flex-wrap gap-1 z-50">
+                                                {emojiList.map((emoji) => (
+                                                    <button
+                                                        key={emoji}
+                                                        className="text-xl p-1 hover:bg-gray-100 dark:hover:bg-[#363739] rounded"
+                                                        onMouseDown={e => e.preventDefault()}
+                                                        onClick={() => { handleEmoji(emoji); setShowEmojiPicker(false); }}
+                                                    >
+                                                        {emoji}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleLink}>
+                                            <Link className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-8 w-8 p-0 hover:bg-[#e9ecef] dark:hover:bg-[#3a3b3d]"
-                                        >
-                                            <ImageIcon className="h-4 w-4" />
+                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleImage}>
+                                            <ImageIcon className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
                                     </div>
                                 </div>
