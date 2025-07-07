@@ -55,6 +55,8 @@ export default function PostOfferPage() {
     const [description, setDescription] = useState("")
     const [descriptionFocused, setDescriptionFocused] = useState(false)
 
+    const editorRef = useRef<HTMLDivElement>(null);
+
     const [showCityDropdown, setShowCityDropdown] = useState(false)
     const cityList = [
         'Mumbai, Maharashtra',
@@ -273,10 +275,20 @@ export default function PostOfferPage() {
     }
 
     // Formatting handlers
-    const handleBold = () => formatText("**", "**", "bold text");
-    const handleItalic = () => formatText("_", "_", "italic text");
-    const handleStrikethrough = () => formatText("~~", "~~", "strikethrough");
-    const handleList = () => formatText("- ", "", "list item");
+    const handleBold = () => {
+        document.execCommand("bold");
+    };
+
+    const handleItalic = () => {
+        document.execCommand("italic");
+    };
+
+    const handleStrikethrough = () => {
+        document.execCommand("strikeThrough");
+    };
+    const handleList = () => {
+        document.execCommand("insertUnorderedList");
+    };
     const handleHorizontalLine = () => {
         if (!textareaRef.current) return;
         const textarea = textareaRef.current;
@@ -296,6 +308,15 @@ export default function PostOfferPage() {
     const handleLink = () => formatText("[", "](url)", "link text");
     const handleImage = () => formatText("![", "](url)", "alt text");
 
+    const handleSubmit = () => {
+        const html = editorRef.current?.innerHTML;
+        console.log("Final formatted HTML:", html);
+    };
+    const handleInput = () => {
+        if (editorRef.current) {
+            setDescription(editorRef.current.innerHTML);
+        }
+    };
     // Emoji picker state
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const emojiList = ["😀", "😂", "😍", "😎", "👍", "🎉", "🔥", "🙏", "😊", "🥳"];
@@ -823,17 +844,18 @@ export default function PostOfferPage() {
                             {/* Description Text Area */}
                             <div className="space-y-4">
                                 <div className="relative h-[400px]">
-                                    <Textarea
-                                        ref={textareaRef}
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                        placeholder="Describe the offer in your own words and explain to other users why it is a good offer. Please do not copy and paste marketing texts. Self-promotion is prohibited and may lead to a ban."
-                                        className={cn(
-                                            " w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-[rgba(4,9,18,0.35)] placeholder:text-opacity-5 placeholder:text-base break-normal rounded-lg p-4 pb-16 resize-none text-base leading-6 placeholder:top-4 placeholder:left-4 placeholder:right-4 transition-all duration-300 ease-in-out flex-shrink-0",
-                                            descriptionFocused ? "min-h-[510px]" : "min-h-[400px]"
-                                        )}
+                                    <div
+                                        ref={editorRef}
+                                        contentEditable
+                                        onInput={handleInput}
+                                        suppressContentEditableWarning
                                         onFocus={() => setDescriptionFocused(true)}
                                         onBlur={() => setDescriptionFocused(false)}
+                                        className={cn(
+                                            "w-full min-h-[400px] bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black focus:outline-none dark:text-white rounded-lg p-4 pb-16 resize-none text-base leading-6 transition-all duration-300 ease-in-out flex-shrink-0 list-disc list-inside",
+                                            descriptionFocused ? "min-h-[510px]" : "min-h-[400px]"
+                                        )}
+                                        
                                     />
 
                                     {/* Help Section for Description - animated */}
@@ -1007,3 +1029,4 @@ export default function PostOfferPage() {
         </div>
     )
 }
+
