@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Link2, Sparkles, ImageIcon, FileText, Eye, ListCheck, CircleCheck, Pencil, MapPin, Info, Scissors, ArrowRight, Plus, X, Link, Smile, Minus, List, Italic, Strikethrough, Bold } from "lucide-react"
+import { Link2, Sparkles, ImageIcon, FileText, Eye, ListCheck, CircleCheck, Pencil, MapPin, Info, Scissors, ArrowRight, Plus, X, Link, Smile, Minus, List, Italic, Strikethrough, Bold, AlignLeft, AlignCenter, Calendar, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { url } from "inspector"
 import { NextResponse } from "next/server"
@@ -55,6 +55,20 @@ export default function PostOfferPage() {
     const [description, setDescription] = useState("")
     const [descriptionFocused, setDescriptionFocused] = useState(false)
 
+    const [showLinkInput, setShowLinkInput] = useState(false);
+    const [linkURL, setLinkURL] = useState("");
+    const [linkText, setLinkText] = useState("");
+
+    const [showImageInput, setShowImageInput] = useState(false);
+
+    const [selected, setSelected] = useState<"left" | "middle">("left");
+
+    const [startDate, setStartDate] = useState("")
+    const [endDate, setEndDate] = useState("")
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+
+    const [showMoreDescription, setShowMoreDescription] = useState(false)
+
     const editorRef = useRef<HTMLDivElement>(null);
 
     const [showCityDropdown, setShowCityDropdown] = useState(false)
@@ -75,6 +89,24 @@ export default function PostOfferPage() {
         'Indore, Madhya Pradesh',
         'Guwahati, Assam',
     ];
+
+    const categories = [
+        "Electronics",
+        "Gaming",
+        "Groceries",
+        "Fashion & Accessories",
+        "Beauty & Health",
+        "To travel",
+        "Family & Children",
+        "Home & Living",
+        "Garden & DIY",
+        "Car & Motorcycle",
+        "Culture & Leisure",
+        "Sports & Outdoors",
+        "Telecom & Internet",
+        "Money Matters & Insurance",
+        "Services & Contracts",
+    ]
 
     const steps = [
         {
@@ -117,6 +149,8 @@ export default function PostOfferPage() {
 
     const fileInputRef = useRef<HTMLInputElement>(null)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+    const [savedSelection, setSavedSelection] = useState<Range | null>(null);
 
     useEffect(() => {
         if (isLoading) {
@@ -215,6 +249,12 @@ export default function PostOfferPage() {
         setLinkValue("")
     }
 
+    const toggleCategory = (category: string) => {
+        setSelectedCategories((prev) =>
+            prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
+        )
+    }
+
     const handleContinue = async () => {
         setIsLoading(true)
         setDuplicateDeal(null)
@@ -251,28 +291,7 @@ export default function PostOfferPage() {
         return 0;
     }
 
-    // Helper to insert/wrap text at cursor
-    function formatText(before: string, after: string = "", placeholder = "") {
-        if (!textareaRef.current) return;
-        const textarea = textareaRef.current;
-        const { selectionStart, selectionEnd, value } = textarea;
-        const selected = value.slice(selectionStart, selectionEnd) || placeholder;
-        const newValue =
-            value.slice(0, selectionStart) +
-            before +
-            selected +
-            after +
-            value.slice(selectionEnd);
-        setDescription(newValue);
-        // Move cursor after the inserted text
-        setTimeout(() => {
-            textarea.focus();
-            textarea.setSelectionRange(
-                selectionStart + before.length,
-                selectionEnd + before.length + selected.length
-            );
-        }, 0);
-    }
+   
 
     // Formatting handlers
     const handleBold = () => {
@@ -290,23 +309,27 @@ export default function PostOfferPage() {
         document.execCommand("insertUnorderedList");
     };
     const handleHorizontalLine = () => {
-        if (!textareaRef.current) return;
-        const textarea = textareaRef.current;
-        const { selectionStart, value } = textarea;
-        const newValue =
-            value.slice(0, selectionStart) + "\n---\n" + value.slice(selectionStart);
-        setDescription(newValue);
-        setTimeout(() => {
-            textarea.focus();
-            textarea.setSelectionRange(
-                selectionStart + 5,
-                selectionStart + 5
-            );
-        }, 0);
+        document.execCommand("insertHorizontalRule");
     };
-    const handleEmoji = (emoji: string) => formatText(emoji, "", "");
-    const handleLink = () => formatText("[", "](url)", "link text");
-    const handleImage = () => formatText("![", "](url)", "alt text");
+    // FIXED: Emoji insertion for contentEditable
+    const handleEmoji = (emoji: string) => {
+        if (!editorRef.current) return;
+        editorRef.current.focus();
+        const selection = window.getSelection();
+        if (!selection || !selection.rangeCount) return;
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        const textNode = document.createTextNode(emoji);
+        range.insertNode(textNode);
+        // Move caret after the inserted emoji
+        range.setStartAfter(textNode);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        // Update description state
+        setDescription(editorRef.current.innerHTML);
+    };
+
 
     const handleSubmit = () => {
         const html = editorRef.current?.innerHTML;
@@ -320,6 +343,61 @@ export default function PostOfferPage() {
     // Emoji picker state
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
     const emojiList = ["😀", "😂", "😍", "😎", "👍", "🎉", "🔥", "🙏", "😊", "🥳"];
+
+    // Add state for image URL input and file input
+    const [imageInsertUrl, setImageInsertUrl] = useState("");
+    const [imageInsertFile, setImageInsertFile] = useState<File | null>(null);
+
+    // Handler for file input change
+    const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setImageInsertFile(file);
+        setImageInsertUrl(""); // Clear URL if file is chosen
+    };
+
+    // Handler for image URL input change
+    const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setImageInsertUrl(e.target.value);
+        setImageInsertFile(null); // Clear file if URL is entered
+    };
+
+    // Handler for placing the image
+    const handlePlaceImage = async () => {
+        if (!editorRef.current) return;
+        editorRef.current.focus();
+        let imageUrl = imageInsertUrl;
+        if (imageInsertFile) {
+            // Read file as data URL
+            imageUrl = await new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target?.result as string);
+                reader.readAsDataURL(imageInsertFile);
+            });
+        }
+        if (!imageUrl) return;
+        const selection = window.getSelection();
+        if (!selection || !selection.rangeCount) return;
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = "Inserted image";
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+        img.style.display = 'block';
+        img.style.margin = selected === 'middle' ? '0 auto' : '0';
+        img.style.float = selected === 'left' ? 'left' : 'none';
+        range.insertNode(img);
+        // Move caret after the inserted image
+        range.setStartAfter(img);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        setShowImageInput(false);
+        setImageInsertFile(null);
+        setImageInsertUrl("");
+        setDescription(editorRef.current.innerHTML);
+    };
 
     const renderStepContent = () => {
         switch (currentStep) {
@@ -474,7 +552,7 @@ export default function PostOfferPage() {
                                             </div>
                                             <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">Make your title stand out</span>
                                         </div>
-                                        <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70] mt-1">
+                                        <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
                                             Please include the brand, product type, color and model in the title (e.g. adidas UltraBoost (black))
                                         </div>
                                     </div>
@@ -827,7 +905,7 @@ export default function PostOfferPage() {
                     </div>
                 )
             case 3:
-                // NEW: Complete rewrite of case 3 to match the description UI
+                
                 return (
                     <div
                         className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up"
@@ -855,7 +933,7 @@ export default function PostOfferPage() {
                                             "w-full min-h-[400px] bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black focus:outline-none dark:text-white rounded-lg p-4 pb-16 resize-none text-base leading-6 transition-all duration-300 ease-in-out flex-shrink-0 list-disc list-inside",
                                             descriptionFocused ? "min-h-[510px]" : "min-h-[400px]"
                                         )}
-                                        
+
                                     />
 
                                     {/* Help Section for Description - animated */}
@@ -880,7 +958,7 @@ export default function PostOfferPage() {
                                     </div>
 
                                     {/* Formatting Toolbar */}
-                                    <div className="relative -top-14 w-fit left-2 inline-flex items-center gap-1 bg-[#fff] dark:bg-[#2a2b2d] rounded-lg p-[7px] border border-[rgba(3,12,25,0.1)] dark:border-[hsla(0,0%,100%,0.1)]">
+                                    <div className="relative -top-14 w-fit left-2 inline-flex items-center gap-1 bg-[#fff] dark:bg-[#2a2b2d] rounded-xl  p-[7px] border border-[rgba(3,12,25,0.1)] dark:border-[hsla(0,0%,100%,0.1)] shadow-lg">
                                         <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleBold}>
                                             <Bold className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
@@ -913,12 +991,220 @@ export default function PostOfferPage() {
                                                 ))}
                                             </div>
                                         )}
-                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleLink}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="icon-button "
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            onClick={() => {
+                                                setShowLinkInput(true);
+                                                // Save the current selection
+                                                const selection = window.getSelection();
+                                                if (selection && selection.rangeCount > 0) {
+                                                    setSavedSelection(selection.getRangeAt(0));
+                                                }
+                                            }}
+                                        >
                                             <Link className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleImage}>
+                                        {showLinkInput && (
+                                            <div className="absolute bottom-12 m-4 left-24 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-6 flex flex-col gap-2 z-50 w-[350px]">
+                                                {/* Arrow pointer at the bottom */}
+                                                <div
+                                                    className="absolute -bottom-2 left-36 w-0 h-0"
+                                                    style={{
+                                                        borderLeft: "8px solid transparent",
+                                                        borderRight: "8px solid transparent",
+                                                        borderTop: "8px solid #fff",
+                                                    }}
+                                                />
+                                                {/* Heading with icon, text, and close button */}
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div className="flex items-center gap-1">
+                                                        <Link2 className="h-6 w-6 text-black dark:text-white" />
+                                                        <span className="font-semibold text-lg text-black dark:text-white">Link</span>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => setShowLinkInput(false)}
+                                                        className="p-1 rounded-full hover:bg-[rgba(15,55,95,0.05)] dark:hover:bg-[#363739] text-[#6b6d70] hover:text-[#76787b] dark:hover:text-white"
+                                                        aria-label="Close"
+                                                    >
+                                                        <X className="h-6 w-6" />
+                                                    </button>
+                                                </div>
+                                                <div className="flex flex-col space-y-8">
+                                                    <div className="flex flex-col space-y-2">
+                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">
+                                                            URL
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            value={linkURL}
+                                                            onChange={(e) => setLinkURL(e.target.value)}
+                                                            className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
+                                                        />
+                                                    </div>
+                                                    <div className="flex flex-col space-y-2">
+                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">
+                                                            Text
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            value={linkText}
+                                                            onChange={(e) => setLinkText(e.target.value)}
+                                                            className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
+                                                        />
+                                                        <div className="pt-4">
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (!editorRef.current) return;
+                                                                    editorRef.current.focus();
+                                                                    if (savedSelection) {
+                                                                        const selection = window.getSelection();
+                                                                        selection?.removeAllRanges();
+                                                                        selection?.addRange(savedSelection);
+                                                                    }
+                                                                    const selection = window.getSelection();
+                                                                    if (!selection || !selection.rangeCount) return;
+                                                                    const range = selection.getRangeAt(0);
+                                                                    range.deleteContents();
+                                                                    // Create a real <a> element
+                                                                    const a = document.createElement('a');
+                                                                    a.href = linkURL;
+                                                                    a.textContent = linkText || linkURL;
+                                                                    a.target = "_blank";
+                                                                    a.rel = "noopener noreferrer";
+                                                                    range.insertNode(a);
+                                                                    // Move caret after link
+                                                                    range.setStartAfter(a);
+                                                                    range.collapse(true);
+                                                                    selection.removeAllRanges();
+                                                                    selection.addRange(range);
+                                                                    setShowLinkInput(false);
+                                                                    setLinkURL("");
+                                                                    setLinkText("");
+                                                                    setDescription(editorRef.current.innerHTML);
+                                                                }}
+
+                                                                disabled={!linkURL.trim()}
+                                                                className={
+                                                                    `text-sm h-9 font-medium  text-white px-3 py-1 w-full rounded-full  ` +
+                                                                    (!linkURL.trim() ? 'bg-[#f3f5f7] text-[#a7a9ac] cursor-not-allowed' : 'text-white bg-[#f7641b] hover:bg-[#eb611f] shadow-[#f7641b] hover:shadow-[#eb611f]')
+                                                                }
+                                                            >
+                                                                Insert
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="icon-button"
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            onClick={() => setShowImageInput((v) => !v)}
+                                        >
                                             <ImageIcon className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
+                                        {showImageInput && (
+                                            <div className="absolute bottom-12 m-4 left-48 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-6 flex flex-col gap-2 z-50 w-[350px]">
+                                                {/* Arrow pointer at the bottom */}
+                                                <div
+                                                    className="absolute -bottom-2 left-36 w-0 h-0"
+                                                    style={{
+                                                        borderLeft: "8px solid transparent",
+                                                        borderRight: "8px solid transparent",
+                                                        borderTop: "8px solid #fff",
+                                                    }}
+                                                />
+                                                {/* Heading with icon, text, and close button */}
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div className="flex items-center gap-1">
+                                                        <ImageIcon className="h-6 w-6 text-black dark:text-white" />
+                                                        <span className="font-semibold text-lg text-black dark:text-white">Add Image</span>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => setShowImageInput(false)}
+                                                        className="p-1 rounded-full hover:bg-[rgba(15,55,95,0.05)] dark:hover:bg-[#363739] text-[#6b6d70] hover:text-[#76787b] dark:hover:text-white"
+                                                        aria-label="Close"
+                                                    >
+                                                        <X className="h-6 w-6" />
+                                                    </button>
+                                                </div>
+                                                <div className="flex flex-col space-y-8">
+                                                    {/* Upload image section */}
+                                                    <div className="flex flex-col space-y-2">
+                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">Upload image</label>
+                                                        <div className="flex items-center gap-3">
+                                                            <input
+                                                                type="file"
+                                                                accept="image/*"
+                                                                className="hidden"
+                                                                id="image-upload-input"
+                                                                onChange={handleImageFileChange}
+                                                            />
+                                                            <label htmlFor="image-upload-input" className="px-3 py-2 h-9 rounded-full w-fit border border-[#f7641b] text-[#f7641b] bg-white hover:bg-[#fbece3] dark:bg-[#481802] dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] text-sm font-medium cursor-pointer">
+                                                                Choose
+                                                            </label>
+                                                            <span className="text-sm text-[#a7a9ac] dark:text-[#8b8d90]">{imageInsertFile ? imageInsertFile.name : "Nothing selected"}</span>
+                                                        </div>
+                                                    </div>
+                                                    {/* Image from URL section */}
+                                                    <div className="flex flex-col space-y-2">
+                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">Image from URL</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Image URL"
+                                                            value={imageInsertUrl}
+                                                            onChange={handleImageUrlChange}
+                                                            className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
+                                                        />
+                                                        {/* Placement options */}
+                                                        <span className="text-[12.25px] text-black dark:text-white font-semibold mr-2 pt-4">Placement:</span>
+                                                        <div className="flex flex-row mt-1 w-full">
+                                                            <button
+                                                                onClick={() => setSelected("left")}
+                                                                className={cn(
+                                                                    "w-1/2 py-2 h-9 rounded-l-full border text-sm font-medium focus:outline-none flex flex-row justify-center items-center gap-1",
+                                                                    selected === "left"
+                                                                        ? "bg-[#f7641b] border-[#f7641b] text-white hover:bg-[#eb611f] hover:border-[#eb611f] "
+                                                                        : "text-[#6b6d70] border-[#dfe1e4] hover:bg-white hover:text-[#f7641b] hover:border-[#dfe1e4] "
+                                                                )}
+                                                            >
+                                                                <AlignLeft className="h-6 w-6" />
+                                                                <span>Left</span>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setSelected("middle")}
+                                                                className={cn(
+                                                                    "w-1/2 py-2 h-9 -ml-[1px] rounded-r-full border text-sm font-medium focus:outline-none flex flex-row justify-center items-center gap-1",
+                                                                    selected === "middle"
+                                                                        ? "bg-[#f7641b] border-[#f7641b] text-white hover:bg-[#eb611f] hover:border-[#eb611f] "
+                                                                        : "text-[#6b6d70] border-[#dfe1e4] hover:bg-white hover:text-[#f7641b] hover:border-[#dfe1e4] "
+                                                                )}
+                                                            >
+                                                                <AlignCenter className="h-6 w-6" />
+                                                                <span>Middle</span>
+                                                            </button>
+                                                        </div>
+
+                                                        <div className="pt-4">
+                                                            <button
+                                                                onClick={handlePlaceImage}
+                                                                className="text-sm h-9 font-medium text-white px-3 py-1 w-full rounded-full bg-[#f7641b] hover:bg-[#eb611f] shadow-[#f7641b] hover:shadow-[#eb611f]"
+                                                                disabled={!imageInsertFile && !imageInsertUrl}
+                                                            >
+                                                                Place image
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
                                     </div>
                                 </div>
                             </div>
@@ -927,24 +1213,271 @@ export default function PostOfferPage() {
                 )
             case 4:
                 return (
-                    <div className="flex flex-col items-center justify-center flex-1 px-8 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-                        <div className="w-full max-w-2xl text-center space-y-8">
-                            <h1 className="text-4xl font-bold text-white">Final Details</h1>
-                            <p className="text-xl text-gray-300">Add the final details to complete your offer</p>
-                            <div className="h-40 flex items-center justify-center border border-dashed border-gray-600 rounded-xl text-gray-400">
-                                Final details form content goes here
+                    <div
+                        className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up"
+                        style={{ animationDelay: "0.1s", animationFillMode: "both" }}
+                    >
+                        <div className="max-w-[682px] w-full space-y-8">
+                            {/* Header */}
+                            <div className="text-start">
+                                <h1 className="text-3xl font-semibold text-[#000] dark:text-[#fff]">Final details</h1>
+                            </div>
+
+                            {/* Date Fields */}
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-[#000] dark:text-[#fff]">Start day</label>
+                                    <div className="relative">
+                                        <Input
+                                            type="text"
+                                            value={startDate}
+                                            onChange={(e) => setStartDate(e.target.value)}
+                                            placeholder="dd/mm/yyyy"
+                                            className="w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-3 pr-10"
+                                        />
+                                        <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-semibold text-[#000] dark:text-[#fff]">End date</label>
+                                    <div className="relative">
+                                        <Input
+                                            type="text"
+                                            value={endDate}
+                                            onChange={(e) => setEndDate(e.target.value)}
+                                            placeholder="dd/mm/yyyy"
+                                            className="w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-3 pr-10"
+                                        />
+                                        <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Category Section */}
+                            <div className="space-y-4">
+                                <div className="space-y-2">
+                                    <h2 className="text-lg font-semibold text-[#000] dark:text-[#fff]">
+                                        Category <span className="text-gray-500 font-normal">(required)</span>
+                                    </h2>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        What is the most relevant category for your offer?
+                                    </p>
+                                </div>
+
+                                {/* Category Grid */}
+                                <div className="grid grid-cols-4 gap-3">
+                                    {categories.map((category) => (
+                                        <Button
+                                            key={category}
+                                            onClick={() => toggleCategory(category)}
+                                            variant="outline"
+                                            className={cn(
+                                                "h-auto p-3 text-left justify-start border rounded-lg transition-all duration-200",
+                                                selectedCategories.includes(category)
+                                                    ? "bg-[#fbf3ef] border-[#f7641b] text-[#f7641b] hover:bg-[#fbece3] hover:border-[#eb611f] hover:text-[#eb611f] dark:bg-[#481802] dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
+                                                    : "bg-[#fff] border-[rgba(3,12,25,0.23)] text-[#000] hover:border-[#d7d9dd] hover:text-[#f7641b] hover:bg-[#fff] dark:bg-[#1d1f20] dark:border-[hsla(0,0%,100%,0.35)] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
+                                            )}
+                                        >
+                                            <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
+                                            <span className="text-sm font-medium">{category}</span>
+                                        </Button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
                 )
             case 5:
                 return (
-                    <div className="flex flex-col items-center justify-center flex-1 px-8 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-                        <div className="w-full max-w-2xl text-center space-y-8">
-                            <h1 className="text-4xl font-bold text-white">Check</h1>
-                            <p className="text-xl text-gray-300">Review your offer before publishing</p>
-                            <div className="h-40 flex items-center justify-center border border-dashed border-gray-600 rounded-xl text-gray-400">
-                                Review content goes here
+                    <div
+                        className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up"
+                        style={{ animationDelay: "0.1s", animationFillMode: "both" }}
+                    >
+                        <div className="max-w-[682px] w-full space-y-8">
+                            {/* Header */}
+                            <div className="text-center">
+                                <h1 className="text-3xl font-semibold text-[#000] dark:text-[#fff]">Check your deal</h1>
+                            </div>
+
+                            {/* Link Section */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Link</h2>
+                                    <Button
+                                        onClick={() => setCurrentStep(0)}
+                                        variant="ghost"
+                                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    >
+                                        To adjust
+                                    </Button>
+                                </div>
+                                <div className="text-base text-[#000] dark:text-[#fff]">{linkValue || "example.com"}</div>
+                            </div>
+
+                            {/* Image Gallery Section */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Image gallery</h2>
+                                    <Button
+                                        onClick={() => setCurrentStep(2)}
+                                        variant="ghost"
+                                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    >
+                                        To adjust
+                                    </Button>
+                                </div>
+                                <div className="text-base text-gray-500 dark:text-gray-400">
+                                    {uploadedImages.length > 0 ? `${uploadedImages.length} image(s) uploaded` : "No info"}
+                                </div>
+                            </div>
+
+                            {/* Description Section */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Description</h2>
+                                    <Button
+                                        onClick={() => setCurrentStep(3)}
+                                        variant="ghost"
+                                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    >
+                                        To adjust
+                                    </Button>
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-base font-medium text-[#000] dark:text-[#fff]">
+                                        Why is this offer worth sharing?
+                                    </h3>
+                                    {description ? (
+                                        <div className="space-y-2">
+                                            <ul className="list-disc list-inside text-sm text-[#000] dark:text-[#fff] space-y-1">
+                                                {description
+                                                    .split("\n")
+                                                    .slice(0, showMoreDescription ? undefined : 6)
+                                                    .map((line, index) => line.trim() && <li key={index}>{line.trim()}</li>)}
+                                            </ul>
+                                            {description.split("\n").length > 6 && (
+                                                <Button
+                                                    onClick={() => setShowMoreDescription(!showMoreDescription)}
+                                                    variant="ghost"
+                                                    className="text-sm text-[#f7641b] hover:text-[#eb611f] p-0 h-auto font-normal"
+                                                >
+                                                    {showMoreDescription ? "Show less" : "Show more"}{" "}
+                                                    <ChevronDown
+                                                        className={cn("h-4 w-4 ml-1 transition-transform", showMoreDescription && "rotate-180")}
+                                                    />
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <ul className="list-disc list-inside text-sm text-[#000] dark:text-[#fff] space-y-1">
+                                            <li>worse</li>
+                                            <li>annoyedlgrg</li>
+                                            <li>terribly</li>
+                                            <li>harrow</li>
+                                            <li>rg</li>
+                                            <li>rgr</li>
+                                            {!showMoreDescription && (
+                                                <Button
+                                                    onClick={() => setShowMoreDescription(true)}
+                                                    variant="ghost"
+                                                    className="text-sm text-[#f7641b] hover:text-[#eb611f] p-0 h-auto font-normal"
+                                                >
+                                                    Show more <ChevronDown className="h-4 w-4 ml-1" />
+                                                </Button>
+                                            )}
+                                            {showMoreDescription && (
+                                                <>
+                                                    <li>get</li>
+                                                    <Button
+                                                        onClick={() => setShowMoreDescription(false)}
+                                                        variant="ghost"
+                                                        className="text-sm text-[#f7641b] hover:text-[#eb611f] p-0 h-auto font-normal"
+                                                    >
+                                                        Show less <ChevronDown className="h-4 w-4 ml-1 rotate-180" />
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </ul>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Essentials Section */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Essentials</h2>
+                                    <Button
+                                        onClick={() => setCurrentStep(1)}
+                                        variant="ghost"
+                                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    >
+                                        To adjust
+                                    </Button>
+                                </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <h3 className="text-base font-medium text-[#000] dark:text-[#fff] mb-1">Title of offer</h3>
+                                        <p className="text-sm text-[#000] dark:text-[#fff]">{title || "dvdffvdvdbdbfb"}</p>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-6">
+                                        <div>
+                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Price Offer</h4>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{priceOffer ? `₹${priceOffer}` : "-"}</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Lowest price elsewhere</h4>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{lowestPrice ? `₹${lowestPrice}` : "-"}</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Postage costs</h4>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{postageCosts ? `₹${postageCosts}` : "-"}</p>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Shipping from</h4>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{shippingFrom || "-"}</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Availability</h4>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{availability || "-"}</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Discount code</h4>
+                                        <p className="text-sm text-[#000] dark:text-[#fff]">{discountCode || "-"}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Final Details Section */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Final details</h2>
+                                    <Button
+                                        onClick={() => setCurrentStep(4)}
+                                        variant="ghost"
+                                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    >
+                                        To adjust
+                                    </Button>
+                                </div>
+                                <div className="grid grid-cols-3 gap-6">
+                                    <div>
+                                        <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Starting day</h4>
+                                        <p className="text-sm text-[#000] dark:text-[#fff]">{startDate || "-"}</p>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">End date</h4>
+                                        <p className="text-sm text-[#000] dark:text-[#fff]">{endDate || "-"}</p>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Category</h4>
+                                        <p className="text-sm text-[#000] dark:text-[#fff]">
+                                            {selectedCategories.length > 0 ? selectedCategories.join(", ") : "Electronics"}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -956,57 +1489,119 @@ export default function PostOfferPage() {
 
     return (
         <div className="fixed inset-0 w-screen h-screen min-h-screen bg-[#fff] dark:bg-[#1d1f20] flex z-30">
-            {/* Left Sidebar */}
-            <div className="w-[272px] mt-14 bg-[#f3f5f7] dark:bg-[#28292a] flex flex-col">
-                <div className="p-6 pt-6  border-gray-700">
-                    <h2 className="text-2xl font-semibold text-[#000] dark:text-[#fff]">Place an offer</h2>
-                </div>
-
-                <nav className="flex-1 p-4 space-y-2">
+            {/* Mobile: Horizontal Step Bar */}
+            <div className="block md:hidden w-full bg-[#f3f5f7] mt-12 h-fit dark:bg-[#28292a] border-b border-gray-200 dark:border-[#23272f]">
+                <nav className="flex flex-row items-center justify-between px-2 py-4 overflow-x-auto">
                     {steps.map((step, index) => {
                         let IconComponent = step.icon;
                         const isActive = index === currentStep;
                         const isCompleted = index < currentStep;
                         const isFuture = index > currentStep;
-
                         if (isCompleted) {
                             IconComponent = hoveredStep === index ? Pencil : CircleCheck;
                         }
-
                         return (
-                            <button
-                                key={step.id}
-                                onClick={() => {
-                                    if (!isFuture) setCurrentStep(index);
-                                }}
-                                disabled={isFuture}
-                                onMouseEnter={() => setHoveredStep(index)}
-                                onMouseLeave={() => setHoveredStep(null)}
-                                className={cn(
-                                    "w-full flex items-center gap-3 pb-4 px-4 py-4 rounded-full text-left transition-colors",
-                                    step.id === "check" && "border-t rounded-none border-gray-700 pt-6 mt-4",
-                                    isActive
-                                        ? "dark:bg-[#1d1f20] bg-[#fff] dark:text-white text-[#000]"
-                                        : isCompleted
-                                            ? "text-[#000] dark:text-[#fff] dark:hover:bg-[#363739] hover:bg-[#dfe1e4] bg-transparent"
-                                            : "dark:text-[hsla(0,0%,100%,0.49)] text-[rgba(4,9,18,0.35)] hover:bg-gray-700 hover:text-gray-300",
-                                    isFuture && "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-inherit",
+                            <div key={step.id} className="flex items-center">
+                                <button
+                                    onClick={() => {
+                                        if (!isFuture) setCurrentStep(index);
+                                    }}
+                                    disabled={isFuture}
+                                    onMouseEnter={() => setHoveredStep(index)}
+                                    onMouseLeave={() => setHoveredStep(null)}
+                                    className={cn(
+                                        "flex flex-col items-center px-2 py-1 focus:outline-none",
+                                        isActive
+                                            ? "text-[#f7641b] dark:text-[#f97936]"
+                                            : isCompleted
+                                                ? "text-[#238012] dark:text-green-400"
+                                                : "text-[#a7a9ac] dark:text-[#525457]",
+                                        isFuture && "cursor-not-allowed opacity-60"
+                                    )}
+                                >
+                                    <IconComponent className="h-5 w-5 mb-1" />
+                                    <span className="text-xs font-medium whitespace-nowrap">{step.title}</span>
+                                </button>
+                                {/* Horizontal line except after last step */}
+                                {index < steps.length - 1 && (
+                                    <div className="h-6 w-px bg-[#dfe1e4] dark:bg-[#46484b] mx-2" />
                                 )}
-                            >
-                                <IconComponent className={cn("h-5 w-5 flex-shrink-0", isCompleted && hoveredStep !== index && "text-green-500 dark:text-green-400")} />
-                                <span className="font-medium text-sm">{step.title}</span>
-                            </button>
-                        )
+                            </div>
+                        );
                     })}
                 </nav>
             </div>
-
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col overflow-auto">
-                {/* Content */}
+            {/* Desktop: Sidebar + Content */}
+            <div className="hidden md:flex w-full h-full flex-row">
+                {/* Sidebar */}
+                <div className="w-[272px] mt-14 bg-[#f3f5f7] dark:bg-[#28292a] flex flex-col">
+                    <div className="p-6 pt-6 border-gray-700">
+                        <h2 className="text-2xl font-semibold text-[#000] dark:text-[#fff]">Place an offer</h2>
+                    </div>
+                    <nav className="flex-1 p-4 space-y-2">
+                        {steps.map((step, index) => {
+                            let IconComponent = step.icon;
+                            const isActive = index === currentStep;
+                            const isCompleted = index < currentStep;
+                            const isFuture = index > currentStep;
+                            if (isCompleted) {
+                                IconComponent = hoveredStep === index ? Pencil : CircleCheck;
+                            }
+                            return (
+                                <button
+                                    key={step.id}
+                                    onClick={() => {
+                                        if (!isFuture) setCurrentStep(index);
+                                    }}
+                                    disabled={isFuture}
+                                    onMouseEnter={() => setHoveredStep(index)}
+                                    onMouseLeave={() => setHoveredStep(null)}
+                                    className={cn(
+                                        "w-full flex items-center gap-3 pb-4 px-4 py-4 rounded-full text-left transition-colors",
+                                        step.id === "check" && "border-t rounded-none border-gray-700 pt-6 mt-4",
+                                        isActive
+                                            ? "dark:bg-[#1d1f20] bg-[#fff] dark:text-white text-[#000]"
+                                            : isCompleted
+                                                ? "text-[#000] dark:text-[#fff] dark:hover:bg-[#363739] hover:bg-[#dfe1e4] bg-transparent"
+                                                : "dark:text-[hsla(0,0%,100%,0.49)] text-[rgba(4,9,18,0.35)] hover:bg-gray-700 hover:text-gray-300",
+                                        isFuture && "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-inherit",
+                                    )}
+                                >
+                                    <IconComponent className={cn("h-5 w-5 flex-shrink-0", isCompleted && hoveredStep !== index && "text-[#238012] dark:text-[#78c86b]")} />
+                                    <span className="font-medium text-sm">{step.title}</span>
+                                </button>
+                            )
+                        })}
+                    </nav>
+                </div>
+                {/* Main Content Area */}
+                <div className="flex-1 flex flex-col overflow-auto">
+                    {/* Content */}
+                    <div className="flex-1 flex">{renderStepContent()}</div>
+                    {/* Navigation Buttons */}
+                    {currentStep > 0 && (
+                        <div className="border-t border-[#dfe1e4] dark:border-[#46484b] p-6 flex justify-between">
+                            <Button
+                                onClick={handleBack}
+                                variant="outline"
+                                className="h-9 px-4 border-[#dfe1e4] rounded-full hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#363739] dark:text-[#c5c7ca] dark:hover:text-[#d7d9dd] dark:bg-[#1d1f20]"
+                            >
+                                Back
+                            </Button>
+                            <Button
+                                onClick={handleNext}
+                                disabled={currentStep === steps.length - 1}
+                                className="border rounded-full h-9 px-4 border-[#f7641b] hover:border-[#eb611f] text-[#f7641b] hover:bg-[#fbf3ef] hover:text-[#eb611f] bg-[#fff] dark:border-[#f97936] dark:text-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] dark:bg-[#1d1f20]"
+                            >
+                                {currentStep === steps.length - 1 ? "Publish" : "Next"}
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </div>
+            {/* Mobile: Main Content Area */}
+            <div className="flex-1 flex flex-col overflow-auto md:hidden">
                 <div className="flex-1 flex">{renderStepContent()}</div>
-
-                {/* Navigation Buttons */}
                 {currentStep > 0 && (
                     <div className="border-t border-[#dfe1e4] dark:border-[#46484b] p-6 flex justify-between">
                         <Button
