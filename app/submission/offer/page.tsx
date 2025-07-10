@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Link2, Sparkles, ImageIcon, FileText, Eye, ListCheck, CircleCheck, Pencil, MapPin, Info, Scissors, ArrowRight, Plus, X, Link, Smile, Minus, List, Italic, Strikethrough, Bold, AlignLeft, AlignCenter, Calendar, ChevronDown } from "lucide-react"
+import { Link2, Sparkles, ImageIcon, FileText, Eye, ListCheck, CircleCheck, Pencil, MapPin, Info, Scissors, ArrowRight, Plus, X, Link, Smile, Minus, List, Italic, Strikethrough, Bold, AlignLeft, AlignCenter, Calendar, ChevronDown, MoveRight, Clock, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { url } from "inspector"
 import { NextResponse } from "next/server"
@@ -64,7 +64,13 @@ export default function PostOfferPage() {
     const [selected, setSelected] = useState<"left" | "middle">("left");
 
     const [startDate, setStartDate] = useState("")
+    const [startTime, setStartTime] = useState("")
+    const [showStartTimeInput, setShowStartTimeInput] = useState(false)
+
     const [endDate, setEndDate] = useState("")
+    const [endTime, setEndTime] = useState("")
+    const [showEndTimeInput, setShowEndTimeInput] = useState(false)
+
     const [selectedCategories, setSelectedCategories] = useState<string[]>([])
 
     const [showMoreDescription, setShowMoreDescription] = useState(false)
@@ -152,6 +158,11 @@ export default function PostOfferPage() {
 
     const [savedSelection, setSavedSelection] = useState<Range | null>(null);
 
+    const startDateRef = useRef<HTMLInputElement>(null);
+    const startTimeRef = useRef<HTMLInputElement>(null);
+    const endDateRef = useRef<HTMLInputElement>(null);
+    const endTimeRef = useRef<HTMLInputElement>(null);
+
     useEffect(() => {
         if (isLoading) {
             setProgressWidth(0)
@@ -163,6 +174,12 @@ export default function PostOfferPage() {
             setProgressWidth(0)
         }
     }, [isLoading])
+
+    useEffect(() => {
+        if (currentStep === 3 && editorRef.current) {
+            editorRef.current.innerHTML = description || "";
+        }
+    }, [currentStep, description]);
 
     const handleFileUpload = (files: FileList | null) => {
         if (!files) return
@@ -228,6 +245,10 @@ export default function PostOfferPage() {
 
 
     const handleNext = () => {
+        if (currentStep === 3 && editorRef.current) {
+            console.log("On next, saving description:", editorRef.current.innerHTML);
+            setDescription(editorRef.current.innerHTML);
+        }
         if (currentStep < steps.length - 1) {
             setCurrentStep(currentStep + 1)
         }
@@ -251,9 +272,9 @@ export default function PostOfferPage() {
 
     const toggleCategory = (category: string) => {
         setSelectedCategories((prev) =>
-            prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
-        )
-    }
+            prev.includes(category) ? [] : [category]
+        );
+    };
 
     const handleContinue = async () => {
         setIsLoading(true)
@@ -291,7 +312,7 @@ export default function PostOfferPage() {
         return 0;
     }
 
-   
+
 
     // Formatting handlers
     const handleBold = () => {
@@ -337,6 +358,7 @@ export default function PostOfferPage() {
     };
     const handleInput = () => {
         if (editorRef.current) {
+            console.log("Saving description:", editorRef.current.innerHTML);
             setDescription(editorRef.current.innerHTML);
         }
     };
@@ -363,18 +385,27 @@ export default function PostOfferPage() {
 
     // Handler for placing the image
     const handlePlaceImage = async () => {
+        console.log('Placing image', { imageInsertFile, imageInsertUrl, selected });
         if (!editorRef.current) return;
         editorRef.current.focus();
+        // Restore the saved selection
+        if (savedSelection) {
+            const selection = window.getSelection();
+            selection?.removeAllRanges();
+            selection?.addRange(savedSelection);
+        }
         let imageUrl = imageInsertUrl;
         if (imageInsertFile) {
-            // Read file as data URL
             imageUrl = await new Promise<string>((resolve) => {
                 const reader = new FileReader();
                 reader.onload = (e) => resolve(e.target?.result as string);
                 reader.readAsDataURL(imageInsertFile);
             });
         }
-        if (!imageUrl) return;
+        if (!imageUrl) {
+            console.log('No imageUrl');
+            return;
+        }
         const selection = window.getSelection();
         if (!selection || !selection.rangeCount) return;
         const range = selection.getRangeAt(0);
@@ -382,13 +413,14 @@ export default function PostOfferPage() {
         const img = document.createElement('img');
         img.src = imageUrl;
         img.alt = "Inserted image";
-        img.style.maxWidth = '100%';
-        img.style.height = 'auto';
+        img.style.width = '200px';
+        img.style.height = '200px';
+        img.style.objectFit = 'cover';
         img.style.display = 'block';
-        img.style.margin = selected === 'middle' ? '0 auto' : '0';
+        img.style.margin = selected === 'middle' ? '16px auto' : '16px 0';
         img.style.float = selected === 'left' ? 'left' : 'none';
+        img.style.borderRadius = '12px';
         range.insertNode(img);
-        // Move caret after the inserted image
         range.setStartAfter(img);
         range.collapse(true);
         selection.removeAllRanges();
@@ -397,6 +429,7 @@ export default function PostOfferPage() {
         setImageInsertFile(null);
         setImageInsertUrl("");
         setDescription(editorRef.current.innerHTML);
+        console.log('Editor HTML after image insert:', editorRef.current.innerHTML);
     };
 
     const renderStepContent = () => {
@@ -905,7 +938,7 @@ export default function PostOfferPage() {
                     </div>
                 )
             case 3:
-                
+
                 return (
                     <div
                         className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up"
@@ -926,9 +959,9 @@ export default function PostOfferPage() {
                                         ref={editorRef}
                                         contentEditable
                                         onInput={handleInput}
+                                        onBlur={() => { setDescriptionFocused(false); handleInput(); }}
                                         suppressContentEditableWarning
                                         onFocus={() => setDescriptionFocused(true)}
-                                        onBlur={() => setDescriptionFocused(false)}
                                         className={cn(
                                             "w-full min-h-[400px] bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black focus:outline-none dark:text-white rounded-lg p-4 pb-16 resize-none text-base leading-6 transition-all duration-300 ease-in-out flex-shrink-0 list-disc list-inside",
                                             descriptionFocused ? "min-h-[510px]" : "min-h-[400px]"
@@ -958,7 +991,7 @@ export default function PostOfferPage() {
                                     </div>
 
                                     {/* Formatting Toolbar */}
-                                    <div className="relative -top-14 w-fit left-2 inline-flex items-center gap-1 bg-[#fff] dark:bg-[#2a2b2d] rounded-xl  p-[7px] border border-[rgba(3,12,25,0.1)] dark:border-[hsla(0,0%,100%,0.1)] shadow-lg">
+                                    <div className="relative -top-14 w-fit left-2 inline-flex items-center gap-1 bg-[#fff] dark:bg-[#1d1f20] rounded-xl  p-[7px] border border-[rgba(3,12,25,0.1)] dark:border-[#1d1f20] shadow-lg">
                                         <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleBold}>
                                             <Bold className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
@@ -1105,7 +1138,14 @@ export default function PostOfferPage() {
                                             size="sm"
                                             className="icon-button"
                                             onMouseDown={(e) => e.preventDefault()}
-                                            onClick={() => setShowImageInput((v) => !v)}
+                                            onClick={() => {
+                                                setShowImageInput(true);
+                                                // Save the current selection
+                                                const selection = window.getSelection();
+                                                if (selection && selection.rangeCount > 0) {
+                                                    setSavedSelection(selection.getRangeAt(0));
+                                                }
+                                            }}
                                         >
                                             <ImageIcon className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
@@ -1219,67 +1259,112 @@ export default function PostOfferPage() {
                     >
                         <div className="max-w-[682px] w-full space-y-8">
                             {/* Header */}
-                            <div className="text-start">
-                                <h1 className="text-3xl font-semibold text-[#000] dark:text-[#fff]">Final details</h1>
+                            <div className="text-start -mt-20">
+                                <h1 className="text-[32px] font-semibold text-[#000] dark:text-[#fff]">Final details</h1>
                             </div>
 
                             {/* Date Fields */}
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-[#000] dark:text-[#fff]">Start day</label>
+                                    <label className="text-[12.25px] font-bold text-[#000] dark:text-[#fff]">Starting day</label>
                                     <div className="relative">
-                                        <Input
-                                            type="text"
+                                        <input
+                                            ref={startDateRef}
+                                            type="date"
                                             value={startDate}
-                                            onChange={(e) => setStartDate(e.target.value)}
+                                            onChange={e => {
+                                                setStartDate(e.target.value);
+                                                setShowStartTimeInput(true);
+                                            }}
+                                            onFocus={() => setShowStartTimeInput(true)}
                                             placeholder="dd/mm/yyyy"
-                                            className="w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-3 pr-10"
+                                            className="w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-2"
                                         />
-                                        <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+
                                     </div>
+                                    {showStartTimeInput && (
+                                        <div className="relative pt-4 space-y-1">
+                                            <label className="text-[12.25px] font-bold text-[#000] dark:text-[#fff]">Time</label>
+                                            <input
+                                                ref={startTimeRef}
+                                                type="time"
+                                                value={startTime}
+                                                onChange={e => setStartTime(e.target.value)}
+                                                onFocus={() => setShowStartTimeInput(true)}
+                                                className="w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-2"
+                                            />
+
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-semibold text-[#000] dark:text-[#fff]">End date</label>
+                                    <label className="text-[12.25px] font-bold text-[#000] dark:text-[#fff]">End date</label>
                                     <div className="relative">
-                                        <Input
-                                            type="text"
+                                        <input
+                                            ref={endDateRef}
+                                            type="date"
                                             value={endDate}
-                                            onChange={(e) => setEndDate(e.target.value)}
+                                            onChange={e => {
+                                                setEndDate(e.target.value);
+                                                setShowEndTimeInput(true);
+                                            }}
+                                            onFocus={() => setShowEndTimeInput(true)}
                                             placeholder="dd/mm/yyyy"
-                                            className="w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-3 pr-10"
+                                            className="w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-2"
                                         />
-                                        <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+
                                     </div>
+                                    {showEndTimeInput && (
+                                        <div className="relative pt-4 space-y-1">
+                                            <label className="text-[12.25px] font-bold text-[#000] dark:text-[#fff]">Time</label>
+                                            <input
+                                                ref={endTimeRef}
+                                                type="time"
+                                                value={endTime}
+                                                onChange={e => setEndTime(e.target.value)}
+                                                onFocus={() => setShowEndTimeInput(true)}
+                                                className="w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-2"
+                                            />
+
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
                             {/* Category Section */}
                             <div className="space-y-4">
                                 <div className="space-y-2">
-                                    <h2 className="text-lg font-semibold text-[#000] dark:text-[#fff]">
-                                        Category <span className="text-gray-500 font-normal">(required)</span>
+                                    <h2 className="text-[12.25px] font-bold text-[#000] dark:text-[#fff]">
+                                        Category <span className="text-sm text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)] font-semibold">(required)</span>
                                     </h2>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    <p className="text-sm text-[rgba(4,8,13,0.59)] dark:text-gray-400">
                                         What is the most relevant category for your offer?
                                     </p>
                                 </div>
 
                                 {/* Category Grid */}
-                                <div className="grid grid-cols-4 gap-3">
-                                    {categories.map((category) => (
+                                <div className="flex flex-wrap gap-2 mb-[7px]">
+                                    {(selectedCategories.length === 0
+                                        ? categories
+                                        : categories.filter((category) => selectedCategories.includes(category))
+                                    ).map((category) => (
                                         <Button
                                             key={category}
                                             onClick={() => toggleCategory(category)}
                                             variant="outline"
                                             className={cn(
-                                                "h-auto p-3 text-left justify-start border rounded-lg transition-all duration-200",
+                                                "h-9 w-fit px-[14px] text-sm font-bold text-left justify-start border border-[#dfe1e4] hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] rounded-full transition-all duration-200",
                                                 selectedCategories.includes(category)
                                                     ? "bg-[#fbf3ef] border-[#f7641b] text-[#f7641b] hover:bg-[#fbece3] hover:border-[#eb611f] hover:text-[#eb611f] dark:bg-[#481802] dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
-                                                    : "bg-[#fff] border-[rgba(3,12,25,0.23)] text-[#000] hover:border-[#d7d9dd] hover:text-[#f7641b] hover:bg-[#fff] dark:bg-[#1d1f20] dark:border-[hsla(0,0%,100%,0.35)] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
+                                                    : "bg-[#fff] border-[#dfe1e4] text-[#6b6d70] hover:border-[#d7d9dd] hover:text-[#76787b] hover:bg-[#f3f5f7] dark:bg-[#1d1f20] dark:border-[#46484b] dark:text-[#c5c7ca] dark:hover:border-[#525457] dark:hover:text-[#babcbf] dark:hover:bg-[#28292a]",
                                             )}
                                         >
-                                            <Plus className="h-4 w-4 mr-2 flex-shrink-0" />
-                                            <span className="text-sm font-medium">{category}</span>
+                                            {selectedCategories.includes(category) ? (
+                                                <Check className="h-4 w-4 flex-shrink-0 stroke-[2.5]" />
+                                            ) : (
+                                                <Plus className="h-4 w-4 flex-shrink-0 stroke-[2.5]" />
+                                            )}
+                                            <span className="text-sm font-semibold">{category}</span>
                                         </Button>
                                     ))}
                                 </div>
@@ -1290,192 +1375,155 @@ export default function PostOfferPage() {
             case 5:
                 return (
                     <div
-                        className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up"
+                        className="flex items-center justify-center flex-1 !p-0 !m-0 animate-fade-in-up "
                         style={{ animationDelay: "0.1s", animationFillMode: "both" }}
                     >
-                        <div className="max-w-[682px] w-full space-y-8">
+                        <div className="max-w-[682px] w-full space-y-2 mb-[84px] ">
                             {/* Header */}
-                            <div className="text-center">
-                                <h1 className="text-3xl font-semibold text-[#000] dark:text-[#fff]">Check your deal</h1>
+                            <div className="text-left mt-28 space-y-8 mb-5">
+                                <h1 className="text-5xl font-semibold text-[#000] dark:text-[#fff]">Check your deal</h1>
                             </div>
 
                             {/* Link Section */}
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Link</h2>
+                                <div className="flex flex-col items-start p-6 border rounded-lg dark:border-[hsla(0,0%,100%,0.18)] space-y-6">
+                                    <h2 className="text-2xl font-bold text-[#000] dark:text-[#fff]">Link</h2>
+                                    <div className="text-base text-[#000] dark:text-[#fff]">{linkValue || "example.com"}</div>
                                     <Button
                                         onClick={() => setCurrentStep(0)}
                                         variant="ghost"
-                                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                        className="text-sm h-7 border rounded-full border-[#dfe1e4] hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#28292a] dark:text-[#c5c7ca] dark:hover:text-[#babcbf]"
                                     >
                                         To adjust
                                     </Button>
                                 </div>
-                                <div className="text-base text-[#000] dark:text-[#fff]">{linkValue || "example.com"}</div>
+
+                            </div>
+                            {/* Essentials Section */}
+                            <div className="space-y-4">
+                                <div className="flex flex-col items-start p-6 border rounded-lg dark:border-[hsla(0,0%,100%,0.18)] space-y-6">
+                                    <h2 className="text-2xl font-bold text-[#000] dark:text-[#fff]">Essentials</h2>
+
+
+                                    <div className="space-y-6">
+                                        <div>
+                                            <h3 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Title of offer</h3>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{title || "dvdffvdvdbdbfb"}</p>
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-6">
+                                            <div>
+                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Price Offer</h4>
+                                                <p className="text-sm text-[#000] dark:text-[#fff]">{priceOffer ? `₹${priceOffer}` : "-"}</p>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Lowest price elsewhere</h4>
+                                                <p className="text-sm text-[#000] dark:text-[#fff]">{lowestPrice ? `₹${lowestPrice}` : "-"}</p>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Postage costs</h4>
+                                                <p className="text-sm text-[#000] dark:text-[#fff]">{postageCosts ? `₹${postageCosts}` : "-"}</p>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div>
+                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Shipping from</h4>
+                                                <p className="text-sm text-[#000] dark:text-[#fff]">{shippingFrom || "-"}</p>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Availability</h4>
+                                                <p className="text-sm text-[#000] dark:text-[#fff]">{availability || "-"}</p>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Discount code</h4>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{discountCode || "-"}</p>
+                                        </div>
+                                        <Button
+                                            onClick={() => setCurrentStep(1)}
+                                            variant="ghost"
+                                            className="text-sm h-7 border rounded-full border-[#dfe1e4] hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#28292a] dark:text-[#c5c7ca] dark:hover:text-[#babcbf]"
+                                        >
+                                            To adjust
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Image Gallery Section */}
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Image gallery</h2>
+                                <div className="flex flex-col items-start p-6 border rounded-lg dark:border-[hsla(0,0%,100%,0.18)] space-y-6">
+                                    <h2 className="text-2xl font-bold text-[#000] dark:text-[#fff]">Image gallery</h2>
+                                    <div className="text-base text-gray-500 dark:text-gray-400">
+                                        {uploadedImages.length > 0 ? `${uploadedImages.length} image(s) uploaded` : "No info"}
+                                    </div>
                                     <Button
                                         onClick={() => setCurrentStep(2)}
                                         variant="ghost"
-                                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                        className="text-sm h-7 border rounded-full border-[#dfe1e4] hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#28292a] dark:text"
                                     >
                                         To adjust
                                     </Button>
                                 </div>
-                                <div className="text-base text-gray-500 dark:text-gray-400">
-                                    {uploadedImages.length > 0 ? `${uploadedImages.length} image(s) uploaded` : "No info"}
-                                </div>
+
                             </div>
 
                             {/* Description Section */}
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col items-start p-6 border rounded-lg dark:border-[hsla(0,0%,100%,0.18)] space-y-6">
                                     <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Description</h2>
+                                    <div className="space-y-2 w-full">
+                                        <h3 className="text-base font-medium text-[#000] dark:text-[#fff]">Why is this offer worth sharing?</h3>
+                                        {description ? (
+                                            <div
+                                                className="prose prose-sm max-w-none dark:prose-invert text-[#000] dark:text-[#fff]"
+                                                dangerouslySetInnerHTML={{ __html: description }}
+                                            />
+                                        ) : (
+                                            <div className="text-sm text-gray-400 italic">No description provided.</div>
+                                        )}
+                                    </div>
                                     <Button
                                         onClick={() => setCurrentStep(3)}
                                         variant="ghost"
-                                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                        className="text-sm h-7 border rounded-full border-[#dfe1e4] hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#28292a] dark:text-[#c5c7ca] dark:hover:text-[#babcbf]"
                                     >
                                         To adjust
                                     </Button>
-                                </div>
-                                <div className="space-y-2">
-                                    <h3 className="text-base font-medium text-[#000] dark:text-[#fff]">
-                                        Why is this offer worth sharing?
-                                    </h3>
-                                    {description ? (
-                                        <div className="space-y-2">
-                                            <ul className="list-disc list-inside text-sm text-[#000] dark:text-[#fff] space-y-1">
-                                                {description
-                                                    .split("\n")
-                                                    .slice(0, showMoreDescription ? undefined : 6)
-                                                    .map((line, index) => line.trim() && <li key={index}>{line.trim()}</li>)}
-                                            </ul>
-                                            {description.split("\n").length > 6 && (
-                                                <Button
-                                                    onClick={() => setShowMoreDescription(!showMoreDescription)}
-                                                    variant="ghost"
-                                                    className="text-sm text-[#f7641b] hover:text-[#eb611f] p-0 h-auto font-normal"
-                                                >
-                                                    {showMoreDescription ? "Show less" : "Show more"}{" "}
-                                                    <ChevronDown
-                                                        className={cn("h-4 w-4 ml-1 transition-transform", showMoreDescription && "rotate-180")}
-                                                    />
-                                                </Button>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <ul className="list-disc list-inside text-sm text-[#000] dark:text-[#fff] space-y-1">
-                                            <li>worse</li>
-                                            <li>annoyedlgrg</li>
-                                            <li>terribly</li>
-                                            <li>harrow</li>
-                                            <li>rg</li>
-                                            <li>rgr</li>
-                                            {!showMoreDescription && (
-                                                <Button
-                                                    onClick={() => setShowMoreDescription(true)}
-                                                    variant="ghost"
-                                                    className="text-sm text-[#f7641b] hover:text-[#eb611f] p-0 h-auto font-normal"
-                                                >
-                                                    Show more <ChevronDown className="h-4 w-4 ml-1" />
-                                                </Button>
-                                            )}
-                                            {showMoreDescription && (
-                                                <>
-                                                    <li>get</li>
-                                                    <Button
-                                                        onClick={() => setShowMoreDescription(false)}
-                                                        variant="ghost"
-                                                        className="text-sm text-[#f7641b] hover:text-[#eb611f] p-0 h-auto font-normal"
-                                                    >
-                                                        Show less <ChevronDown className="h-4 w-4 ml-1 rotate-180" />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </ul>
-                                    )}
                                 </div>
                             </div>
 
-                            {/* Essentials Section */}
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Essentials</h2>
-                                    <Button
-                                        onClick={() => setCurrentStep(1)}
-                                        variant="ghost"
-                                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                    >
-                                        To adjust
-                                    </Button>
-                                </div>
-                                <div className="space-y-4">
-                                    <div>
-                                        <h3 className="text-base font-medium text-[#000] dark:text-[#fff] mb-1">Title of offer</h3>
-                                        <p className="text-sm text-[#000] dark:text-[#fff]">{title || "dvdffvdvdbdbfb"}</p>
-                                    </div>
-                                    <div className="grid grid-cols-3 gap-6">
-                                        <div>
-                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Price Offer</h4>
-                                            <p className="text-sm text-[#000] dark:text-[#fff]">{priceOffer ? `₹${priceOffer}` : "-"}</p>
-                                        </div>
-                                        <div>
-                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Lowest price elsewhere</h4>
-                                            <p className="text-sm text-[#000] dark:text-[#fff]">{lowestPrice ? `₹${lowestPrice}` : "-"}</p>
-                                        </div>
-                                        <div>
-                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Postage costs</h4>
-                                            <p className="text-sm text-[#000] dark:text-[#fff]">{postageCosts ? `₹${postageCosts}` : "-"}</p>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div>
-                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Shipping from</h4>
-                                            <p className="text-sm text-[#000] dark:text-[#fff]">{shippingFrom || "-"}</p>
-                                        </div>
-                                        <div>
-                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Availability</h4>
-                                            <p className="text-sm text-[#000] dark:text-[#fff]">{availability || "-"}</p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Discount code</h4>
-                                        <p className="text-sm text-[#000] dark:text-[#fff]">{discountCode || "-"}</p>
-                                    </div>
-                                </div>
-                            </div>
+
 
                             {/* Final Details Section */}
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-col items-start p-6 border rounded-lg dark:border-[hsla(0,0%,100%,0.18)] space-y-6">
                                     <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Final details</h2>
-                                    <Button
-                                        onClick={() => setCurrentStep(4)}
-                                        variant="ghost"
-                                        className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                    >
-                                        To adjust
-                                    </Button>
-                                </div>
-                                <div className="grid grid-cols-3 gap-6">
-                                    <div>
-                                        <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Starting day</h4>
-                                        <p className="text-sm text-[#000] dark:text-[#fff]">{startDate || "-"}</p>
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">End date</h4>
-                                        <p className="text-sm text-[#000] dark:text-[#fff]">{endDate || "-"}</p>
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Category</h4>
-                                        <p className="text-sm text-[#000] dark:text-[#fff]">
-                                            {selectedCategories.length > 0 ? selectedCategories.join(", ") : "Electronics"}
-                                        </p>
+
+
+                                    <div className="grid grid-cols-3 gap-6">
+                                        <div>
+                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Starting day</h4>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{startDate || "-"}</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">End date</h4>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{endDate || "-"}</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Category</h4>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">
+                                                {selectedCategories}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <Button
+                                                onClick={() => setCurrentStep(4)}
+                                                variant="ghost"
+                                                className="text-sm h-7 border rounded-full border-[#dfe1e4] hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#28292a] dark:text-[#c5c7ca] dark:hover:text-[#babcbf]"
+                                            >
+                                                To adjust
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1593,7 +1641,9 @@ export default function PostOfferPage() {
                                 disabled={currentStep === steps.length - 1}
                                 className="border rounded-full h-9 px-4 border-[#f7641b] hover:border-[#eb611f] text-[#f7641b] hover:bg-[#fbf3ef] hover:text-[#eb611f] bg-[#fff] dark:border-[#f97936] dark:text-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] dark:bg-[#1d1f20]"
                             >
+
                                 {currentStep === steps.length - 1 ? "Publish" : "Next"}
+                                <ArrowRight className="h-4 w-1" />
                             </Button>
                         </div>
                     )}
