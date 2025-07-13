@@ -200,14 +200,14 @@ export function Navbar() {
           className="flex flex-col items-center justify-center gap-1 h-auto py-2 rounded-none flex-1"
           onClick={() => {
             if (user) {
-              setIsPostDealOpen(true)
+              router.push('/submission/add');
             } else {
               setIsLoginOpen(true)
             }
           }}
         >
           <Plus className="h-5 w-5" />
-          <span className="text-xs">Post</span>
+          <span className="text-xs">Post </span>
         </Button>
 
         {user ? (

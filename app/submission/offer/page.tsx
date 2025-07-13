@@ -1,33 +1,59 @@
 "use client"
 
+import type React from "react"
 import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Link2, Sparkles, ImageIcon, FileText, Eye, ListCheck, CircleCheck, Pencil, MapPin, Info, Scissors, ArrowRight, Plus, X, Link, Smile, Minus, List, Italic, Strikethrough, Bold, AlignLeft, AlignCenter, Calendar, ChevronDown, MoveRight, Clock, Check } from "lucide-react"
+import {
+    Link2,
+    Sparkles,
+    ImageIcon,
+    FileText,
+    Eye,
+    ListChecksIcon as ListCheck,
+    CircleCheck,
+    Pencil,
+    MapPin,
+    Info,
+    Scissors,
+    ArrowRight,
+    Plus,
+    X,
+    Link,
+    Smile,
+    Minus,
+    List,
+    Italic,
+    Strikethrough,
+    Bold,
+    AlignLeft,
+    AlignCenter,
+    Check,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
-import { url } from "inspector"
-import { NextResponse } from "next/server"
 import { formatDistanceStrict } from "date-fns"
-import { Textarea } from "@/components/ui/textarea"
+
+// Import the separated components
+import { MobileOfferSubmission } from "./mobile-offer-submission"
+import { DesktopOfferSubmission } from "./desktop-offer-submission"
 
 interface DuplicateDeal {
-    title: string;
-    image: string;
-    price?: string;
-    merchant?: string;
-    createdAt?: string;
+    title: string
+    image: string
+    price?: string
+    merchant?: string
+    createdAt?: string
 }
 
 interface UploadedImage {
-    id: string,
-    url: string,
-    file?: File,
-    isCover: boolean,
-
-
+    id: string
+    url: string
+    file?: File
+    isCover: boolean
 }
 
 export default function PostOfferPage() {
+    // Shared state for both mobile and desktop
     const [currentStep, setCurrentStep] = useState(0)
     const [linkValue, setLinkValue] = useState("")
     const [isLoading, setIsLoading] = useState(false)
@@ -55,13 +81,13 @@ export default function PostOfferPage() {
     const [description, setDescription] = useState("")
     const [descriptionFocused, setDescriptionFocused] = useState(false)
 
-    const [showLinkInput, setShowLinkInput] = useState(false);
-    const [linkURL, setLinkURL] = useState("");
-    const [linkText, setLinkText] = useState("");
+    const [showLinkInput, setShowLinkInput] = useState(false)
+    const [linkURL, setLinkURL] = useState("")
+    const [linkText, setLinkText] = useState("")
 
-    const [showImageInput, setShowImageInput] = useState(false);
+    const [showImageInput, setShowImageInput] = useState(false)
 
-    const [selected, setSelected] = useState<"left" | "middle">("left");
+    const [selected, setSelected] = useState<"left" | "middle">("left")
 
     const [startDate, setStartDate] = useState("")
     const [startTime, setStartTime] = useState("")
@@ -75,26 +101,26 @@ export default function PostOfferPage() {
 
     const [showMoreDescription, setShowMoreDescription] = useState(false)
 
-    const editorRef = useRef<HTMLDivElement>(null);
+    const editorRef = useRef<HTMLDivElement>(null)
 
     const [showCityDropdown, setShowCityDropdown] = useState(false)
     const cityList = [
-        'Mumbai, Maharashtra',
-        'Delhi, Delhi',
-        'Bengaluru, Karnataka',
-        'Hyderabad, Telangana',
-        'Ahmedabad, Gujarat',
-        'Chennai, Tamil Nadu',
-        'Kolkata, West Bengal',
-        'Pune, Maharashtra',
-        'Jaipur, Rajasthan',
-        'Lucknow, Uttar Pradesh',
-        'Chandigarh, Chandigarh',
-        'Bhopal, Madhya Pradesh',
-        'Patna, Bihar',
-        'Indore, Madhya Pradesh',
-        'Guwahati, Assam',
-    ];
+        "Mumbai, Maharashtra",
+        "Delhi, Delhi",
+        "Bengaluru, Karnataka",
+        "Hyderabad, Telangana",
+        "Ahmedabad, Gujarat",
+        "Chennai, Tamil Nadu",
+        "Kolkata, West Bengal",
+        "Pune, Maharashtra",
+        "Jaipur, Rajasthan",
+        "Lucknow, Uttar Pradesh",
+        "Chandigarh, Chandigarh",
+        "Bhopal, Madhya Pradesh",
+        "Patna, Bihar",
+        "Indore, Madhya Pradesh",
+        "Guwahati, Assam",
+    ]
 
     const categories = [
         "Electronics",
@@ -156,12 +182,16 @@ export default function PostOfferPage() {
     const fileInputRef = useRef<HTMLInputElement>(null)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-    const [savedSelection, setSavedSelection] = useState<Range | null>(null);
+    const [savedSelection, setSavedSelection] = useState<Range | null>(null)
 
-    const startDateRef = useRef<HTMLInputElement>(null);
-    const startTimeRef = useRef<HTMLInputElement>(null);
-    const endDateRef = useRef<HTMLInputElement>(null);
-    const endTimeRef = useRef<HTMLInputElement>(null);
+    const startDateRef = useRef<HTMLInputElement>(null)
+    const startTimeRef = useRef<HTMLInputElement>(null)
+    const endDateRef = useRef<HTMLInputElement>(null)
+    const endTimeRef = useRef<HTMLInputElement>(null)
+
+    const [titleError, setTitleError] = useState("");
+    const [descriptionError, setDescriptionError] = useState("");
+    const [categoryError, setCategoryError] = useState("");
 
     useEffect(() => {
         if (isLoading) {
@@ -177,9 +207,9 @@ export default function PostOfferPage() {
 
     useEffect(() => {
         if (currentStep === 3 && editorRef.current) {
-            editorRef.current.innerHTML = description || "";
+            editorRef.current.innerHTML = description || ""
         }
-    }, [currentStep, description]);
+    }, [currentStep, description])
 
     const handleFileUpload = (files: FileList | null) => {
         if (!files) return
@@ -243,14 +273,30 @@ export default function PostOfferPage() {
         handleFileUpload(e.dataTransfer.files)
     }
 
-
     const handleNext = () => {
-        if (currentStep === 3 && editorRef.current) {
-            console.log("On next, saving description:", editorRef.current.innerHTML);
-            setDescription(editorRef.current.innerHTML);
+        if (currentStep === 1 && !title.trim()) {
+            setTitleError("This field is required");
+            return;
         }
+        setTitleError("");
+        if (currentStep === 3) {
+            if (editorRef.current) {
+                setDescription(editorRef.current.innerHTML);
+            }
+            const plainText = editorRef.current?.innerText?.trim() || "";
+            if (!plainText) {
+                setDescriptionError("This field is required");
+                return;
+            }
+            setDescriptionError("");
+        }
+        if (currentStep === 4 && selectedCategories.length === 0) {
+            setCategoryError("Select the most relevant category");
+            return;
+        }
+        setCategoryError("");
         if (currentStep < steps.length - 1) {
-            setCurrentStep(currentStep + 1)
+            setCurrentStep(currentStep + 1);
         }
     }
 
@@ -271,18 +317,16 @@ export default function PostOfferPage() {
     }
 
     const toggleCategory = (category: string) => {
-        setSelectedCategories((prev) =>
-            prev.includes(category) ? [] : [category]
-        );
-    };
+        setSelectedCategories((prev) => (prev.includes(category) ? [] : [category]))
+    }
 
     const handleContinue = async () => {
         setIsLoading(true)
         setDuplicateDeal(null)
-        const encodedUrl = encodeURIComponent(linkValue.trim());
+        const encodedUrl = encodeURIComponent(linkValue.trim())
         try {
-            const res = await fetch(`/api/deals/check?url=${encodedUrl}`);
-            const result = await res.json();
+            const res = await fetch(`/api/deals/check?url=${encodedUrl}`)
+            const result = await res.json()
 
             if (result.exists) {
                 setDuplicateDeal({
@@ -290,48 +334,46 @@ export default function PostOfferPage() {
                     image: result.deal.image || "/placeholder.jpg",
                     price: result.deal.price,
                     merchant: result.deal.merchant,
-                    createdAt: result.deal.createdAt
+                    createdAt: result.deal.createdAt,
                 })
             } else {
-                handleNext();
+                handleNext()
             }
         } catch (error) {
-            alert("Something went wrong while checking the deal.");
-            console.error(error);
+            alert("Something went wrong while checking the deal.")
+            console.error(error)
         } finally {
             setIsLoading(false)
         }
     }
     const calculateDiscount = () => {
-        const offer = Number.parseFloat(priceOffer) || 0;
-        const lowest = Number.parseFloat(lowestPrice) || 0;
+        const offer = Number.parseFloat(priceOffer) || 0
+        const lowest = Number.parseFloat(lowestPrice) || 0
         if (lowest > 0) {
-            const discount = Math.round(((lowest - offer) / lowest) * 100);
-            return discount > 0 ? discount : 0;
+            const discount = Math.round(((lowest - offer) / lowest) * 100)
+            return discount > 0 ? discount : 0
         }
-        return 0;
+        return 0
     }
-
-
 
     // Formatting handlers
     const handleBold = () => {
-        document.execCommand("bold");
-    };
+        document.execCommand("bold")
+    }
 
     const handleItalic = () => {
-        document.execCommand("italic");
-    };
+        document.execCommand("italic")
+    }
 
     const handleStrikethrough = () => {
-        document.execCommand("strikeThrough");
-    };
+        document.execCommand("strikeThrough")
+    }
     const handleList = () => {
-        document.execCommand("insertUnorderedList");
-    };
+        document.execCommand("insertUnorderedList")
+    }
     const handleHorizontalLine = () => {
-        document.execCommand("insertHorizontalRule");
-    };
+        document.execCommand("insertHorizontalRule")
+    }
     // FIXED: Emoji insertion for contentEditable
     const handleEmoji = (emoji: string) => {
         if (!editorRef.current) return;
@@ -351,205 +393,476 @@ export default function PostOfferPage() {
         setDescription(editorRef.current.innerHTML);
     };
 
-
     const handleSubmit = () => {
-        const html = editorRef.current?.innerHTML;
-        console.log("Final formatted HTML:", html);
-    };
+        const html = editorRef.current?.innerHTML
+        console.log("Final formatted HTML:", html)
+    }
     const handleInput = () => {
         if (editorRef.current) {
-            console.log("Saving description:", editorRef.current.innerHTML);
+            // Save caret position as character offset
+            const selection = window.getSelection();
+            let caretOffset = 0;
+            if (selection && selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const preCaretRange = range.cloneRange();
+                preCaretRange.selectNodeContents(editorRef.current);
+                preCaretRange.setEnd(range.endContainer, range.endOffset);
+                caretOffset = preCaretRange.toString().length;
+            }
+
             setDescription(editorRef.current.innerHTML);
+
+            // Restore caret position after state update
+            setTimeout(() => {
+                if (editorRef.current && caretOffset >= 0) {
+                    const node = editorRef.current;
+                    let charIndex = 0, range = document.createRange();
+                    range.setStart(node, 0);
+                    range.collapse(true);
+
+                    const treeWalker = document.createTreeWalker(
+                        node,
+                        NodeFilter.SHOW_TEXT,
+                        null
+                    );
+
+                    let found = false;
+                    while (treeWalker.nextNode()) {
+                        const textNode = treeWalker.currentNode as Text;
+                        const nextCharIndex = charIndex + textNode.length;
+                        if (!found && caretOffset <= nextCharIndex) {
+                            range.setStart(textNode, caretOffset - charIndex);
+                            range.collapse(true);
+                            found = true;
+                        }
+                        charIndex = nextCharIndex;
+                    }
+
+                    const sel = window.getSelection();
+                    sel?.removeAllRanges();
+                    sel?.addRange(range);
+                }
+            }, 0);
         }
-    };
+    }
     // Emoji picker state
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-    const emojiList = ["😀", "😂", "😍", "😎", "👍", "🎉", "🔥", "🙏", "😊", "🥳"];
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+    const emojiList = ["😀", "😂", "😍", "😎", "👍", "🎉", "🔥", "🙏", "😊", "🥳"]
 
     // Add state for image URL input and file input
-    const [imageInsertUrl, setImageInsertUrl] = useState("");
-    const [imageInsertFile, setImageInsertFile] = useState<File | null>(null);
+    const [imageInsertUrl, setImageInsertUrl] = useState("")
+    const [imageInsertFile, setImageInsertFile] = useState<File | null>(null)
 
     // Handler for file input change
     const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0] || null;
-        setImageInsertFile(file);
-        setImageInsertUrl(""); // Clear URL if file is chosen
-    };
+        const file = e.target.files?.[0] || null
+        setImageInsertFile(file)
+        setImageInsertUrl("") // Clear URL if file is chosen
+    }
 
     // Handler for image URL input change
     const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setImageInsertUrl(e.target.value);
-        setImageInsertFile(null); // Clear file if URL is entered
-    };
+        setImageInsertUrl(e.target.value)
+        setImageInsertFile(null) // Clear file if URL is entered
+    }
 
     // Handler for placing the image
     const handlePlaceImage = async () => {
-        console.log('Placing image', { imageInsertFile, imageInsertUrl, selected });
-        if (!editorRef.current) return;
-        editorRef.current.focus();
+        console.log("Placing image", { imageInsertFile, imageInsertUrl, selected })
+        if (!editorRef.current) return
+        editorRef.current.focus()
         // Restore the saved selection
         if (savedSelection) {
-            const selection = window.getSelection();
-            selection?.removeAllRanges();
-            selection?.addRange(savedSelection);
+            const selection = window.getSelection()
+            selection?.removeAllRanges()
+            selection?.addRange(savedSelection)
         }
-        let imageUrl = imageInsertUrl;
+        let imageUrl = imageInsertUrl
         if (imageInsertFile) {
             imageUrl = await new Promise<string>((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target?.result as string);
-                reader.readAsDataURL(imageInsertFile);
-            });
+                const reader = new FileReader()
+                reader.onload = (e) => resolve(e.target?.result as string)
+                reader.readAsDataURL(imageInsertFile)
+            })
         }
         if (!imageUrl) {
-            console.log('No imageUrl');
-            return;
+            console.log("No imageUrl")
+            return
         }
-        const selection = window.getSelection();
-        if (!selection || !selection.rangeCount) return;
-        const range = selection.getRangeAt(0);
-        range.deleteContents();
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        img.alt = "Inserted image";
-        img.style.width = '200px';
-        img.style.height = '200px';
-        img.style.objectFit = 'cover';
-        img.style.display = 'block';
-        img.style.margin = selected === 'middle' ? '16px auto' : '16px 0';
-        img.style.float = selected === 'left' ? 'left' : 'none';
-        img.style.borderRadius = '12px';
-        range.insertNode(img);
-        range.setStartAfter(img);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        setShowImageInput(false);
-        setImageInsertFile(null);
-        setImageInsertUrl("");
-        setDescription(editorRef.current.innerHTML);
-        console.log('Editor HTML after image insert:', editorRef.current.innerHTML);
-    };
+        const selection = window.getSelection()
+        if (!selection || !selection.rangeCount) return
+        const range = selection.getRangeAt(0)
+        range.deleteContents()
+        const img = document.createElement("img")
+        img.src = imageUrl
+        img.alt = "Inserted image"
+        img.style.width = "200px"
+        img.style.height = "200px"
+        img.style.objectFit = "cover"
+        img.style.display = "block"
+        img.style.margin = selected === "middle" ? "16px auto" : "16px 0"
+        img.style.float = selected === "left" ? "left" : "none"
+        img.style.borderRadius = "12px"
+        range.insertNode(img)
+        range.setStartAfter(img)
+        range.collapse(true)
+        selection.removeAllRanges()
+        selection.addRange(range)
+        setShowImageInput(false)
+        setImageInsertFile(null)
+        setImageInsertUrl("")
+        setDescription(editorRef.current.innerHTML)
+        console.log("Editor HTML after image insert:", editorRef.current.innerHTML)
+    }
+
+    // Shared props for both components
+    const sharedProps = {
+        currentStep,
+        setCurrentStep,
+        linkValue,
+        setLinkValue,
+        isLoading,
+        setIsLoading,
+        duplicateDeal,
+        setDuplicateDeal,
+        progressWidth,
+        setProgressWidth,
+        hoveredStep,
+        setHoveredStep,
+        title,
+        setTitle,
+        titleFocused,
+        setTitleFocused,
+        priceOffer,
+        setPriceOffer,
+        lowestPrice,
+        setLowestPrice,
+        discountCode,
+        setDiscountCode,
+        availability,
+        setAvailability,
+        postageCosts,
+        setPostageCosts,
+        shippingFrom,
+        setShippingFrom,
+        priceOfferFocused,
+        setPriceOfferFocused,
+        lowestPriceFocused,
+        setLowestPriceFocused,
+        discountCodeFocused,
+        setDiscountCodeFocused,
+        uploadedImages,
+        setUploadedImages,
+        imageUrlInput,
+        setImageUrlInput,
+        isDragOver,
+        setIsDragOver,
+        description,
+        setDescription,
+        descriptionFocused,
+        setDescriptionFocused,
+        showLinkInput,
+        setShowLinkInput,
+        linkURL,
+        setLinkURL,
+        linkText,
+        setLinkText,
+        showImageInput,
+        setShowImageInput,
+        selected,
+        setSelected,
+        startDate,
+        setStartDate,
+        startTime,
+        setStartTime,
+        showStartTimeInput,
+        setShowStartTimeInput,
+        endDate,
+        setEndDate,
+        endTime,
+        setEndTime,
+        showEndTimeInput,
+        setShowEndTimeInput,
+        selectedCategories,
+        setSelectedCategories,
+        showMoreDescription,
+        setShowMoreDescription,
+        editorRef,
+        showCityDropdown,
+        setShowCityDropdown,
+        cityList,
+        categories,
+        steps,
+        fileInputRef,
+        textareaRef,
+        savedSelection,
+        setSavedSelection,
+        startDateRef,
+        startTimeRef,
+        endDateRef,
+        endTimeRef,
+        handleFileUpload,
+        handleUrlUpload,
+        removeImage,
+        setCoverImage,
+        handleDragOver,
+        handleDragLeave,
+        handleDrop,
+        handleNext,
+        handleBack,
+        handleProceedAnyway,
+        handleCancelSubmission,
+        toggleCategory,
+        handleContinue,
+        calculateDiscount,
+        handleBold,
+        handleItalic,
+        handleStrikethrough,
+        handleList,
+        handleHorizontalLine,
+        handleEmoji,
+        handleSubmit,
+        handleInput,
+        showEmojiPicker,
+        setShowEmojiPicker,
+        emojiList,
+        imageInsertUrl,
+        setImageInsertUrl,
+        imageInsertFile,
+        setImageInsertFile,
+        handleImageFileChange,
+        handleImageUrlChange,
+        handlePlaceImage,
+    }
+
+    function renderCase0Mobile() {
+        return (
+            <div className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up px-4" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+                <div className="w-full max-w-2xl text-center space-y-8">
+                    <div className="space-y-4">
+                        <h1 className="text-2xl leading-tight font-poppins font-medium text-[#000] dark:text-[#fff]">
+                            Share an offer with millions of people
+                        </h1>
+                        <p className="text-lg font-poppins text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)]">
+                            Paste the link where other people can buy the deal or find more information
+                        </p>
+                    </div>
+                    <div className="space-y-6">
+                        <div className="flex flex-col items-center space-y-3 w-full">
+                            <div className="relative flex-1 w-full">
+                                <Link2 className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                <Input
+                                    type="url"
+                                    placeholder="https://www.example.com/greatdeal..."
+                                    value={linkValue}
+                                    onChange={(e) => setLinkValue(e.target.value)}
+                                    className="w-full h-auto text-sm leading-5 bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] dark:text-white text-[#000] placeholder:text-gray-400 focus:border-[#f97936] focus:shadow-none rounded-lg transition-all duration-200 ease-out py-[9px] pl-10 text-ellipsis"
+                                />
+                            </div>
+                            <Button
+                                onClick={handleContinue}
+                                disabled={!linkValue.trim() || isLoading}
+                                className="h-9 px-4 text-sm rounded-full bg-[#f7641b] hover:bg-[#eb611f] text-white disabled:text-[#a7a9ac] dark:disabled:text-[#8b8d90] disabled:bg-[#f3f5f7] dark:disabled:bg-[#363739] w-full"
+                            >
+                                {isLoading ? "Checking..." : "Continue"}
+                            </Button>
+                        </div>
+                        {isLoading && (
+                            <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                <div
+                                    className="bg-[#f7641b] h-2 rounded-full transition-all duration-2000 ease-out"
+                                    style={{ width: `${progressWidth}%` }}
+                                ></div>
+                            </div>
+                        )}
+                        {duplicateDeal && (
+                            <div className="bg-[#28292a] rounded-lg p-4 space-y-4">
+                                <div className="space-y-2 text-left">
+                                    <h3 className="text-lg font-bold text-white">Has this been posted before?</h3>
+                                    <p className="text-gray-300 text-base text-left">
+                                        It looks like this offer has already been posted or is being reviewed. Duplicate deals are usually removed.
+                                    </p>
+                                </div>
+                                <div className="dark:bg-[#1d1f20] p-2 rounded-lg flex items-center space-x-4 relative">
+                                    <div className="relative w-16 h-16">
+                                        <img
+                                            src={duplicateDeal.image || "/placeholder.svg"}
+                                            alt={duplicateDeal.title}
+                                            className="absolute top-0 left-0 right-0 bottom-0 max-w-full max-h-full m-auto align-top box-content object-fill rounded-lg h-12 w-12"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-white font-medium text-base text-left">{duplicateDeal.title}</h4>
+                                        <div className="flex items-center space-x-2 mt-1 gap-1">
+                                            {duplicateDeal.price && (
+                                                <span className="dark:text-[#f97936] text-base font-medium">₹{duplicateDeal.price}</span>
+                                            )}
+                                            {duplicateDeal.merchant && (
+                                                <span className="dark:text-[#f97936] text-base">{duplicateDeal.merchant}</span>
+                                            )}
+                                            {duplicateDeal.createdAt && (
+                                                <span className="dark:text-[hsla(0,0%,100%,0.75)] text-base">
+                                                    {formatDistanceStrict(new Date(duplicateDeal.createdAt), new Date(), { addSuffix: true })}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col justify-end space-y-2">
+                                    <Button
+                                        onClick={handleProceedAnyway}
+                                        className="h-9 text-sm dark:bg-transparent dark:hover:bg-[hsla(0,0%,100%,0.05)] dark:text-[#c5c7ca] px-3 rounded-full w-full"
+                                    >
+                                        No, proceed to the next step
+                                    </Button>
+                                    <Button
+                                        onClick={handleCancelSubmission}
+                                        variant="outline"
+                                        className="h-9 text-sm border dark:border-[#fd9997] dark:hover:border-[#fc8988] dark:bg-[#1d1f20] dark:text-[#fd9997] dark:hover:text-[#fc8988] dark:hover:bg-[#4c0a11] px-3 rounded-full bg-transparent w-full"
+                                    >
+                                        Yes, cancel the submission
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                        {currentStep === 0 && !isLoading && !duplicateDeal && (
+                            <button onClick={handleNext} className="text-[#6b6d70] hover:text-[#76787b] dark:text-[#c5c7ca] h-9 px-4 dark:hover:text-[#babcbf] hover:bg-[rgba(15,55,95,0.05)] dark:hover:bg-[hsla(0,0%,100%,0.05)] hover:rounded-full text-sm font-semibold w-full">
+                                I have no link
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    function renderCase0Desktop() {
+        return (
+            <div className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up min-h-screen w-full" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
+                <div className="w-full max-w-2xl text-center space-y-8">
+                    <div className="space-y-4">
+                        <h1 className="text-[32px] leading-[2.625rem] font-poppins font-medium text-[#000] dark:text-[#fff]">Share an offer with millions of people</h1>
+                        <p className="text-2xl font-poppins text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)]">
+                            Paste the link where other people can buy the deal or find more information
+                        </p>
+                    </div>
+
+                    <div className="space-y-6">
+                        {/* Flex container for input + button */}
+                        <div className="flex items-center space-x-3">
+                            {/* Input with icon */}
+                            <div className="relative flex-1">
+                                <Link2 className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                <Input
+                                    type="url"
+                                    placeholder="https://www.example.com/greatdeal..."
+                                    value={linkValue}
+                                    onChange={(e) => setLinkValue(e.target.value)}
+                                    className="w-full h-auto text-sm leading-5 bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] dark:text-white text-[#000] placeholder:text-gray-400 focus:border-[#f97936] focus:shadow-none rounded-lg transition-all duration-200 ease-out py-[9px] pl-10 text-ellipsis"
+                                />
+                            </div>
+
+                            {/* Button */}
+                            <Button
+                                onClick={handleContinue}
+                                disabled={!linkValue.trim() || isLoading}
+                                className="h-9 px-4 text-sm rounded-full bg-[#f7641b] hover:bg-[#eb611f] text-white disabled:text-[#a7a9ac] dark:disabled:text-[#8b8d90] disabled:bg-[#f3f5f7] dark:disabled:bg-[#363739]"
+                            >
+                                {isLoading ? "Checking..." : "Continue"}
+                            </Button>
+                        </div>
+
+                        {/* Progress Bar - moved below textbox */}
+                        {isLoading && (
+                            <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+                                <div className="bg-[#f7641b] h-2 rounded-full transition-all duration-2000 ease-out" style={{ width: `${progressWidth}%` }}></div>
+                            </div>
+                        )}
+
+                        {/* Duplicate Deal Warning */}
+                        {duplicateDeal && (
+                            <div className="bg-[#28292a] rounded-lg p-4 space-y-4">
+                                <div className=" space-y-2 text-left">
+                                    <h3 className="text-lg font-bold text-white">Has this been posted before?</h3>
+                                    <p className="text-gray-300 text-base text-left">
+                                        It looks like this offer has already been posted or is being reviewed. Duplicate deals are usually removed.
+                                    </p>
+                                </div>
+
+                                {/* Deal Preview */}
+                                <div className="dark:bg-[#1d1f20] p-2 rounded-lg flex items-center space-x-4 relative">
+                                    <div className="relative w-16 h-16">
+                                        <img
+                                            src={duplicateDeal.image}
+                                            alt={duplicateDeal.title}
+                                            className="absolute top-0 left-0 right-0 bottom-0 max-w-full max-h-full m-auto align-top box-content object-fill rounded-lg h-12 w-12"
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-white font-medium text-base text-left">{duplicateDeal.title}</h4>
+                                        <div className="flex items-center space-x-2 mt-1 gap-1">
+                                            {duplicateDeal.price && (
+                                                <span className="dark:text-[#f97936] text-base font-medium">₹{duplicateDeal.price}</span>
+                                            )}
+                                            {duplicateDeal.merchant && (
+                                                <span className="dark:text-[#f97936] text-base">{duplicateDeal.merchant}</span>
+                                            )}
+                                            {duplicateDeal.createdAt && (
+                                                <span className="dark:text-[hsla(0,0%,100%,0.75)] text-base">{formatDistanceStrict(new Date(duplicateDeal.createdAt), new Date(), { addSuffix: true })}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex justify-end">
+                                    <Button
+                                        onClick={handleProceedAnyway}
+                                        className=" h-9 text-sm dark:bg-transparent dark:hover:bg-[hsla(0,0%,100%,0.05)] dark:text-[#c5c7ca] mr-2 pl-3 pr-3 rounded-full"
+                                    >
+                                        No, proceed to the next step
+                                    </Button>
+                                    <Button
+                                        onClick={handleCancelSubmission}
+                                        variant="outline"
+                                        className=" h-9 text-sm border dark:border-[#fd9997] dark:hover:border-[#fc8988]  dark:bg-[#1d1f20] dark:text-[#fd9997] dark:hover:text-[#fc8988] dark:hover:bg-[#4c0a11] mr-2 pl-[1em] pr-3 rounded-full"
+                                    >
+                                        Yes, cancel the submission
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Link below input */}
+                        {currentStep === 0 && !isLoading && !duplicateDeal && (
+                            <button onClick={handleNext} className="text-[#6b6d70] hover:text-[#76787b] dark:text-[#c5c7ca] h-9 px-4 dark:hover:text-[#babcbf] hover:bg-[rgba(15,55,95,0.05)] dark:hover:bg-[hsla(0,0%,100%,0.05)] hover:rounded-full text-sm font-semibold">
+                                I have no link
+                            </button>
+                        )}
+                    </div>
+
+                </div>
+            </div>
+        )
+    }
 
     const renderStepContent = () => {
         switch (currentStep) {
             case 0:
                 return (
-                    <div className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-                        <div className="w-full max-w-2xl text-center space-y-8">
-                            <div className="space-y-4">
-                                <h1 className="text-[32px] leading-[2.625rem] font-poppins font-medium text-[#000] dark:text-[#fff]">Share an offer with millions of people</h1>
-                                <p className="text-2xl font-poppins text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)]">
-                                    Paste the link where other people can buy the deal or find more information
-                                </p>
-                            </div>
-
-                            <div className="space-y-6">
-                                {/* Flex container for input + button */}
-                                <div className="flex items-center space-x-3">
-                                    {/* Input with icon */}
-                                    <div className="relative flex-1">
-                                        <Link2 className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                        <Input
-                                            type="url"
-                                            placeholder="https://www.example.com/greatdeal..."
-                                            value={linkValue}
-                                            onChange={(e) => setLinkValue(e.target.value)}
-                                            className="w-full h-auto text-sm leading-5 bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] dark:text-white text-[#000] placeholder:text-gray-400 focus:border-[#f97936] focus:shadow-none rounded-lg transition-all duration-200 ease-out py-[9px] pl-10 text-ellipsis"
-                                        />
-                                    </div>
-
-                                    {/* Button */}
-                                    <Button
-                                        onClick={handleContinue}
-                                        disabled={!linkValue.trim() || isLoading}
-                                        className="h-9 px-4 text-sm rounded-full bg-[#f7641b] hover:bg-[#eb611f] text-white disabled:text-[#a7a9ac] dark:disabled:text-[#8b8d90] disabled:bg-[#f3f5f7] dark:disabled:bg-[#363739]"
-                                    >
-                                        {isLoading ? "Checking..." : "Continue"}
-                                    </Button>
-                                </div>
-
-                                {/* Progress Bar - moved below textbox */}
-                                {isLoading && (
-                                    <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
-                                        <div className="bg-[#f7641b] h-2 rounded-full transition-all duration-2000 ease-out" style={{ width: `${progressWidth}%` }}></div>
-                                    </div>
-                                )}
-
-                                {/* Duplicate Deal Warning */}
-                                {duplicateDeal && (
-                                    <div className="bg-[#28292a] rounded-lg p-4 space-y-4">
-                                        <div className=" space-y-2 text-left">
-                                            <h3 className="text-lg font-bold text-white">Has this been posted before?</h3>
-                                            <p className="text-gray-300 text-base text-left">
-                                                It looks like this offer has already been posted or is being reviewed. Duplicate deals are usually removed.
-                                            </p>
-                                        </div>
-
-                                        {/* Deal Preview */}
-                                        <div className="dark:bg-[#1d1f20] p-2 rounded-lg flex items-center space-x-4 relative">
-                                            <div className="relative w-16 h-16">
-                                                <img
-                                                    src={duplicateDeal.image}
-                                                    alt={duplicateDeal.title}
-                                                    className="absolute top-0 left-0 right-0 bottom-0 max-w-full max-h-full m-auto align-top box-content object-fill rounded-lg h-12 w-12"
-                                                />
-                                            </div>
-                                            <div className="flex-1">
-                                                <h4 className="text-white font-medium text-base text-left">{duplicateDeal.title}</h4>
-                                                <div className="flex items-center space-x-2 mt-1 gap-1">
-                                                    {duplicateDeal.price && (
-                                                        <span className="dark:text-[#f97936] text-base font-medium">₹{duplicateDeal.price}</span>
-                                                    )}
-                                                    {duplicateDeal.merchant && (
-                                                        <span className="dark:text-[#f97936] text-base">{duplicateDeal.merchant}</span>
-                                                    )}
-                                                    {duplicateDeal.createdAt && (
-                                                        <span className="dark:text-[hsla(0,0%,100%,0.75)] text-base">{formatDistanceStrict(new Date(duplicateDeal.createdAt), new Date(), { addSuffix: true })}</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Action Buttons */}
-                                        <div className="flex justify-end">
-                                            <Button
-                                                onClick={handleProceedAnyway}
-                                                className=" h-9 text-sm dark:bg-transparent dark:hover:bg-[hsla(0,0%,100%,0.05)] dark:text-[#c5c7ca] mr-2 pl-3 pr-3 rounded-full"
-                                            >
-                                                No, proceed to the next step
-                                            </Button>
-                                            <Button
-                                                onClick={handleCancelSubmission}
-                                                variant="outline"
-                                                className=" h-9 text-sm border dark:border-[#fd9997] dark:hover:border-[#fc8988]  dark:bg-[#1d1f20] dark:text-[#fd9997] dark:hover:text-[#fc8988] dark:hover:bg-[#4c0a11] mr-2 pl-[1em] pr-3 rounded-full"
-                                            >
-                                                Yes, cancel the submission
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Link below input */}
-                                {currentStep === 0 && !isLoading && !duplicateDeal && (
-                                    <button className="text-[#6b6d70] hover:text-[#76787b] dark:text-[#c5c7ca] h-9 px-4 dark:hover:text-[#babcbf] hover:bg-[rgba(15,55,95,0.05)] dark:hover:bg-[hsla(0,0%,100%,0.05)] hover:rounded-full text-sm font-semibold">
-                                        I have no link
-                                    </button>
-                                )}
-                            </div>
-
-                        </div>
-                    </div>
+                    <>
+                        <div className="block md:hidden">{renderCase0Mobile()}</div>
+                        <div className="hidden md:block min-h-screen w-full ">{renderCase0Desktop()}</div>
+                    </>
                 )
             case 1:
                 return (
                     <div
-                        className="flex flex-col items-center justify-center flex-1 animate-fade-in-up !m-0 !p-0"
+                        className="flex flex-col items-center justify-center flex-1 animate-fade-in-up !m-0 !p-0 px-4 md:px-0"
                         style={{ animationDelay: "0.1s", animationFillMode: "both" }}
                     >
-                        <div className="w-full  max-w-2xl mx-auto space-y-8">
-                            <h1 className="text-3xl -ml-20 font-semibold text-[#000] dark:text-[#fff] text-center mb-8 ">
+                        <div className="w-full max-w-2xl mx-auto space-y-8">
+                            <h1 className="text-2xl md:text-3xl font-semibold text-[#000] dark:text-[#fff] text-left mb-8">
                                 Let's start with the essential information
                             </h1>
 
@@ -563,18 +876,27 @@ export default function PostOfferPage() {
                                 </div>
                                 <Input
                                     value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
+                                    onChange={e => {
+                                        setTitle(e.target.value);
+                                        if (titleError) setTitleError("");
+                                    }}
                                     placeholder="A short, clear title of your offer"
-                                    className="w-full border border-[rgba(3,12,25,0.23)] text-black dark:border-[hsla(0,0%,100%,0.35)] dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]"
+                                    className={cn(
+                                        "w-full border text-black dark:border-[hsla(0,0%,100%,0.35)] dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]",
+                                        titleError ? "border-red-500 focus:border-red-500" : "border-[rgba(3,12,25,0.23)]"
+                                    )}
                                     onFocus={() => setTitleFocused(true)}
                                     onBlur={() => setTitleFocused(false)}
                                 />
+                                {titleError && (
+                                    <div className="text-red-500 text-xs mt-1">{titleError}</div>
+                                )}
 
                                 {/* Help Section  */}
                                 <div
                                     className={cn(
-                                        'transition-[height] duration-300 ease-in-out overflow-hidden',
-                                        !titleFocused && 'expand-leave-to'
+                                        "transition-[height] duration-300 ease-in-out overflow-hidden",
+                                        !titleFocused && "expand-leave-to",
                                     )}
                                     style={{ height: titleFocused ? 110 : 0 }}
                                 >
@@ -583,10 +905,13 @@ export default function PostOfferPage() {
                                             <div className="flex items-center mr-1">
                                                 <Info className="w-[18px] h-[18px] dark:text-[hsla(0,0%,100%,0.75)] text-black" />
                                             </div>
-                                            <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">Make your title stand out</span>
+                                            <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                                Make your title stand out
+                                            </span>
                                         </div>
                                         <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                            Please include the brand, product type, color and model in the title (e.g. adidas UltraBoost (black))
+                                            Please include the brand, product type, color and model in the title (e.g. adidas UltraBoost
+                                            (black))
                                         </div>
                                     </div>
                                 </div>
@@ -596,7 +921,7 @@ export default function PostOfferPage() {
                             <div className="">
                                 <h2 className="text-xl font-semibold dark:text-white text-black pb-4">Price details</h2>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="">
                                         <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">Price Offer</label>
                                         <div className="relative">
@@ -614,8 +939,8 @@ export default function PostOfferPage() {
                                         {/* Help Section for Price Offer - animated */}
                                         <div
                                             className={cn(
-                                                'transition-[height] duration-300 ease-in-out overflow-hidden',
-                                                !priceOfferFocused && 'expand-leave-to'
+                                                "transition-[height] duration-300 ease-in-out overflow-hidden",
+                                                !priceOfferFocused && "expand-leave-to",
                                             )}
                                             style={{ height: priceOfferFocused ? 110 : 0 }}
                                         >
@@ -624,7 +949,9 @@ export default function PostOfferPage() {
                                                     <div className="flex items-center mr-1">
                                                         <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
                                                     </div>
-                                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">Tell us the price</span>
+                                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                                        Tell us the price
+                                                    </span>
                                                 </div>
                                                 <div className="text-sm font-normal leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
                                                     This should be the total price after discount(s)
@@ -634,7 +961,9 @@ export default function PostOfferPage() {
                                     </div>
 
                                     <div className="">
-                                        <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">Lowest price elsewhere</label>
+                                        <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">
+                                            Lowest price elsewhere
+                                        </label>
                                         <div className="relative flex-1">
                                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
                                             <Input
@@ -648,7 +977,9 @@ export default function PostOfferPage() {
                                             <span
                                                 className={cn(
                                                     "absolute right-3 top-1/2 transform -translate-y-1/2 text-xs font-semibold px-2 py-0.5 rounded bg-[#f3f5f7] dark:bg-[hsla(0,0%,100%,0.11)]",
-                                                    calculateDiscount() > 0 ? "text-green-600 dark:bg-[#052f01] dark:text-[#78c86b]" : "text-[#f7641b] dark:text-[hsla(0,0%,100%,0.75)]"
+                                                    calculateDiscount() > 0
+                                                        ? "text-green-600 dark:bg-[#052f01] dark:text-[#78c86b]"
+                                                        : "text-[#f7641b] dark:text-[hsla(0,0%,100%,0.75)]",
                                                 )}
                                             >
                                                 {calculateDiscount()}%
@@ -658,8 +989,8 @@ export default function PostOfferPage() {
                                         {/* Help Section for Lowest Price Elsewhere - animated */}
                                         <div
                                             className={cn(
-                                                'transition-[height] duration-300 ease-in-out overflow-hidden',
-                                                !lowestPriceFocused && 'expand-leave-to'
+                                                "transition-[height] duration-300 ease-in-out overflow-hidden",
+                                                !lowestPriceFocused && "expand-leave-to",
                                             )}
                                             style={{ height: lowestPriceFocused ? 150 : 0 }}
                                         >
@@ -668,10 +999,13 @@ export default function PostOfferPage() {
                                                     <div className="flex items-center mr-1">
                                                         <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
                                                     </div>
-                                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">Tell us lowest price elsewhere</span>
+                                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                                        Tell us lowest price elsewhere
+                                                    </span>
                                                 </div>
                                                 <div className="text-sm font-normal leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                                    This is the lowest price you can find for the product elsewhere through price comparison (not for the recommended retail price)
+                                                    This is the lowest price you can find for the product elsewhere through price comparison (not
+                                                    for the recommended retail price)
                                                 </div>
                                             </div>
                                         </div>
@@ -697,8 +1031,8 @@ export default function PostOfferPage() {
                                 {/* Help Section for Discount Code - animated */}
                                 <div
                                     className={cn(
-                                        'transition-[height] duration-300 ease-in-out overflow-hidden',
-                                        !discountCodeFocused && 'expand-leave-to'
+                                        "transition-[height] duration-300 ease-in-out overflow-hidden",
+                                        !discountCodeFocused && "expand-leave-to",
                                     )}
                                     style={{ height: discountCodeFocused ? 100 : 0 }}
                                 >
@@ -707,7 +1041,9 @@ export default function PostOfferPage() {
                                             <div className="flex items-center mr-1">
                                                 <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
                                             </div>
-                                            <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">Tell us the discount code</span>
+                                            <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                                Tell us the discount code
+                                            </span>
                                         </div>
                                         <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
                                             Add only one code and instructions to the description
@@ -729,7 +1065,6 @@ export default function PostOfferPage() {
                                                 : "text-black bg-[#fff] hover:border-[#d7d9dd] hover:text-[#f7641b] hover:bg-[#fff] dark:bg-[#1d1f20] dark:hover:bg-[#1d1f20] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
                                             "rounded-l-full",
                                             "rounded-r-none",
-
                                         )}
                                     >
                                         Online
@@ -741,18 +1076,17 @@ export default function PostOfferPage() {
                                             availability === "offline"
                                                 ? "bg-[#fbf3ef] hover:bg-[#fbece3] border-[#f7641b] hover:border-[#eb611f] hover:text-[#eb611f] dark:bg-[#481802] text-[#f7641b]  dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
                                                 : "text-black bg-[#fff] hover:border-[#d7d9dd] hover:text-[#f7641b] hover:bg-[#fff] dark:bg-[#1d1f20] dark:hover:bg-[#1d1f20] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
-                                            "rounded-r-full",           // Right outer corner rounded
-                                            "rounded-l-none"          // Inner corner flat
+                                            "rounded-r-full", // Right outer corner rounded
+                                            "rounded-l-none", // Inner corner flat
                                         )}
                                     >
                                         Offline
                                     </Button>
                                 </div>
-
                             </div>
 
                             {/* Postage and Shipping Section or Location Selection for Offline */}
-                            {availability === 'offline' ? (
+                            {availability === "offline" ? (
                                 <div className=" rounded-lg relative">
                                     <label className="dark:text-white text-sm font-semibold pb-[1.75px]">Select location(s)</label>
                                     <Input
@@ -770,8 +1104,8 @@ export default function PostOfferPage() {
                                                     key={city}
                                                     className="px-4 py-2 cursor-pointer hover:bg-[#e3e4e8] dark:hover:bg-[#363739]"
                                                     onMouseDown={() => {
-                                                        setShippingFrom(city);
-                                                        setShowCityDropdown(false);
+                                                        setShippingFrom(city)
+                                                        setShowCityDropdown(false)
                                                     }}
                                                 >
                                                     {city}
@@ -781,9 +1115,11 @@ export default function PostOfferPage() {
                                     )}
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="">
-                                        <label className="dark:text-white font-semibold text-black text-sm pb-[1.75px]">Postage costs</label>
+                                        <label className="dark:text-white font-semibold text-black text-sm pb-[1.75px]">
+                                            Postage costs
+                                        </label>
                                         <div className="relative">
                                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
                                             <Input
@@ -818,17 +1154,20 @@ export default function PostOfferPage() {
                 )
             case 2:
                 return (
-                    <div className="flex items-center justify-center flex-1 !p-0 !m-0 animate-fade-in-up " style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
-                        <div className="max-w-[682px] space-y-8">
-                            <div className="text-left mt-28 space-y-6">
-                                <h1 className="text-[32px] font-bold text-[#000] dark:text-[#fff]">
+                    <div
+                        className="flex items-center justify-center flex-1 !p-0 !m-0 animate-fade-in-up px-4 md:px-0"
+                        style={{ animationDelay: "0.1s", animationFillMode: "both" }}
+                    >
+                        <div className="max-w-[682px] space-y-8 w-full">
+                            <div className="text-left mt-8 md:mt-28 space-y-6">
+                                <h1 className="text-2xl md:text-[32px] font-bold text-[#000] dark:text-[#fff]">
                                     Make your deal stand out with images
                                 </h1>
-                                <p className="text-lg text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)]">
+                                <p className="text-base md:text-lg text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)]">
                                     Upload up to 8 images to post your deal. You can drag and drop to reorder and choose the cover.
                                 </p>
                             </div>
-                            <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto border border-dashed border-[rgba(9,24,47,0.13)] dark:border-[hsla(0,0%,100%,0.18)] p-4 rounded-lg">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto border border-dashed border-[rgba(9,24,47,0.13)] dark:border-[hsla(0,0%,100%,0.18)] p-4 rounded-lg">
                                 {/* Render uploaded images */}
                                 {uploadedImages.map((image, index) => (
                                     <div key={image.id} className="relative group">
@@ -886,11 +1225,13 @@ export default function PostOfferPage() {
                                                         <div className="flex flex-col items-center">
                                                             <Button
                                                                 onClick={(e) => {
-                                                                    e.preventDefault();
-                                                                    e.stopPropagation();
-                                                                    const fileInput = e.currentTarget.parentElement?.parentElement?.querySelector('input[type="file"]') as HTMLInputElement;
+                                                                    e.preventDefault()
+                                                                    e.stopPropagation()
+                                                                    const fileInput = e.currentTarget.parentElement?.parentElement?.querySelector(
+                                                                        'input[type="file"]',
+                                                                    ) as HTMLInputElement
                                                                     if (fileInput) {
-                                                                        fileInput.click();
+                                                                        fileInput.click()
                                                                     }
                                                                 }}
                                                                 className="bg-[#f7641b] hover:bg-[#eb611f] h-9 text-white rounded-full px-[14px] text-sm font-medium relative"
@@ -898,8 +1239,6 @@ export default function PostOfferPage() {
                                                                 <Plus className="w-4 h-4" />
                                                                 Upload images
                                                             </Button>
-                                                            {/* <p className="dark:text-[hsla(0,0%,100%,0.75)] text-sm leading-6 font-semibold">Or drag them</p>
-                                                            <p className="dark:text-[hsla(0,0%,100%,0.75)] text-sm leading-6 font-semibold ">(6MB max file size, max dimensions 6000px. Min dimensions are 150x150px)</p> */}
                                                         </div>
                                                     ) : (
                                                         <div className="flex flex-col items-center text-[#f7641b]">
@@ -938,16 +1277,15 @@ export default function PostOfferPage() {
                     </div>
                 )
             case 3:
-
                 return (
                     <div
-                        className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up"
+                        className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up px-4 md:px-0"
                         style={{ animationDelay: "0.1s", animationFillMode: "both" }}
                     >
                         <div className="max-w-[682px] w-full space-y-8">
                             {/* Header */}
                             <div className="text-left">
-                                <h1 className="text-[32px]  leading-10 font-semibold text-[#000] dark:text-[#fff]">
+                                <h1 className="text-2xl md:text-[32px] leading-8 md:leading-10 font-semibold text-[#000] dark:text-[#fff]">
                                     Why is this offer worth sharing?
                                 </h1>
                             </div>
@@ -958,22 +1296,33 @@ export default function PostOfferPage() {
                                     <div
                                         ref={editorRef}
                                         contentEditable
+                                        dir="ltr"
                                         onInput={handleInput}
-                                        onBlur={() => { setDescriptionFocused(false); handleInput(); }}
+                                        onBlur={() => {
+                                            setDescriptionFocused(false);
+                                            handleInput();
+                                        }}
                                         suppressContentEditableWarning
                                         onFocus={() => setDescriptionFocused(true)}
+                                        onClick={() => {
+                                            if (editorRef.current) {
+                                                editorRef.current.focus();
+                                            }
+                                        }}
                                         className={cn(
                                             "w-full min-h-[400px] bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black focus:outline-none dark:text-white rounded-lg p-4 pb-16 resize-none text-base leading-6 transition-all duration-300 ease-in-out flex-shrink-0 list-disc list-inside",
-                                            descriptionFocused ? "min-h-[510px]" : "min-h-[400px]"
+                                            descriptionFocused ? "min-h-[510px]" : "min-h-[400px]",
+                                            descriptionError ? "border-red-500 focus:border-red-500" : ""
                                         )}
-
                                     />
-
+                                    {descriptionError && (
+                                        <div className="text-red-500 text-xs mt-1">{descriptionError}</div>
+                                    )}
                                     {/* Help Section for Description - animated */}
                                     <div
                                         className={cn(
-                                            'transition-[height] duration-300 ease-in-out overflow-hidden absolute top-[353px] left-2 right-2 z-10',
-                                            !descriptionFocused && 'expand-leave-to'
+                                            "transition-[height] duration-300 ease-in-out overflow-hidden absolute top-[353px] left-2 right-2 z-10",
+                                            !descriptionFocused && "expand-leave-to",
                                         )}
                                         style={{ height: descriptionFocused ? 110 : 0 }}
                                     >
@@ -982,29 +1331,62 @@ export default function PostOfferPage() {
                                                 <div className="flex items-center mr-1">
                                                     <Info className="w-[18px] h-[18px] dark:text-[hsla(0,0%,100%,0.75)] text-black" />
                                                 </div>
-                                                <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">Tell us about your deal.</span>
+                                                <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                                    Tell us about your deal.
+                                                </span>
                                             </div>
                                             <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[rgba(4,8,13,0.59)] mt-1">
-                                                Add the details about the product,links to relevant info/reviews and why you think it's a good deal
+                                                Add the details about the product,links to relevant info/reviews and why you think it's a good
+                                                deal
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Formatting Toolbar */}
-                                    <div className="relative -top-14 w-fit left-2 inline-flex items-center gap-1 bg-[#fff] dark:bg-[#1d1f20] rounded-xl  p-[7px] border border-[rgba(3,12,25,0.1)] dark:border-[#1d1f20] shadow-lg">
-                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleBold}>
+                                    <div className="relative -top-14 w-fit left-2 inline-flex items-center gap-1 bg-[#fff] dark:bg-[#1d1f20] rounded-xl p-[7px] border border-[rgba(3,12,25,0.1)] dark:border-[#1d1f20] shadow-lg overflow-x-auto">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="icon-button flex-shrink-0"
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            onClick={handleBold}
+                                        >
                                             <Bold className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleStrikethrough}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="icon-button flex-shrink-0"
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            onClick={handleStrikethrough}
+                                        >
                                             <Strikethrough className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleItalic}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="icon-button flex-shrink-0"
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            onClick={handleItalic}
+                                        >
                                             <Italic className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleList}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="icon-button flex-shrink-0"
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            onClick={handleList}
+                                        >
                                             <List className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
-                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={handleHorizontalLine}>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="icon-button flex-shrink-0"
+                                            onMouseDown={(e) => e.preventDefault()}
+                                            onClick={handleHorizontalLine}
+                                        >
                                             <Minus className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
                                         <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={() => setShowEmojiPicker((v) => !v)}>
@@ -1027,21 +1409,21 @@ export default function PostOfferPage() {
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="icon-button "
+                                            className="icon-button flex-shrink-0"
                                             onMouseDown={(e) => e.preventDefault()}
                                             onClick={() => {
-                                                setShowLinkInput(true);
+                                                setShowLinkInput(true)
                                                 // Save the current selection
-                                                const selection = window.getSelection();
+                                                const selection = window.getSelection()
                                                 if (selection && selection.rangeCount > 0) {
-                                                    setSavedSelection(selection.getRangeAt(0));
+                                                    setSavedSelection(selection.getRangeAt(0))
                                                 }
                                             }}
                                         >
                                             <Link className="h-4 w-4 stroke-[3.2]" />
                                         </Button>
                                         {showLinkInput && (
-                                            <div className="absolute bottom-12 m-4 left-24 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-6 flex flex-col gap-2 z-50 w-[350px]">
+                                            <div className="absolute bottom-12 m-4 left-24 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-6 flex flex-col gap-2 w-[350px]">
                                                 {/* Arrow pointer at the bottom */}
                                                 <div
                                                     className="absolute -bottom-2 left-36 w-0 h-0"
@@ -1067,9 +1449,7 @@ export default function PostOfferPage() {
                                                 </div>
                                                 <div className="flex flex-col space-y-8">
                                                     <div className="flex flex-col space-y-2">
-                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">
-                                                            URL
-                                                        </label>
+                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">URL</label>
                                                         <input
                                                             type="text"
                                                             value={linkURL}
@@ -1078,9 +1458,7 @@ export default function PostOfferPage() {
                                                         />
                                                     </div>
                                                     <div className="flex flex-col space-y-2">
-                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">
-                                                            Text
-                                                        </label>
+                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">Text</label>
                                                         <input
                                                             type="text"
                                                             value={linkText}
@@ -1090,39 +1468,40 @@ export default function PostOfferPage() {
                                                         <div className="pt-4">
                                                             <button
                                                                 onClick={() => {
-                                                                    if (!editorRef.current) return;
-                                                                    editorRef.current.focus();
+                                                                    if (!editorRef.current) return
+                                                                    editorRef.current.focus()
                                                                     if (savedSelection) {
-                                                                        const selection = window.getSelection();
-                                                                        selection?.removeAllRanges();
-                                                                        selection?.addRange(savedSelection);
+                                                                        const selection = window.getSelection()
+                                                                        selection?.removeAllRanges()
+                                                                        selection?.addRange(savedSelection)
                                                                     }
-                                                                    const selection = window.getSelection();
-                                                                    if (!selection || !selection.rangeCount) return;
-                                                                    const range = selection.getRangeAt(0);
-                                                                    range.deleteContents();
+                                                                    const selection = window.getSelection()
+                                                                    if (!selection || !selection.rangeCount) return
+                                                                    const range = selection.getRangeAt(0)
+                                                                    range.deleteContents()
                                                                     // Create a real <a> element
-                                                                    const a = document.createElement('a');
-                                                                    a.href = linkURL;
-                                                                    a.textContent = linkText || linkURL;
-                                                                    a.target = "_blank";
-                                                                    a.rel = "noopener noreferrer";
-                                                                    range.insertNode(a);
+                                                                    const a = document.createElement("a")
+                                                                    a.href = linkURL
+                                                                    a.textContent = linkText || linkURL
+                                                                    a.target = "_blank"
+                                                                    a.rel = "noopener noreferrer"
+                                                                    range.insertNode(a)
                                                                     // Move caret after link
-                                                                    range.setStartAfter(a);
-                                                                    range.collapse(true);
-                                                                    selection.removeAllRanges();
-                                                                    selection.addRange(range);
-                                                                    setShowLinkInput(false);
-                                                                    setLinkURL("");
-                                                                    setLinkText("");
-                                                                    setDescription(editorRef.current.innerHTML);
+                                                                    range.setStartAfter(a)
+                                                                    range.collapse(true)
+                                                                    selection.removeAllRanges()
+                                                                    selection.addRange(range)
+                                                                    setShowLinkInput(false)
+                                                                    setLinkURL("")
+                                                                    setLinkText("")
+                                                                    setDescription(editorRef.current.innerHTML)
                                                                 }}
-
                                                                 disabled={!linkURL.trim()}
                                                                 className={
                                                                     `text-sm h-9 font-medium  text-white px-3 py-1 w-full rounded-full  ` +
-                                                                    (!linkURL.trim() ? 'bg-[#f3f5f7] text-[#a7a9ac] cursor-not-allowed' : 'text-white bg-[#f7641b] hover:bg-[#eb611f] shadow-[#f7641b] hover:shadow-[#eb611f]')
+                                                                    (!linkURL.trim()
+                                                                        ? "bg-[#f3f5f7] text-[#a7a9ac] cursor-not-allowed"
+                                                                        : "text-white bg-[#f7641b] hover:bg-[#eb611f] shadow-[#f7641b] hover:shadow-[#eb611f]")
                                                                 }
                                                             >
                                                                 Insert
@@ -1136,14 +1515,14 @@ export default function PostOfferPage() {
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            className="icon-button"
+                                            className="icon-button flex-shrink-0"
                                             onMouseDown={(e) => e.preventDefault()}
                                             onClick={() => {
-                                                setShowImageInput(true);
+                                                setShowImageInput(true)
                                                 // Save the current selection
-                                                const selection = window.getSelection();
+                                                const selection = window.getSelection()
                                                 if (selection && selection.rangeCount > 0) {
-                                                    setSavedSelection(selection.getRangeAt(0));
+                                                    setSavedSelection(selection.getRangeAt(0))
                                                 }
                                             }}
                                         >
@@ -1177,7 +1556,9 @@ export default function PostOfferPage() {
                                                 <div className="flex flex-col space-y-8">
                                                     {/* Upload image section */}
                                                     <div className="flex flex-col space-y-2">
-                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">Upload image</label>
+                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">
+                                                            Upload image
+                                                        </label>
                                                         <div className="flex items-center gap-3">
                                                             <input
                                                                 type="file"
@@ -1186,15 +1567,22 @@ export default function PostOfferPage() {
                                                                 id="image-upload-input"
                                                                 onChange={handleImageFileChange}
                                                             />
-                                                            <label htmlFor="image-upload-input" className="px-3 py-2 h-9 rounded-full w-fit border border-[#f7641b] text-[#f7641b] bg-white hover:bg-[#fbece3] dark:bg-[#481802] dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] text-sm font-medium cursor-pointer">
+                                                            <label
+                                                                htmlFor="image-upload-input"
+                                                                className="px-3 py-2 h-9 rounded-full w-fit border border-[#f7641b] text-[#f7641b] bg-white hover:bg-[#fbece3] dark:bg-[#481802] dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] text-sm font-medium cursor-pointer"
+                                                            >
                                                                 Choose
                                                             </label>
-                                                            <span className="text-sm text-[#a7a9ac] dark:text-[#8b8d90]">{imageInsertFile ? imageInsertFile.name : "Nothing selected"}</span>
+                                                            <span className="text-sm text-[#a7a9ac] dark:text-[#8b8d90]">
+                                                                {imageInsertFile ? imageInsertFile.name : "Nothing selected"}
+                                                            </span>
                                                         </div>
                                                     </div>
                                                     {/* Image from URL section */}
                                                     <div className="flex flex-col space-y-2">
-                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">Image from URL</label>
+                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">
+                                                            Image from URL
+                                                        </label>
                                                         <input
                                                             type="text"
                                                             placeholder="Image URL"
@@ -1203,7 +1591,9 @@ export default function PostOfferPage() {
                                                             className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
                                                         />
                                                         {/* Placement options */}
-                                                        <span className="text-[12.25px] text-black dark:text-white font-semibold mr-2 pt-4">Placement:</span>
+                                                        <span className="text-[12.25px] text-black dark:text-white font-semibold mr-2 pt-4">
+                                                            Placement:
+                                                        </span>
                                                         <div className="flex flex-row mt-1 w-full">
                                                             <button
                                                                 onClick={() => setSelected("left")}
@@ -1211,7 +1601,7 @@ export default function PostOfferPage() {
                                                                     "w-1/2 py-2 h-9 rounded-l-full border text-sm font-medium focus:outline-none flex flex-row justify-center items-center gap-1",
                                                                     selected === "left"
                                                                         ? "bg-[#f7641b] border-[#f7641b] text-white hover:bg-[#eb611f] hover:border-[#eb611f] "
-                                                                        : "text-[#6b6d70] border-[#dfe1e4] hover:bg-white hover:text-[#f7641b] hover:border-[#dfe1e4] "
+                                                                        : "text-[#6b6d70] border-[#dfe1e4] hover:bg-white hover:text-[#f7641b] hover:border-[#dfe1e4] ",
                                                                 )}
                                                             >
                                                                 <AlignLeft className="h-6 w-6" />
@@ -1223,7 +1613,7 @@ export default function PostOfferPage() {
                                                                     "w-1/2 py-2 h-9 -ml-[1px] rounded-r-full border text-sm font-medium focus:outline-none flex flex-row justify-center items-center gap-1",
                                                                     selected === "middle"
                                                                         ? "bg-[#f7641b] border-[#f7641b] text-white hover:bg-[#eb611f] hover:border-[#eb611f] "
-                                                                        : "text-[#6b6d70] border-[#dfe1e4] hover:bg-white hover:text-[#f7641b] hover:border-[#dfe1e4] "
+                                                                        : "text-[#6b6d70] border-[#dfe1e4] hover:bg-white hover:text-[#f7641b] hover:border-[#dfe1e4] ",
                                                                 )}
                                                             >
                                                                 <AlignCenter className="h-6 w-6" />
@@ -1244,7 +1634,6 @@ export default function PostOfferPage() {
                                                 </div>
                                             </div>
                                         )}
-
                                     </div>
                                 </div>
                             </div>
@@ -1254,17 +1643,17 @@ export default function PostOfferPage() {
             case 4:
                 return (
                     <div
-                        className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up"
+                        className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up px-4 md:px-0"
                         style={{ animationDelay: "0.1s", animationFillMode: "both" }}
                     >
                         <div className="max-w-[682px] w-full space-y-8">
                             {/* Header */}
-                            <div className="text-start -mt-20">
-                                <h1 className="text-[32px] font-semibold text-[#000] dark:text-[#fff]">Final details</h1>
+                            <div className="text-start -mt-8 md:-mt-20">
+                                <h1 className="text-2xl md:text-[32px] font-semibold text-[#000] dark:text-[#fff]">Final details</h1>
                             </div>
 
                             {/* Date Fields */}
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[12.25px] font-bold text-[#000] dark:text-[#fff]">Starting day</label>
                                     <div className="relative">
@@ -1272,15 +1661,14 @@ export default function PostOfferPage() {
                                             ref={startDateRef}
                                             type="date"
                                             value={startDate}
-                                            onChange={e => {
-                                                setStartDate(e.target.value);
-                                                setShowStartTimeInput(true);
+                                            onChange={(e) => {
+                                                setStartDate(e.target.value)
+                                                setShowStartTimeInput(true)
                                             }}
                                             onFocus={() => setShowStartTimeInput(true)}
                                             placeholder="dd/mm/yyyy"
                                             className="w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-2"
                                         />
-
                                     </div>
                                     {showStartTimeInput && (
                                         <div className="relative pt-4 space-y-1">
@@ -1289,11 +1677,10 @@ export default function PostOfferPage() {
                                                 ref={startTimeRef}
                                                 type="time"
                                                 value={startTime}
-                                                onChange={e => setStartTime(e.target.value)}
+                                                onChange={(e) => setStartTime(e.target.value)}
                                                 onFocus={() => setShowStartTimeInput(true)}
                                                 className="w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-2"
                                             />
-
                                         </div>
                                     )}
                                 </div>
@@ -1304,15 +1691,14 @@ export default function PostOfferPage() {
                                             ref={endDateRef}
                                             type="date"
                                             value={endDate}
-                                            onChange={e => {
-                                                setEndDate(e.target.value);
-                                                setShowEndTimeInput(true);
+                                            onChange={(e) => {
+                                                setEndDate(e.target.value)
+                                                setShowEndTimeInput(true)
                                             }}
                                             onFocus={() => setShowEndTimeInput(true)}
                                             placeholder="dd/mm/yyyy"
                                             className="w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-2"
                                         />
-
                                     </div>
                                     {showEndTimeInput && (
                                         <div className="relative pt-4 space-y-1">
@@ -1321,11 +1707,10 @@ export default function PostOfferPage() {
                                                 ref={endTimeRef}
                                                 type="time"
                                                 value={endTime}
-                                                onChange={e => setEndTime(e.target.value)}
+                                                onChange={(e) => setEndTime(e.target.value)}
                                                 onFocus={() => setShowEndTimeInput(true)}
                                                 className="w-full bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white placeholder:text-gray-400 focus:border-[#f97936] dark:focus:border-[#f97936] rounded-lg p-2"
                                             />
-
                                         </div>
                                     )}
                                 </div>
@@ -1335,7 +1720,10 @@ export default function PostOfferPage() {
                             <div className="space-y-4">
                                 <div className="space-y-2">
                                     <h2 className="text-[12.25px] font-bold text-[#000] dark:text-[#fff]">
-                                        Category <span className="text-sm text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)] font-semibold">(required)</span>
+                                        Category{" "}
+                                        <span className="text-sm text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)] font-semibold">
+                                            (required)
+                                        </span>
                                     </h2>
                                     <p className="text-sm text-[rgba(4,8,13,0.59)] dark:text-gray-400">
                                         What is the most relevant category for your offer?
@@ -1368,6 +1756,9 @@ export default function PostOfferPage() {
                                         </Button>
                                     ))}
                                 </div>
+                                {categoryError && (
+                                    <div className="text-red-500 text-xs mt-1">{categoryError}</div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -1375,20 +1766,20 @@ export default function PostOfferPage() {
             case 5:
                 return (
                     <div
-                        className="flex items-center justify-center flex-1 !p-0 !m-0 animate-fade-in-up "
+                        className="flex items-center justify-center flex-1 !p-0 !m-0 animate-fade-in-up px-4 md:px-0"
                         style={{ animationDelay: "0.1s", animationFillMode: "both" }}
                     >
-                        <div className="max-w-[682px] w-full space-y-2 mb-[84px] ">
+                        <div className="max-w-[682px] w-full space-y-2 mb-[84px]">
                             {/* Header */}
-                            <div className="text-left mt-28 space-y-8 mb-5">
-                                <h1 className="text-5xl font-semibold text-[#000] dark:text-[#fff]">Check your deal</h1>
+                            <div className="text-left mt-8 md:mt-28 space-y-8 mb-5">
+                                <h1 className="text-3xl md:text-5xl font-semibold text-[#000] dark:text-[#fff]">Check your deal</h1>
                             </div>
 
                             {/* Link Section */}
                             <div className="space-y-4">
                                 <div className="flex flex-col items-start p-6 border rounded-lg dark:border-[hsla(0,0%,100%,0.18)] space-y-6">
                                     <h2 className="text-2xl font-bold text-[#000] dark:text-[#fff]">Link</h2>
-                                    <div className="text-base text-[#000] dark:text-[#fff]">{linkValue || "example.com"}</div>
+                                    <div className="text-base text-[#000] dark:text-[#fff] break-all">{linkValue || "example.com"}</div>
                                     <Button
                                         onClick={() => setCurrentStep(0)}
                                         variant="ghost"
@@ -1397,34 +1788,37 @@ export default function PostOfferPage() {
                                         To adjust
                                     </Button>
                                 </div>
-
                             </div>
+
                             {/* Essentials Section */}
                             <div className="space-y-4">
                                 <div className="flex flex-col items-start p-6 border rounded-lg dark:border-[hsla(0,0%,100%,0.18)] space-y-6">
                                     <h2 className="text-2xl font-bold text-[#000] dark:text-[#fff]">Essentials</h2>
 
-
-                                    <div className="space-y-6">
+                                    <div className="space-y-6 w-full">
                                         <div>
                                             <h3 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Title of offer</h3>
                                             <p className="text-sm text-[#000] dark:text-[#fff]">{title || "dvdffvdvdbdbfb"}</p>
                                         </div>
-                                        <div className="grid grid-cols-3 gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                             <div>
                                                 <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Price Offer</h4>
                                                 <p className="text-sm text-[#000] dark:text-[#fff]">{priceOffer ? `₹${priceOffer}` : "-"}</p>
                                             </div>
                                             <div>
-                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Lowest price elsewhere</h4>
+                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">
+                                                    Lowest price elsewhere
+                                                </h4>
                                                 <p className="text-sm text-[#000] dark:text-[#fff]">{lowestPrice ? `₹${lowestPrice}` : "-"}</p>
                                             </div>
                                             <div>
                                                 <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Postage costs</h4>
-                                                <p className="text-sm text-[#000] dark:text-[#fff]">{postageCosts ? `₹${postageCosts}` : "-"}</p>
+                                                <p className="text-sm text-[#000] dark:text-[#fff]">
+                                                    {postageCosts ? `₹${postageCosts}` : "-"}
+                                                </p>
                                             </div>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Shipping from</h4>
                                                 <p className="text-sm text-[#000] dark:text-[#fff]">{shippingFrom || "-"}</p>
@@ -1459,12 +1853,11 @@ export default function PostOfferPage() {
                                     <Button
                                         onClick={() => setCurrentStep(2)}
                                         variant="ghost"
-                                        className="text-sm h-7 border rounded-full border-[#dfe1e4] hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#28292a] dark:text"
+                                        className="text-sm h-7 border rounded-full border-[#dfe1e4] hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#28292a] dark:text-[#c5c7ca] dark:hover:text-[#babcbf]"
                                     >
                                         To adjust
                                     </Button>
                                 </div>
-
                             </div>
 
                             {/* Description Section */}
@@ -1472,7 +1865,9 @@ export default function PostOfferPage() {
                                 <div className="flex flex-col items-start p-6 border rounded-lg dark:border-[hsla(0,0%,100%,0.18)] space-y-6">
                                     <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Description</h2>
                                     <div className="space-y-2 w-full">
-                                        <h3 className="text-base font-medium text-[#000] dark:text-[#fff]">Why is this offer worth sharing?</h3>
+                                        <h3 className="text-base font-medium text-[#000] dark:text-[#fff]">
+                                            Why is this offer worth sharing?
+                                        </h3>
                                         {description ? (
                                             <div
                                                 className="prose prose-sm max-w-none dark:prose-invert text-[#000] dark:text-[#fff]"
@@ -1492,15 +1887,12 @@ export default function PostOfferPage() {
                                 </div>
                             </div>
 
-
-
                             {/* Final Details Section */}
                             <div className="space-y-4">
                                 <div className="flex flex-col items-start p-6 border rounded-lg dark:border-[hsla(0,0%,100%,0.18)] space-y-6">
                                     <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Final details</h2>
 
-
-                                    <div className="grid grid-cols-3 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
                                         <div>
                                             <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Starting day</h4>
                                             <p className="text-sm text-[#000] dark:text-[#fff]">{startDate || "-"}</p>
@@ -1511,20 +1903,16 @@ export default function PostOfferPage() {
                                         </div>
                                         <div>
                                             <h4 className="text-sm font-medium text-[#000] dark:text-[#fff] mb-1">Category</h4>
-                                            <p className="text-sm text-[#000] dark:text-[#fff]">
-                                                {selectedCategories}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <Button
-                                                onClick={() => setCurrentStep(4)}
-                                                variant="ghost"
-                                                className="text-sm h-7 border rounded-full border-[#dfe1e4] hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#28292a] dark:text-[#c5c7ca] dark:hover:text-[#babcbf]"
-                                            >
-                                                To adjust
-                                            </Button>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{selectedCategories.join(", ") || "-"}</p>
                                         </div>
                                     </div>
+                                    <Button
+                                        onClick={() => setCurrentStep(4)}
+                                        variant="ghost"
+                                        className="text-sm h-7 border rounded-full border-[#dfe1e4] hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#28292a] dark:text-[#c5c7ca] dark:hover:text-[#babcbf]"
+                                    >
+                                        To adjust
+                                    </Button>
                                 </div>
                             </div>
                         </div>
@@ -1537,141 +1925,15 @@ export default function PostOfferPage() {
 
     return (
         <div className="fixed inset-0 w-screen h-screen min-h-screen bg-[#fff] dark:bg-[#1d1f20] flex z-30">
-            {/* Mobile: Horizontal Step Bar */}
-            <div className="block md:hidden w-full bg-[#f3f5f7] mt-12 h-fit dark:bg-[#28292a] border-b border-gray-200 dark:border-[#23272f]">
-                <nav className="flex flex-row items-center justify-between px-2 py-4 overflow-x-auto">
-                    {steps.map((step, index) => {
-                        let IconComponent = step.icon;
-                        const isActive = index === currentStep;
-                        const isCompleted = index < currentStep;
-                        const isFuture = index > currentStep;
-                        if (isCompleted) {
-                            IconComponent = hoveredStep === index ? Pencil : CircleCheck;
-                        }
-                        return (
-                            <div key={step.id} className="flex items-center">
-                                <button
-                                    onClick={() => {
-                                        if (!isFuture) setCurrentStep(index);
-                                    }}
-                                    disabled={isFuture}
-                                    onMouseEnter={() => setHoveredStep(index)}
-                                    onMouseLeave={() => setHoveredStep(null)}
-                                    className={cn(
-                                        "flex flex-col items-center px-2 py-1 focus:outline-none",
-                                        isActive
-                                            ? "text-[#f7641b] dark:text-[#f97936]"
-                                            : isCompleted
-                                                ? "text-[#238012] dark:text-green-400"
-                                                : "text-[#a7a9ac] dark:text-[#525457]",
-                                        isFuture && "cursor-not-allowed opacity-60"
-                                    )}
-                                >
-                                    <IconComponent className="h-5 w-5 mb-1" />
-                                    <span className="text-xs font-medium whitespace-nowrap">{step.title}</span>
-                                </button>
-                                {/* Horizontal line except after last step */}
-                                {index < steps.length - 1 && (
-                                    <div className="h-6 w-px bg-[#dfe1e4] dark:bg-[#46484b] mx-2" />
-                                )}
-                            </div>
-                        );
-                    })}
-                </nav>
+            {/* Mobile Layout */}
+            <div className="block md:hidden w-full">
+                <MobileOfferSubmission {...sharedProps} renderStepContent={renderStepContent} />
             </div>
-            {/* Desktop: Sidebar + Content */}
-            <div className="hidden md:flex w-full h-full flex-row">
-                {/* Sidebar */}
-                <div className="w-[272px] mt-14 bg-[#f3f5f7] dark:bg-[#28292a] flex flex-col">
-                    <div className="p-6 pt-6 border-gray-700">
-                        <h2 className="text-2xl font-semibold text-[#000] dark:text-[#fff]">Place an offer</h2>
-                    </div>
-                    <nav className="flex-1 p-4 space-y-2">
-                        {steps.map((step, index) => {
-                            let IconComponent = step.icon;
-                            const isActive = index === currentStep;
-                            const isCompleted = index < currentStep;
-                            const isFuture = index > currentStep;
-                            if (isCompleted) {
-                                IconComponent = hoveredStep === index ? Pencil : CircleCheck;
-                            }
-                            return (
-                                <button
-                                    key={step.id}
-                                    onClick={() => {
-                                        if (!isFuture) setCurrentStep(index);
-                                    }}
-                                    disabled={isFuture}
-                                    onMouseEnter={() => setHoveredStep(index)}
-                                    onMouseLeave={() => setHoveredStep(null)}
-                                    className={cn(
-                                        "w-full flex items-center gap-3 pb-4 px-4 py-4 rounded-full text-left transition-colors",
-                                        step.id === "check" && "border-t rounded-none border-gray-700 pt-6 mt-4",
-                                        isActive
-                                            ? "dark:bg-[#1d1f20] bg-[#fff] dark:text-white text-[#000]"
-                                            : isCompleted
-                                                ? "text-[#000] dark:text-[#fff] dark:hover:bg-[#363739] hover:bg-[#dfe1e4] bg-transparent"
-                                                : "dark:text-[hsla(0,0%,100%,0.49)] text-[rgba(4,9,18,0.35)] hover:bg-gray-700 hover:text-gray-300",
-                                        isFuture && "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-inherit",
-                                    )}
-                                >
-                                    <IconComponent className={cn("h-5 w-5 flex-shrink-0", isCompleted && hoveredStep !== index && "text-[#238012] dark:text-[#78c86b]")} />
-                                    <span className="font-medium text-sm">{step.title}</span>
-                                </button>
-                            )
-                        })}
-                    </nav>
-                </div>
-                {/* Main Content Area */}
-                <div className="flex-1 flex flex-col overflow-auto">
-                    {/* Content */}
-                    <div className="flex-1 flex">{renderStepContent()}</div>
-                    {/* Navigation Buttons */}
-                    {currentStep > 0 && (
-                        <div className="border-t border-[#dfe1e4] dark:border-[#46484b] p-6 flex justify-between">
-                            <Button
-                                onClick={handleBack}
-                                variant="outline"
-                                className="h-9 px-4 border-[#dfe1e4] rounded-full hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#363739] dark:text-[#c5c7ca] dark:hover:text-[#d7d9dd] dark:bg-[#1d1f20]"
-                            >
-                                Back
-                            </Button>
-                            <Button
-                                onClick={handleNext}
-                                disabled={currentStep === steps.length - 1}
-                                className="border rounded-full h-9 px-4 border-[#f7641b] hover:border-[#eb611f] text-[#f7641b] hover:bg-[#fbf3ef] hover:text-[#eb611f] bg-[#fff] dark:border-[#f97936] dark:text-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] dark:bg-[#1d1f20]"
-                            >
 
-                                {currentStep === steps.length - 1 ? "Publish" : "Next"}
-                                <ArrowRight className="h-4 w-1" />
-                            </Button>
-                        </div>
-                    )}
-                </div>
-            </div>
-            {/* Mobile: Main Content Area */}
-            <div className="flex-1 flex flex-col overflow-auto md:hidden">
-                <div className="flex-1 flex">{renderStepContent()}</div>
-                {currentStep > 0 && (
-                    <div className="border-t border-[#dfe1e4] dark:border-[#46484b] p-6 flex justify-between">
-                        <Button
-                            onClick={handleBack}
-                            variant="outline"
-                            className="h-9 px-4 border-[#dfe1e4] rounded-full hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#363739] dark:text-[#c5c7ca] dark:hover:text-[#d7d9dd] dark:bg-[#1d1f20]"
-                        >
-                            Back
-                        </Button>
-                        <Button
-                            onClick={handleNext}
-                            disabled={currentStep === steps.length - 1}
-                            className="border rounded-full h-9 px-4 border-[#f7641b] hover:border-[#eb611f] text-[#f7641b] hover:bg-[#fbf3ef] hover:text-[#eb611f] bg-[#fff] dark:border-[#f97936] dark:text-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] dark:bg-[#1d1f20]"
-                        >
-                            {currentStep === steps.length - 1 ? "Publish" : "Next"}
-                        </Button>
-                    </div>
-                )}
+            {/* Desktop Layout */}
+            <div className="hidden md:block w-full">
+                <DesktopOfferSubmission {...sharedProps} renderStepContent={renderStepContent} />
             </div>
         </div>
     )
 }
-
