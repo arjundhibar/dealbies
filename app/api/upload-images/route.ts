@@ -1,31 +1,37 @@
+import { NextRequest, NextResponse } from 'next/server'
 
-import { NextResponse } from 'next/server'
-
-export async function POST() {
+export async function POST(req: NextRequest) {
     const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID
     const CLOUDFLARE_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN
 
-    console.log("ACCOUNT_ID:", CLOUDFLARE_ACCOUNT_ID)
-    console.log("API_TOKEN:", CLOUDFLARE_API_TOKEN)
+    const uploadURLRes = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/images/v2/direct_upload`,
+        {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
+                'Content-Type': 'application/json',
+            },
+        }
+    )
 
-    const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/images/v2/direct_upload`, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
-            'Content-Type': 'application/json',
-        },
-    })
-
-    const data = await response.json()
-    console.log("Cloudflare Response:", data)
-    if (!data.success) {
-        console.error("Cloudflare Error:", data.errors)
-        return NextResponse.json({ error: 'Failed to get upload URL', details: data.errors }, { status: 500 })
+    const uploadURLData = await uploadURLRes.json()
+    const uploadURL = uploadURLData?.result?.uploadURL
+    if (!uploadURL) {
+        return NextResponse.json({ error: 'Failed to get Cloudflare upload URL' }, { status: 500 })
     }
 
-
-    return NextResponse.json({
-        uploadURL: data.result.uploadURL,
-        imageID: data.result.id,
+    // forward the upload
+    const formData = await req.formData()
+    const uploadRes = await fetch(uploadURL, {
+        method: 'POST',
+        body: formData,
     })
+
+    const result = await uploadRes.json()
+    if (!uploadRes.ok) {
+        return NextResponse.json({ error: 'Failed to upload image to Cloudflare', details: result }, { status: 500 })
+    }
+
+    return NextResponse.json(result)
 }

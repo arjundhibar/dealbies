@@ -1932,7 +1932,26 @@ export default function PostOfferPage() {
 
             {/* Desktop Layout */}
             <div className="hidden md:block w-full">
-                <DesktopOfferSubmission {...sharedProps} renderStepContent={renderStepContent} />
+                <DesktopOfferSubmission
+                    {...sharedProps}
+                    title={title}
+                    description={description}
+                    priceOffer={priceOffer}
+                    lowestPrice={lowestPrice}
+                    discountCode={discountCode}
+                    availability={availability}
+                    postageCosts={postageCosts}
+                    shippingFrom={shippingFrom}
+                    startDate={startDate}
+                    startTime={startTime}
+                    endDate={endDate}
+                    endTime={endTime}
+                    selectedCategories={selectedCategories}
+                    linkValue={linkValue}
+                    uploadedImages={uploadedImages}
+                    // ...other sharedProps
+                    renderStepContent={renderStepContent}
+                />
             </div>
         </div>
     )
