@@ -56,8 +56,9 @@ export function DesktopOfferSubmission(props: any) {
           const publicUrl = uploadResult.result.variants[0];
 
           imageUploadResults.push({ url: publicUrl, isCover: i === 0 });
-        } else if (img.url.startsWith("http")) {
-          imageUploadResults.push({ url: img.url, isCover: i === 0 });
+        } else {
+          console.warn("Skipped non-uploaded image:", img.url);
+
         }
       }
 

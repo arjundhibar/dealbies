@@ -144,23 +144,39 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     async (category?: string, sort?: string): Promise<Deal[]> => {
       setIsLoading(true)
       try {
-        let url = "/api/deals"
-        const params = new URLSearchParams()
+        const response = await fetch("/api/graphql", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // Optional: add Authorization header if needed
+          },
+          body: JSON.stringify({
+            query: `
+            query GetDeals($category: String, $sort: String) {
+              deals(category: $category, sort: $sort) {
+                id
+                title
+                price
+                category
+                description
+                postedBy {
+                  username
+                  avatarUrl
+                }
+                score
+                commentCount
+                createdAt
+              }
+            }
+          `,
+            variables: { category, sort },
+          }),
+        })
 
-        if (category) params.append("category", category)
-        if (sort) params.append("sort", sort)
-
-        if (params.toString()) {
-          url += `?${params.toString()}`
-        }
-
-        const response = await fetch(url)
-        if (response.ok) {
-          const data = await response.json()
-          setDeals(data)
-          return data
-        }
-        return []
+        const { data } = await response.json()
+        const result = data?.deals || []
+        setDeals(result)
+        return result
       } catch (error) {
         console.error("Error fetching deals:", error)
         toast({
@@ -173,8 +189,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false)
       }
     },
-    [toast],
+    [toast]
   )
+
 
   const fetchCoupons = useCallback(
     async (merchant?: string, sort?: string): Promise<Coupon[]> => {

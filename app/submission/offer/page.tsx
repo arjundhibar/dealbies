@@ -231,17 +231,41 @@ export default function PostOfferPage() {
         })
     }
 
-    const handleUrlUpload = () => {
-        if (imageUrlInput.trim() && uploadedImages.length < 8) {
+    const handleUrlUpload = async () => {
+        if (!imageUrlInput.trim() || uploadedImages.length >= 8) return;
+
+        try {
+            setIsLoading(true);
+
+            // Step 1: Fetch image blob from the URL
+            const response = await fetch(imageUrlInput.trim());
+            const blob = await response.blob();
+
+            // Step 2: Create a File from blob
+            const ext = blob.type.split("/")[1] || "jpg";
+            const file = new File([blob], `url-upload-${Date.now()}.${ext}`, {
+                type: blob.type,
+            });
+
+            // Step 3: Store it in uploadedImages[] like other images
             const newImage: UploadedImage = {
                 id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-                url: imageUrlInput.trim(),
+                file,
+                url: URL.createObjectURL(blob), // shows preview in UI
                 isCover: uploadedImages.length === 0,
-            }
-            setUploadedImages((prev) => [...prev, newImage])
-            setImageUrlInput("")
+            };
+
+            setUploadedImages((prev) => [...prev, newImage]);
+            setImageUrlInput("");
+        } catch (error) {
+            console.error("🚨 Failed to convert URL to file:", error);
+            alert("Failed to load image from the URL. Try a different one.");
+        } finally {
+            setIsLoading(false);
         }
-    }
+    };
+
+
     const removeImage = (id: string) => {
         setUploadedImages((prev) => {
             const filtered = prev.filter((img) => img.id !== id)
@@ -846,311 +870,581 @@ export default function PostOfferPage() {
         )
     }
 
-    const renderStepContent = () => {
-        switch (currentStep) {
-            case 0:
-                return (
-                    <>
-                        <div className="block md:hidden">{renderCase0Mobile()}</div>
-                        <div className="hidden md:block min-h-screen w-full ">{renderCase0Desktop()}</div>
-                    </>
-                )
-            case 1:
-                return (
-                    <div
-                        className="flex flex-col items-center justify-center flex-1 animate-fade-in-up !m-0 !p-0 px-4 md:px-0"
-                        style={{ animationDelay: "0.1s", animationFillMode: "both" }}
-                    >
-                        <div className="w-full max-w-2xl mx-auto space-y-8">
-                            <h1 className="text-2xl md:text-3xl font-semibold text-[#000] dark:text-[#fff] text-left mb-8">
-                                Let's start with the essential information
-                            </h1>
-
-                            {/* Title Section */}
-                            <div className="">
-                                <div className="flex justify-between items-center">
-                                    <label className="dark:text-white text-black text-sm font-semibold pb-[1.75px]">
-                                        Title of offer <span className="dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span>
-                                    </label>
-                                    <span className="dark:text-[hsla(0,0%,100%,0.75)] text-sm">{140 - title.length}</span>
-                                </div>
-                                <Input
-                                    value={title}
-                                    onChange={e => {
-                                        setTitle(e.target.value);
-                                        if (titleError) setTitleError("");
-                                    }}
-                                    placeholder="A short, clear title of your offer"
-                                    className={cn(
-                                        "w-full border text-black dark:border-[hsla(0,0%,100%,0.35)] dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]",
-                                        titleError ? "border-red-500 focus:border-red-500" : "border-[rgba(3,12,25,0.23)]"
-                                    )}
-                                    onFocus={() => setTitleFocused(true)}
-                                    onBlur={() => setTitleFocused(false)}
-                                />
-                                {titleError && (
-                                    <div className="text-red-500 text-xs mt-1">{titleError}</div>
-                                )}
-
-                                {/* Help Section  */}
-                                <div
-                                    className={cn(
-                                        "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                        !titleFocused && "expand-leave-to",
-                                    )}
-                                    style={{ height: titleFocused ? 110 : 0 }}
-                                >
-                                    <div className="mt-2 bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1">
-                                        <div className="flex items-center">
-                                            <div className="flex items-center mr-1">
-                                                <Info className="w-[18px] h-[18px] dark:text-[hsla(0,0%,100%,0.75)] text-black" />
-                                            </div>
-                                            <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                                Make your title stand out
-                                            </span>
-                                        </div>
-                                        <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                            Please include the brand, product type, color and model in the title (e.g. adidas UltraBoost
-                                            (black))
-                                        </div>
+    function renderCase1Mobile() {
+        return (
+            <div className="flex flex-col items-center justify-center flex-1 animate-fade-in-up !m-0 !p-0 px-4  " style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+                <div className="w-full max-w-2xl mx-auto space-y-8">
+                    <h1 className="text-2xl md:text-3xl font-semibold text-[#000] dark:text-[#fff] text-left mb-8">
+                        Let's start with the essential information
+                    </h1>
+                    {/* Title Section */}
+                    <div className="">
+                        <div className="flex justify-between items-center">
+                            <label className="dark:text-white text-black text-sm font-semibold pb-[1.75px]">
+                                Title of offer <span className="dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span>
+                            </label>
+                            <span className="dark:text-[hsla(0,0%,100%,0.75)] text-sm">{140 - title.length}</span>
+                        </div>
+                        <Input
+                            value={title}
+                            onChange={e => {
+                                setTitle(e.target.value);
+                                if (titleError) setTitleError("");
+                            }}
+                            placeholder="A short, clear title of your offer"
+                            className={cn(
+                                "w-full border text-black dark:border-[hsla(0,0%,100%,0.35)] dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]",
+                                titleError ? "border-red-500 focus:border-red-500" : "border-[rgba(3,12,25,0.23)]"
+                            )}
+                            onFocus={() => setTitleFocused(true)}
+                            onBlur={() => setTitleFocused(false)}
+                        />
+                        {titleError && (
+                            <div className="text-red-500 text-xs mt-1">{titleError}</div>
+                        )}
+                        {/* Help Section  */}
+                        <div
+                            className={cn(
+                                "transition-[height] duration-300 ease-in-out overflow-hidden",
+                                !titleFocused && "expand-leave-to",
+                            )}
+                            style={{ height: titleFocused ? 110 : 0 }}
+                        >
+                            <div className="mt-2 bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1">
+                                <div className="flex items-center">
+                                    <div className="flex items-center mr-1">
+                                        <Info className="w-[18px] h-[18px] dark:text-[hsla(0,0%,100%,0.75)] text-black" />
                                     </div>
+                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                        Make your title stand out
+                                    </span>
+                                </div>
+                                <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
+                                    Please include the brand, product type, color and model in the title (e.g. adidas UltraBoost
+                                    (black))
                                 </div>
                             </div>
-
-                            {/* Price Details Section */}
+                        </div>
+                    </div>
+                    {/* Price Details Section */}
+                    <div className="">
+                        <h2 className="text-xl font-semibold dark:text-white text-black pb-4">Price details</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="">
-                                <h2 className="text-xl font-semibold dark:text-white text-black pb-4">Price details</h2>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="">
-                                        <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">Price Offer</label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
-                                            <Input
-                                                value={priceOffer}
-                                                onChange={(e) => setPriceOffer(e.target.value)}
-                                                placeholder="15,55"
-                                                className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 text-sm placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-12 dark:focus:border-[#f97936]"
-                                                onFocus={() => setPriceOfferFocused(true)}
-                                                onBlur={() => setPriceOfferFocused(false)}
-                                            />
-                                        </div>
-
-                                        {/* Help Section for Price Offer - animated */}
-                                        <div
-                                            className={cn(
-                                                "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                                !priceOfferFocused && "expand-leave-to",
-                                            )}
-                                            style={{ height: priceOfferFocused ? 110 : 0 }}
-                                        >
-                                            <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
-                                                <div className="flex items-center">
-                                                    <div className="flex items-center mr-1">
-                                                        <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
-                                                    </div>
-                                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                                        Tell us the price
-                                                    </span>
-                                                </div>
-                                                <div className="text-sm font-normal leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                                    This should be the total price after discount(s)
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="">
-                                        <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">
-                                            Lowest price elsewhere
-                                        </label>
-                                        <div className="relative flex-1">
-                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
-                                            <Input
-                                                value={lowestPrice}
-                                                onChange={(e) => setLowestPrice(e.target.value)}
-                                                placeholder="0.00"
-                                                className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-12 dark:focus:border-[#f97936]"
-                                                onFocus={() => setLowestPriceFocused(true)}
-                                                onBlur={() => setLowestPriceFocused(false)}
-                                            />
-                                            <span
-                                                className={cn(
-                                                    "absolute right-3 top-1/2 transform -translate-y-1/2 text-xs font-semibold px-2 py-0.5 rounded bg-[#f3f5f7] dark:bg-[hsla(0,0%,100%,0.11)]",
-                                                    calculateDiscount() > 0
-                                                        ? "text-green-600 dark:bg-[#052f01] dark:text-[#78c86b]"
-                                                        : "text-[#f7641b] dark:text-[hsla(0,0%,100%,0.75)]",
-                                                )}
-                                            >
-                                                {calculateDiscount()}%
-                                            </span>
-                                        </div>
-
-                                        {/* Help Section for Lowest Price Elsewhere - animated */}
-                                        <div
-                                            className={cn(
-                                                "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                                !lowestPriceFocused && "expand-leave-to",
-                                            )}
-                                            style={{ height: lowestPriceFocused ? 150 : 0 }}
-                                        >
-                                            <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
-                                                <div className="flex items-center">
-                                                    <div className="flex items-center mr-1">
-                                                        <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
-                                                    </div>
-                                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                                        Tell us lowest price elsewhere
-                                                    </span>
-                                                </div>
-                                                <div className="text-sm font-normal leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                                    This is the lowest price you can find for the product elsewhere through price comparison (not
-                                                    for the recommended retail price)
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Discount Code Section */}
-                            <div className="">
-                                <label className="dark:text-white text-sm font-semibold pb-[1.75px]">Discount code</label>
+                                <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">Price Offer</label>
                                 <div className="relative">
-                                    <Scissors className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
                                     <Input
-                                        value={discountCode}
-                                        onChange={(e) => setDiscountCode(e.target.value)}
-                                        placeholder="Enter the discount code"
-                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 dark:focus:border-[#f97936]"
-                                        onFocus={() => setDiscountCodeFocused(true)}
-                                        onBlur={() => setDiscountCodeFocused(false)}
+                                        value={priceOffer}
+                                        onChange={(e) => setPriceOffer(e.target.value)}
+                                        placeholder="15,55"
+                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 text-sm placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-12 dark:focus:border-[#f97936]"
+                                        onFocus={() => setPriceOfferFocused(true)}
+                                        onBlur={() => setPriceOfferFocused(false)}
                                     />
                                 </div>
-
-                                {/* Help Section for Discount Code - animated */}
+                                {/* Help Section for Price Offer - animated */}
                                 <div
                                     className={cn(
                                         "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                        !discountCodeFocused && "expand-leave-to",
+                                        !priceOfferFocused && "expand-leave-to",
                                     )}
-                                    style={{ height: discountCodeFocused ? 100 : 0 }}
+                                    style={{ height: priceOfferFocused ? 110 : 0 }}
                                 >
-                                    <div className="bg-[#f3f5f7] dark:bg-[#363739]rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
+                                    <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
                                         <div className="flex items-center">
                                             <div className="flex items-center mr-1">
                                                 <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
                                             </div>
                                             <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                                Tell us the discount code
+                                                Tell us the price
                                             </span>
                                         </div>
-                                        <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                            Add only one code and instructions to the description
+                                        <div className="text-sm font-normal leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
+                                            This should be the total price after discount(s)
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Availability Section */}
-                            <div className="space-y-4">
-                                <h2 className="text-xl font-semibold dark:text-white text-black">Availability</h2>
-                                <div className="flex w-full">
-                                    <Button
-                                        onClick={() => setAvailability("online")}
+                            <div className="">
+                                <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">
+                                    Lowest price elsewhere
+                                </label>
+                                <div className="relative flex-1">
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
+                                    <Input
+                                        value={lowestPrice}
+                                        onChange={(e) => setLowestPrice(e.target.value)}
+                                        placeholder="0.00"
+                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-12 dark:focus:border-[#f97936]"
+                                        onFocus={() => setLowestPriceFocused(true)}
+                                        onBlur={() => setLowestPriceFocused(false)}
+                                    />
+                                    <span
                                         className={cn(
-                                            "flex-1 py-3 border",
-                                            availability === "online"
-                                                ? "bg-[#fbf3ef] hover:bg-[#fbece3] border-[#f7641b] hover:border-[#eb611f] hover:text-[#eb611f] dark:bg-[#481802] text-[#f7641b]  dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
-                                                : "text-black bg-[#fff] hover:border-[#d7d9dd] hover:text-[#f7641b] hover:bg-[#fff] dark:bg-[#1d1f20] dark:hover:bg-[#1d1f20] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
-                                            "rounded-l-full",
-                                            "rounded-r-none",
+                                            "absolute right-3 top-1/2 transform -translate-y-1/2 text-xs font-semibold px-2 py-0.5 rounded bg-[#f3f5f7] dark:bg-[hsla(0,0%,100%,0.11)]",
+                                            calculateDiscount() > 0
+                                                ? "text-green-600 dark:bg-[#052f01] dark:text-[#78c86b]"
+                                                : "text-[#f7641b] dark:text-[hsla(0,0%,100%,0.75)]",
                                         )}
                                     >
-                                        Online
-                                    </Button>
-                                    <Button
-                                        onClick={() => setAvailability("offline")}
-                                        className={cn(
-                                            "flex-1 py-3 border",
-                                            availability === "offline"
-                                                ? "bg-[#fbf3ef] hover:bg-[#fbece3] border-[#f7641b] hover:border-[#eb611f] hover:text-[#eb611f] dark:bg-[#481802] text-[#f7641b]  dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
-                                                : "text-black bg-[#fff] hover:border-[#d7d9dd] hover:text-[#f7641b] hover:bg-[#fff] dark:bg-[#1d1f20] dark:hover:bg-[#1d1f20] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
-                                            "rounded-r-full", // Right outer corner rounded
-                                            "rounded-l-none", // Inner corner flat
-                                        )}
-                                    >
-                                        Offline
-                                    </Button>
+                                        {calculateDiscount()}%
+                                    </span>
+                                </div>
+                                {/* Help Section for Lowest Price Elsewhere - animated */}
+                                <div
+                                    className={cn(
+                                        "transition-[height] duration-300 ease-in-out overflow-hidden",
+                                        !lowestPriceFocused && "expand-leave-to",
+                                    )}
+                                    style={{ height: lowestPriceFocused ? 150 : 0 }}
+                                >
+                                    <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
+                                        <div className="flex items-center">
+                                            <div className="flex items-center mr-1">
+                                                <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
+                                            </div>
+                                            <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                                Tell us lowest price elsewhere
+                                            </span>
+                                        </div>
+                                        <div className="text-sm font-normal leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
+                                            This is the lowest price you can find for the product elsewhere through price comparison (not
+                                            for the recommended retail price)
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            {/* Postage and Shipping Section or Location Selection for Offline */}
-                            {availability === "offline" ? (
-                                <div className=" rounded-lg relative">
-                                    <label className="dark:text-white text-sm font-semibold pb-[1.75px]">Select location(s)</label>
+                        </div>
+                    </div>
+                    {/* Discount Code Section */}
+                    <div className="">
+                        <label className="dark:text-white text-sm font-semibold pb-[1.75px]">Discount code</label>
+                        <div className="relative">
+                            <Scissors className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            <Input
+                                value={discountCode}
+                                onChange={(e) => setDiscountCode(e.target.value)}
+                                placeholder="Enter the discount code"
+                                className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 dark:focus:border-[#f97936]"
+                                onFocus={() => setDiscountCodeFocused(true)}
+                                onBlur={() => setDiscountCodeFocused(false)}
+                            />
+                        </div>
+                        {/* Help Section for Discount Code - animated */}
+                        <div
+                            className={cn(
+                                "transition-[height] duration-300 ease-in-out overflow-hidden",
+                                !discountCodeFocused && "expand-leave-to",
+                            )}
+                            style={{ height: discountCodeFocused ? 100 : 0 }}
+                        >
+                            <div className="bg-[#f3f5f7] dark:bg-[#363739]rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
+                                <div className="flex items-center">
+                                    <div className="flex items-center mr-1">
+                                        <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
+                                    </div>
+                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                        Tell us the discount code
+                                    </span>
+                                </div>
+                                <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
+                                    Add only one code and instructions to the description
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {/* Availability Section */}
+                    <div className="space-y-4">
+                        <h2 className="text-xl font-semibold dark:text-white text-black">Availability</h2>
+                        <div className="flex w-full">
+                            <Button
+                                onClick={() => setAvailability("online")}
+                                className={cn(
+                                    "flex-1 py-3 border",
+                                    availability === "online"
+                                        ? "bg-[#fbf3ef] hover:bg-[#fbece3] border-[#f7641b] hover:border-[#eb611f] hover:text-[#eb611f] dark:bg-[#481802] text-[#f7641b]  dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
+                                        : "text-black bg-[#fff] hover:border-[#d7d9dd] hover:text-[#f7641b] hover:bg-[#fff] dark:bg-[#1d1f20] dark:hover:bg-[#1d1f20] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
+                                    "rounded-l-full",
+                                    "rounded-r-none",
+                                )}
+                            >
+                                Online
+                            </Button>
+                            <Button
+                                onClick={() => setAvailability("offline")}
+                                className={cn(
+                                    "flex-1 py-3 border",
+                                    availability === "offline"
+                                        ? "bg-[#fbf3ef] hover:bg-[#fbece3] border-[#f7641b] hover:border-[#eb611f] hover:text-[#eb611f] dark:bg-[#481802] text-[#f7641b]  dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
+                                        : "text-black bg-[#fff] hover:border-[#d7d9dd] hover:text-[#f7641b] hover:bg-[#fff] dark:bg-[#1d1f20] dark:hover:bg-[#1d1f20] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
+                                    "rounded-r-full", // Right outer corner rounded
+                                    "rounded-l-none", // Inner corner flat
+                                )}
+                            >
+                                Offline
+                            </Button>
+                        </div>
+                    </div>
+                    {/* Postage and Shipping Section or Location Selection for Offline */}
+                    {availability === "offline" ? (
+                        <div className=" rounded-lg relative">
+                            <label className="dark:text-white text-sm font-semibold pb-[1.75px]">Select location(s)</label>
+                            <Input
+                                value={shippingFrom}
+                                onChange={(e) => setShippingFrom(e.target.value)}
+                                placeholder="Type to search or add city..."
+                                className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]"
+                                onFocus={() => setShowCityDropdown(true)}
+                                onBlur={() => setTimeout(() => setShowCityDropdown(false), 150)}
+                            />
+                            {showCityDropdown && (
+                                <ul className="absolute left-0 right-0 z-10 mt-2 max-h-56 overflow-y-auto bg-[#f3f5f7] dark:bg-[#23272f] rounded-lg shadow-lg border border-gray-200 dark:border-[#23272f] text-sm font-medium text-black dark:text-white">
+                                    {cityList.map((city) => (
+                                        <li
+                                            key={city}
+                                            className="px-4 py-2 cursor-pointer hover:bg-[#e3e4e8] dark:hover:bg-[#363739]"
+                                            onMouseDown={() => {
+                                                setShippingFrom(city)
+                                                setShowCityDropdown(false)
+                                            }}
+                                        >
+                                            {city}
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="">
+                                <label className="dark:text-white font-semibold text-black text-sm pb-[1.75px]">
+                                    Postage costs
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
+                                    <Input
+                                        value={postageCosts}
+                                        onChange={(e) => setPostageCosts(e.target.value)}
+                                        placeholder="0.00"
+                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 focus:outline-none !focus:ring-0 focus:border-[#f97936] dark:focus:ring-0 dark:focus:border-[#f97936]"
+                                    />
+                                </div>
+                            </div>
+                            <div className="">
+                                <label className="dark:text-white font-semibold text-sm pb-[1.75px]">Shipping from</label>
+                                <div className="relative">
+                                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                     <Input
                                         value={shippingFrom}
                                         onChange={(e) => setShippingFrom(e.target.value)}
-                                        placeholder="Type to search or add city..."
-                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]"
-                                        onFocus={() => setShowCityDropdown(true)}
-                                        onBlur={() => setTimeout(() => setShowCityDropdown(false), 150)}
+                                        placeholder="Search..."
+                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 dark:focus:border-[#f97936]"
                                     />
-                                    {showCityDropdown && (
-                                        <ul className="absolute left-0 right-0 z-10 mt-2 max-h-56 overflow-y-auto bg-[#f3f5f7] dark:bg-[#23272f] rounded-lg shadow-lg border border-gray-200 dark:border-[#23272f] text-sm font-medium text-black dark:text-white">
-                                            {cityList.map((city) => (
-                                                <li
-                                                    key={city}
-                                                    className="px-4 py-2 cursor-pointer hover:bg-[#e3e4e8] dark:hover:bg-[#363739]"
-                                                    onMouseDown={() => {
-                                                        setShippingFrom(city)
-                                                        setShowCityDropdown(false)
-                                                    }}
-                                                >
-                                                    {city}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
                                 </div>
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    const renderStepContent = () => {
+        switch (currentStep) {
+            case 0:
+                return (
+                    <>
+                        <div className="block md:hidden p-2">{renderCase0Mobile()}</div>
+                        <div className="hidden md:block min-h-screen w-full ">{renderCase0Desktop()}</div>
+                    </>
+                )
+            case 1:
+                return (
+                    <>
+                        <div className="block md:hidden p-2  ">{renderCase1Mobile()}</div>
+                        <div className="hidden md:block min-h-screen w-full ">
+                            {/* Restore the original desktop JSX for case 1 here */}
+                            <div
+                                className="flex flex-col items-center justify-center flex-1 animate-fade-in-up !m-0 !p-0 px-4 md:px-0"
+                                style={{ animationDelay: "0.1s", animationFillMode: "both" }}
+                            >
+                                <div className="w-full max-w-2xl mx-auto space-y-8">
+                                    <h1 className="text-2xl md:text-3xl font-semibold text-[#000] dark:text-[#fff] text-left mb-8">
+                                        Let's start with the essential information
+                                    </h1>
+                                    {/* Title Section */}
                                     <div className="">
-                                        <label className="dark:text-white font-semibold text-black text-sm pb-[1.75px]">
-                                            Postage costs
-                                        </label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
-                                            <Input
-                                                value={postageCosts}
-                                                onChange={(e) => setPostageCosts(e.target.value)}
-                                                placeholder="0.00"
-                                                className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] 
-             text-black dark:bg-[#1d1f20] dark:text-white 
-             placeholder:text-gray-400 
-             rounded-lg pt-2 pb-2 pl-9 pr-4 
-             focus:outline-none !focus:ring-0 focus:border-[#f97936] 
-              dark:focus:ring-0 dark:focus:border-[#f97936]"
-                                            />
+                                        <div className="flex justify-between items-center">
+                                            <label className="dark:text-white text-black text-sm font-semibold pb-[1.75px]">
+                                                Title of offer <span className="dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span>
+                                            </label>
+                                            <span className="dark:text-[hsla(0,0%,100%,0.75)] text-sm">{140 - title.length}</span>
+                                        </div>
+                                        <Input
+                                            value={title}
+                                            onChange={e => {
+                                                setTitle(e.target.value);
+                                                if (titleError) setTitleError("");
+                                            }}
+                                            placeholder="A short, clear title of your offer"
+                                            className={cn(
+                                                "w-full border text-black dark:border-[hsla(0,0%,100%,0.35)] dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]",
+                                                titleError ? "border-red-500 focus:border-red-500" : "border-[rgba(3,12,25,0.23)]"
+                                            )}
+                                            onFocus={() => setTitleFocused(true)}
+                                            onBlur={() => setTitleFocused(false)}
+                                        />
+                                        {titleError && (
+                                            <div className="text-red-500 text-xs mt-1">{titleError}</div>
+                                        )}
+                                        {/* Help Section  */}
+                                        <div
+                                            className={cn(
+                                                "transition-[height] duration-300 ease-in-out overflow-hidden",
+                                                !titleFocused && "expand-leave-to",
+                                            )}
+                                            style={{ height: titleFocused ? 110 : 0 }}
+                                        >
+                                            <div className="mt-2 bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1">
+                                                <div className="flex items-center">
+                                                    <div className="flex items-center mr-1">
+                                                        <Info className="w-[18px] h-[18px] dark:text-[hsla(0,0%,100%,0.75)] text-black" />
+                                                    </div>
+                                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                                        Make your title stand out
+                                                    </span>
+                                                </div>
+                                                <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
+                                                    Please include the brand, product type, color and model in the title (e.g. adidas UltraBoost
+                                                    (black))
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
+                                    {/* Price Details Section */}
                                     <div className="">
-                                        <label className="dark:text-white font-semibold text-sm pb-[1.75px]">Shipping from</label>
+                                        <h2 className="text-xl font-semibold dark:text-white text-black pb-4">Price details</h2>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="">
+                                                <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">Price Offer</label>
+                                                <div className="relative">
+                                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
+                                                    <Input
+                                                        value={priceOffer}
+                                                        onChange={(e) => setPriceOffer(e.target.value)}
+                                                        placeholder="15,55"
+                                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 text-sm placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-12 dark:focus:border-[#f97936]"
+                                                        onFocus={() => setPriceOfferFocused(true)}
+                                                        onBlur={() => setPriceOfferFocused(false)}
+                                                    />
+                                                </div>
+                                                {/* Help Section for Price Offer - animated */}
+                                                <div
+                                                    className={cn(
+                                                        "transition-[height] duration-300 ease-in-out overflow-hidden",
+                                                        !priceOfferFocused && "expand-leave-to",
+                                                    )}
+                                                    style={{ height: priceOfferFocused ? 110 : 0 }}
+                                                >
+                                                    <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
+                                                        <div className="flex items-center">
+                                                            <div className="flex items-center mr-1">
+                                                                <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
+                                                            </div>
+                                                            <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                                                Tell us the price
+                                                            </span>
+                                                        </div>
+                                                        <div className="text-sm font-normal leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
+                                                            This should be the total price after discount(s)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="">
+                                                <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">
+                                                    Lowest price elsewhere
+                                                </label>
+                                                <div className="relative flex-1">
+                                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
+                                                    <Input
+                                                        value={lowestPrice}
+                                                        onChange={(e) => setLowestPrice(e.target.value)}
+                                                        placeholder="0.00"
+                                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-12 dark:focus:border-[#f97936]"
+                                                        onFocus={() => setLowestPriceFocused(true)}
+                                                        onBlur={() => setLowestPriceFocused(false)}
+                                                    />
+                                                    <span
+                                                        className={cn(
+                                                            "absolute right-3 top-1/2 transform -translate-y-1/2 text-xs font-semibold px-2 py-0.5 rounded bg-[#f3f5f7] dark:bg-[hsla(0,0%,100%,0.11)]",
+                                                            calculateDiscount() > 0
+                                                                ? "text-green-600 dark:bg-[#052f01] dark:text-[#78c86b]"
+                                                                : "text-[#f7641b] dark:text-[hsla(0,0%,100%,0.75)]",
+                                                        )}
+                                                    >
+                                                        {calculateDiscount()}%
+                                                    </span>
+                                                </div>
+                                                {/* Help Section for Lowest Price Elsewhere - animated */}
+                                                <div
+                                                    className={cn(
+                                                        "transition-[height] duration-300 ease-in-out overflow-hidden",
+                                                        !lowestPriceFocused && "expand-leave-to",
+                                                    )}
+                                                    style={{ height: lowestPriceFocused ? 150 : 0 }}
+                                                >
+                                                    <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
+                                                        <div className="flex items-center">
+                                                            <div className="flex items-center mr-1">
+                                                                <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
+                                                            </div>
+                                                            <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                                                Tell us lowest price elsewhere
+                                                            </span>
+                                                        </div>
+                                                        <div className="text-sm font-normal leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
+                                                            This is the lowest price you can find for the product elsewhere through price comparison (not
+                                                            for the recommended retail price)
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* Discount Code Section */}
+                                    <div className="">
+                                        <label className="dark:text-white text-sm font-semibold pb-[1.75px]">Discount code</label>
                                         <div className="relative">
-                                            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                            <Scissors className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                            <Input
+                                                value={discountCode}
+                                                onChange={(e) => setDiscountCode(e.target.value)}
+                                                placeholder="Enter the discount code"
+                                                className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 dark:focus:border-[#f97936]"
+                                                onFocus={() => setDiscountCodeFocused(true)}
+                                                onBlur={() => setDiscountCodeFocused(false)}
+                                            />
+                                        </div>
+                                        {/* Help Section for Discount Code - animated */}
+                                        <div
+                                            className={cn(
+                                                "transition-[height] duration-300 ease-in-out overflow-hidden",
+                                                !discountCodeFocused && "expand-leave-to",
+                                            )}
+                                            style={{ height: discountCodeFocused ? 100 : 0 }}
+                                        >
+                                            <div className="bg-[#f3f5f7] dark:bg-[#363739]rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
+                                                <div className="flex items-center">
+                                                    <div className="flex items-center mr-1">
+                                                        <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
+                                                    </div>
+                                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                                        Tell us the discount code
+                                                    </span>
+                                                </div>
+                                                <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
+                                                    Add only one code and instructions to the description
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* Availability Section */}
+                                    <div className="space-y-4">
+                                        <h2 className="text-xl font-semibold dark:text-white text-black">Availability</h2>
+                                        <div className="flex w-full">
+                                            <Button
+                                                onClick={() => setAvailability("online")}
+                                                className={cn(
+                                                    "flex-1 py-3 border",
+                                                    availability === "online"
+                                                        ? "bg-[#fbf3ef] hover:bg-[#fbece3] border-[#f7641b] hover:border-[#eb611f] hover:text-[#eb611f] dark:bg-[#481802] text-[#f7641b]  dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
+                                                        : "text-black bg-[#fff] hover:border-[#d7d9dd] hover:text-[#f7641b] hover:bg-[#fff] dark:bg-[#1d1f20] dark:hover:bg-[#1d1f20] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
+                                                    "rounded-l-full",
+                                                    "rounded-r-none",
+                                                )}
+                                            >
+                                                Online
+                                            </Button>
+                                            <Button
+                                                onClick={() => setAvailability("offline")}
+                                                className={cn(
+                                                    "flex-1 py-3 border",
+                                                    availability === "offline"
+                                                        ? "bg-[#fbf3ef] hover:bg-[#fbece3] border-[#f7641b] hover:border-[#eb611f] hover:text-[#eb611f] dark:bg-[#481802] text-[#f7641b]  dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
+                                                        : "text-black bg-[#fff] hover:border-[#d7d9dd] hover:text-[#f7641b] hover:bg-[#fff] dark:bg-[#1d1f20] dark:hover:bg-[#1d1f20] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
+                                                    "rounded-r-full", // Right outer corner rounded
+                                                    "rounded-l-none", // Inner corner flat
+                                                )}
+                                            >
+                                                Offline
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    {/* Postage and Shipping Section or Location Selection for Offline */}
+                                    {availability === "offline" ? (
+                                        <div className=" rounded-lg relative">
+                                            <label className="dark:text-white text-sm font-semibold pb-[1.75px]">Select location(s)</label>
                                             <Input
                                                 value={shippingFrom}
                                                 onChange={(e) => setShippingFrom(e.target.value)}
-                                                placeholder="Search..."
-                                                className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 dark:focus:border-[#f97936]"
+                                                placeholder="Type to search or add city..."
+                                                className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]"
+                                                onFocus={() => setShowCityDropdown(true)}
+                                                onBlur={() => setTimeout(() => setShowCityDropdown(false), 150)}
                                             />
+                                            {showCityDropdown && (
+                                                <ul className="absolute left-0 right-0 z-10 mt-2 max-h-56 overflow-y-auto bg-[#f3f5f7] dark:bg-[#23272f] rounded-lg shadow-lg border border-gray-200 dark:border-[#23272f] text-sm font-medium text-black dark:text-white">
+                                                    {cityList.map((city) => (
+                                                        <li
+                                                            key={city}
+                                                            className="px-4 py-2 cursor-pointer hover:bg-[#e3e4e8] dark:hover:bg-[#363739]"
+                                                            onMouseDown={() => {
+                                                                setShippingFrom(city)
+                                                                setShowCityDropdown(false)
+                                                            }}
+                                                        >
+                                                            {city}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="">
+                                                <label className="dark:text-white font-semibold text-black text-sm pb-[1.75px]">
+                                                    Postage costs
+                                                </label>
+                                                <div className="relative">
+                                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
+                                                    <Input
+                                                        value={postageCosts}
+                                                        onChange={(e) => setPostageCosts(e.target.value)}
+                                                        placeholder="0.00"
+                                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 focus:outline-none !focus:ring-0 focus:border-[#f97936] dark:focus:ring-0 dark:focus:border-[#f97936]"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="">
+                                                <label className="dark:text-white font-semibold text-sm pb-[1.75px]">Shipping from</label>
+                                                <div className="relative">
+                                                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                                    <Input
+                                                        value={shippingFrom}
+                                                        onChange={(e) => setShippingFrom(e.target.value)}
+                                                        placeholder="Search..."
+                                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 dark:focus:border-[#f97936]"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+                            </div>
                         </div>
-                    </div>
+                    </>
                 )
             case 2:
                 return (
