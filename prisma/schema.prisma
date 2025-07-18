@@ -30,7 +30,6 @@ model Deal {
   id            String      @id @default(uuid())
   title         String
   slug          String      @unique
-  imageId       String
   description   String
   price         Decimal     @db.Decimal(10, 2)
   originalPrice Decimal?    @map("original_price") @db.Decimal(10, 2)
@@ -51,7 +50,7 @@ model Deal {
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   savedDeals    SavedDeal[]
   votes         Vote[]
-  images        DealImage[]
+  images        DealImage[] @relation("DealToImages")
 
   @@map("deals")
 }
@@ -61,9 +60,9 @@ model DealImage {
   url       String
   isCover   Boolean  @default(false)
   dealId    String   @map("deal_id")
-  deal      Deal     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  deal      Deal     @relation("DealToImages", fields: [dealId], references: [id], onDelete: Cascade)
+  slug      String
   createdAt DateTime @default(now()) @map("created_at")
-
   @@map("deal_images")
 }
 

@@ -171,7 +171,7 @@ export async function POST(request: Request) {
     console.log("📦 Payload received:", body)
 
     if (!title || !description || !category || !dealUrl || !price || !imageUrls || imageUrls.length === 0) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+      return NextResponse.json({ error: 'Missing required fields', title, description, category, dealUrl, price, imageUrls }, { status: 400 })
     }
 
     // const supabase = getSupabase()
@@ -196,12 +196,11 @@ export async function POST(request: Request) {
     const parsedPrice = parseFloat(price)
     const parsedOriginalPrice = originalPrice ? parseFloat(originalPrice) : null
     const parsedPostageCosts = postageCosts ? parseFloat(postageCosts) : null
-
+   
     const deal = await prisma.deal.create({
       data: {
         title,
         slug,
-       
         description,
         price: parsedPrice,
         originalPrice: parsedOriginalPrice,
@@ -216,21 +215,15 @@ export async function POST(request: Request) {
         shippingFrom: shippingFrom || null,
         userId: "dc60fdb9-df0d-40a4-ae45-d74589d00b10",
         images: {
-          create: imageUrls.map((url: string, index: number) => {
-            const imageId = getImageIdFromUrl(url);
-            const slugPart = slugify(title, { lower: true, strict: true });
-            const imageSlug = `${slugPart}-${index + 1}.jpg`;
-
-            return {
-              url,
-              imageId,
-              slug: imageSlug,
-              isCover: index === coverImageIndex,
-            };
-          }),
+          create: imageUrls.map((img: any, index: number) => ({
+            url: img.url,
+            slug: img.slug,
+            isCover: img.isCover ?? index === coverImageIndex,
+          })),
         },
       },
-    });
+      include: { images: true },
+    })
 
     return NextResponse.json({ success: true, dealId: deal.id }, { status: 201 })
   } catch (err) {
