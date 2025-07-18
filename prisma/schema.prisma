@@ -29,6 +29,8 @@ model User {
 model Deal {
   id            String      @id @default(uuid())
   title         String
+  slug          String      @unique
+  imageId       String
   description   String
   price         Decimal     @db.Decimal(10, 2)
   originalPrice Decimal?    @map("original_price") @db.Decimal(10, 2)

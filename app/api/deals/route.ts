@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getSupabase } from "@/lib/supabase"
-
+import slugify from "slugify"
+import { getImageIdFromUrl } from "@/lib/getImageIdFromUrl";
 
 // Helper function to check if Prisma is initialized
 async function isPrismaInitialized() {
@@ -190,7 +191,8 @@ export async function POST(request: Request) {
     // if (!dbUser) {
     //   return NextResponse.json({ error: 'User not found in database' }, { status: 403 })
     // }
-
+    const slug = slugify(title, { lower: true, strict: true });
+    // const imageId = getImageIdFromCloudflareResponse();
     const parsedPrice = parseFloat(price)
     const parsedOriginalPrice = originalPrice ? parseFloat(originalPrice) : null
     const parsedPostageCosts = postageCosts ? parseFloat(postageCosts) : null
@@ -198,6 +200,8 @@ export async function POST(request: Request) {
     const deal = await prisma.deal.create({
       data: {
         title,
+        slug,
+       
         description,
         price: parsedPrice,
         originalPrice: parsedOriginalPrice,
@@ -212,13 +216,21 @@ export async function POST(request: Request) {
         shippingFrom: shippingFrom || null,
         userId: "dc60fdb9-df0d-40a4-ae45-d74589d00b10",
         images: {
-          create: imageUrls.map((url: string, index: number) => ({
-            url,
-            isCover: index === coverImageIndex,
-          })),
+          create: imageUrls.map((url: string, index: number) => {
+            const imageId = getImageIdFromUrl(url);
+            const slugPart = slugify(title, { lower: true, strict: true });
+            const imageSlug = `${slugPart}-${index + 1}.jpg`;
+
+            return {
+              url,
+              imageId,
+              slug: imageSlug,
+              isCover: index === coverImageIndex,
+            };
+          }),
         },
       },
-    })
+    });
 
     return NextResponse.json({ success: true, dealId: deal.id }, { status: 201 })
   } catch (err) {
