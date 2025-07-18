@@ -1162,14 +1162,14 @@ export default function PostOfferPage() {
             case 1:
                 return (
                     <>
-                        <div className="block md:hidden p-2  ">{renderCase1Mobile()}</div>
-                        <div className="hidden md:block min-h-screen w-full ">
+                        <div className="block md:hidden p-2">{renderCase1Mobile()}</div>
+                        <div className="hidden md:block w-full">
                             {/* Restore the original desktop JSX for case 1 here */}
                             <div
-                                className="flex flex-col items-center justify-center flex-1 animate-fade-in-up !m-0 !p-0 px-4 md:px-0"
+                                className="flex flex-col items-center justify-center flex-1 animate-fade-in-up !m-0 !p-0  h-full w-full "
                                 style={{ animationDelay: "0.1s", animationFillMode: "both" }}
                             >
-                                <div className="w-full max-w-2xl mx-auto space-y-8">
+                                <div className="w-full  max-w-2xl mx-auto space-y-8">
                                     <h1 className="text-2xl md:text-3xl font-semibold text-[#000] dark:text-[#fff] text-left mb-8">
                                         Let's start with the essential information
                                     </h1>
