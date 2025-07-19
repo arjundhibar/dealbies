@@ -174,23 +174,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields', title, description, category, dealUrl, price, imageUrls }, { status: 400 })
     }
 
-    // const supabase = getSupabase()
-    // const token = request.headers.get('Authorization')?.replace('Bearer ', '')
+    const supabase = getSupabase()
+    const token = request.headers.get('Authorization')?.replace('Bearer ', '')
 
-    // if (!token) {
-    //   return NextResponse.json({ error: 'Missing or invalid token' }, { status: 401 })
-    // }
+    if (!token) {
+      return NextResponse.json({ error: 'Missing or invalid token' }, { status: 401 })
+    }
 
-    // const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
 
-    // if (userError || !user) {
-    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    // }
+    if (userError || !user) {
+      return NextResponse.json({ error: 'Unauthorized user not found' }, { status: 401 })
+    }
 
-    // let dbUser = await prisma.user.findUnique({ where: { email: user.email! } })
-    // if (!dbUser) {
-    //   return NextResponse.json({ error: 'User not found in database' }, { status: 403 })
-    // }
+    let dbUser = await prisma.user.findUnique({ where: { email: user.email! } })
+    if (!dbUser) {
+      return NextResponse.json({ error: 'User not found in database' }, { status: 403 })
+    }
     const slug = slugify(title, { lower: true, strict: true });
     // const imageId = getImageIdFromCloudflareResponse();
     const parsedPrice = parseFloat(price)
@@ -213,7 +213,7 @@ export async function POST(request: Request) {
         availability: availability.toUpperCase() || null,
         postageCosts: parsedPostageCosts,
         shippingFrom: shippingFrom || null,
-        userId: "dc60fdb9-df0d-40a4-ae45-d74589d00b10",
+        userId: user.id,
         images: {
           create: imageUrls.map((img: any, index: number) => ({
             url: img.url,
