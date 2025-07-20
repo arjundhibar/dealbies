@@ -58,10 +58,11 @@ model Deal {
 model DealImage {
   id        String   @id @default(uuid())
   url       String
+  cloudflareUrl String? // Actual Cloudflare URL for redirect
   isCover   Boolean  @default(false)
   dealId    String   @map("deal_id")
   deal      Deal     @relation("DealToImages", fields: [dealId], references: [id], onDelete: Cascade)
-  slug      String
+  slug      String   @unique
   createdAt DateTime @default(now()) @map("created_at")
   @@map("deal_images")
 }

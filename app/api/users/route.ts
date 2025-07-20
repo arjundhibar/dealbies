@@ -36,7 +36,6 @@ export async function GET(request: Request) {
 export async function POST(req: Request) {
   const authHeader = req.headers.get("Authorization");
   const token = authHeader?.replace("Bearer ", "");
-
   if (!token) return new Response("Unauthorized", { status: 401 });
 
   const supabase = getSupabase(token);

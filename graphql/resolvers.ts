@@ -38,11 +38,19 @@ export const resolvers = {
                 const downVotes = deal.votes.filter((v : any) => v.voteType === 'down').length
                 const userVote = deal.votes.find((v : any) => v.userId === currentUserId)?.voteType
 
+                // Find the cover image (isCover) or fallback to first image
+                let coverImage = null;
+                if (deal.images && deal.images.length > 0) {
+                    const cover = deal.images.find((img: any) => img.isCover);
+                    coverImage = cover ? cover.url : deal.images[0].url;
+                }
+
                 return {
                     id: deal.id,
                     title: deal.title,
                     description: deal.description,
                     imageUrls: deal.images.map((img : any) => img.url),
+                    coverImage, // <-- add this field
                     price: deal.price,
                     originalPrice: deal.originalPrice,
                     merchant: deal.merchant,

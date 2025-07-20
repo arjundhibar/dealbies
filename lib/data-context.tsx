@@ -148,7 +148,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            // Optional: add Authorization header if needed
           },
           body: JSON.stringify({
             query: `
@@ -156,16 +155,23 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
               deals(category: $category, sort: $sort) {
                 id
                 title
-                price
-                category
                 description
-                postedBy {
-                  username
-                  avatarUrl
-                }
+                price
+                originalPrice
+                merchant
+                category
+                dealUrl
+                expired
+                expiresAt
+                createdAt
                 score
                 commentCount
-                createdAt
+                postedBy {
+                  id
+                  username
+                }
+                userVote
+                imageUrls
               }
             }
           `,
@@ -174,7 +180,17 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         })
 
         const { data } = await response.json()
-        const result = data?.deals || []
+
+        const result = (data?.deals || []).map((deal: any) => ({
+          ...deal,
+          imageUrl: deal.imageUrls?.[0] || "", // assuming first image is cover
+          postedBy: {
+            id: deal.postedBy.id,
+            name: deal.postedBy.username,
+            avatar: "", // default since avatarUrl is not queried
+          },
+        }))
+
         setDeals(result)
         return result
       } catch (error) {
@@ -191,6 +207,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     },
     [toast]
   )
+
 
 
   const fetchCoupons = useCallback(

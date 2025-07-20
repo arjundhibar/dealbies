@@ -38,6 +38,7 @@ export function DealsList({ category, initialSort = "newest" }: DealsListProps) 
     const loadDeals = async () => {
       try {
         const deals = await fetchDeals(category, sort)
+        console.log("the deal fetched here", deals)
         setFilteredDeals(deals)
       } catch (error) {
         console.error("Error loading deals:", error)

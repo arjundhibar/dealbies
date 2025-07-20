@@ -216,7 +216,8 @@ export async function POST(request: Request) {
         userId: user.id,
         images: {
           create: imageUrls.map((img: any, index: number) => ({
-            url: img.url,
+            url: img.url, // SEO-friendly URL
+            cloudflareUrl: img.cloudflareUrl, // Actual Cloudflare URL
             slug: img.slug,
             isCover: img.isCover ?? index === coverImageIndex,
           })),

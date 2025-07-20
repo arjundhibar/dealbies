@@ -2,6 +2,8 @@ import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Pencil, CircleCheck, ArrowRight, CheckCircle, Check } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { getSupabase } from "@/lib/supabase"
+import { useAuth } from "@/lib/auth-context"
 
 export function DesktopOfferSubmission(props: any) {
   const {
@@ -32,10 +34,24 @@ export function DesktopOfferSubmission(props: any) {
 
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { session } = useAuth();
 
   async function handleSubmitDeal() {
     try {
       setIsLoading(true);
+      // Prefer token from useAuth session, fallback to Supabase if needed
+      let accessToken = session?.access_token;
+      if (!accessToken) {
+        const supabase = getSupabase();
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData?.session || !sessionData.session.user) {
+          throw new Error("Failed to retrieve session after login");
+        }
+        accessToken = sessionData.session.access_token;
+      }
+      if (!accessToken) {
+        throw new Error("Access token not found in session");
+      }
       const imageUploadResults = [];
 
       for (let i = 0; i < uploadedImages.length; i++) {
@@ -54,15 +70,18 @@ export function DesktopOfferSubmission(props: any) {
 
           const uploadResult = await uploadRes.json();
           const publicUrl = uploadResult.result.variants[0];
-
-          imageUploadResults.push({ url: publicUrl, isCover: i === 0 });
+          // Generate SEO-friendly slug
+          const slugBase = title ? title : `image-${i+1}`;
+          const slug = slugBase.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + `-${i+1}.jpg`;
+          const seoUrl = `https://images.dealbies.com/${slug}`;
+          imageUploadResults.push({ url: seoUrl, slug, isCover: i === 0, cloudflareUrl: publicUrl });
         } else {
           console.warn("Skipped non-uploaded image:", img.url);
 
         }
       }
 
-      const imageUrls = imageUploadResults.map((img) => img.url);
+      const imageUrls = imageUploadResults; // send array of objects
       const coverImageIndex = imageUploadResults.findIndex((img) => img.isCover);
 
       const payload = {
@@ -84,7 +103,10 @@ export function DesktopOfferSubmission(props: any) {
       console.log("Payload sending to /api/deals:", payload);
       const dealRes = await fetch("/api/deals", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify(payload),
       });
 
