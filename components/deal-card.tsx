@@ -136,7 +136,7 @@ export function DealCard({ deal }: DealCardProps) {
                   <div className="text-sm text-muted-foreground pl-[0.5rem] pr-[0.5rem] pb-[0.25rem] pt-[0.25rem] rounded-md dark:bg-[hsla(0,0%,100%,0.11)] dark:text-[hsla(0,0%,100%,0.75)] bg-[#0f375f0d] ">Posted {formatRelativeTime(postedAtDate)}</div>
                 </div>
 
-                <h3 className="text-base font-bold mb-1 leading-[1.5rem] group-hover:text-[#f7641b]">{title}</h3>
+                <h3 className="text-base font-bold mb-1 leading-[1.5rem] group-hover:text-[#f7641b] line-clamp-1">{title}</h3>
 
                 <div className="flex items-center gap-2 mb-1 leading-none">
                   <span className="text-xl font-bold text-[#f7641b] dark:text-[#f97936]">{formatCurrency(Number(price))}</span>
@@ -248,7 +248,7 @@ export function DealCard({ deal }: DealCardProps) {
             </div>
 
             {/* Title */}
-            <h3 className="text-lg font-bold group-hover:text-[#f7641b]">{title}</h3>
+            <h3 className="text-lg font-bold group-hover:text-[#f7641b] line-clamp-1">{title}</h3>
 
             {/* Price section */}
             {/* Price, Merchant, Posted By - All in one line */}
