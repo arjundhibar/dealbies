@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ThumbsUp, ThumbsDown, ExternalLink, Share2, MessageCircle, ChevronDown, ChevronUp, MoveDiagonal } from "lucide-react"
-import { formatDistanceToNow, isPast } from "date-fns"
+import { ThumbsUp, ThumbsDown, ExternalLink, Share2, MessageCircle, ChevronDown, ChevronUp, MoveDiagonal, Clock } from "lucide-react"
+import { formatDistanceToNow, isPast, format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { CommentSection } from "@/components/comment-section"
@@ -17,6 +17,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { DealCardSaveButton } from "@/components/deal-card-save-button"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { Carousel } from "@/components/ui/carousel";
 
 export default function DealPage() {
   const params = useParams()
@@ -34,10 +35,12 @@ export default function DealPage() {
       setLoading(true)
       try {
         const dealData = await getDeal(id)
-        if (!dealData) {
-          notFound()
-        }
+        console.log("this is the deal data in useeffect", dealData)
+        // if (!dealData) {
+        //   notFound()
+        // }
         setDeal(dealData)
+       
 
         const related = await getRelatedDeals(id)
         setRelatedDeals(related)
@@ -138,7 +141,6 @@ export default function DealPage() {
   const {
     title,
     description,
-    imageUrl,
     price,
     originalPrice,
     merchant,
@@ -151,11 +153,37 @@ export default function DealPage() {
     userVote,
     expired,
     expiresAt,
+    startAt,
+    imageUrls
   } = deal
-
+  console.log("this is the deal data in page[]id lauda lehsun", deal)
   const isExpired = expired || (expiresAt && isPast(new Date(expiresAt)))
   const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : null
   const postedAtDate = new Date(createdAt)
+
+  const now = new Date();
+  const startAtDate = startAt ? new Date(startAt) : null;
+  const expiresAtDate = expiresAt ? new Date(expiresAt) : null;
+  let offerStatus = null;
+  if (startAtDate && now < startAtDate) {
+    offerStatus = (
+      <div className="flex items-center gap-2 mb-4 w-full justify-center text-[var(--textStatusInfo)] dark:text-blue-400 text-base font-normal text-center bg-[var(--bgStatusInfoMuted)] dark:bg-blue-900 rounded-md py-4 mr-2">
+        <Clock className="h-5 w-5" />
+        <span>
+          This offer will start on {format(startAtDate, "MMMM d, yyyy 'at' HH:mm")}
+        </span>
+      </div>
+    );
+  } else if (expiresAtDate) {
+    offerStatus = (
+      <div className="flex items-center gap-2 mb-4 text-red-600 dark:text-red-400 text-sm font-medium">
+        <Clock className="h-5 w-5" />
+        <span>
+          This offer expires on {format(expiresAtDate, "MMMM d, yyyy 'at' HH:mm")}
+        </span>
+      </div>
+    );
+  }
 
   // Mobile layout
   if (isMobile) {
@@ -165,10 +193,10 @@ export default function DealPage() {
         <Card className="mb-6 overflow-hidden dark:bg-dark-secondary">
           <div className="flex flex-col">
             {/* Deal Image */}
-            <div className="w-full">
+            {/* <div className="w-full">
               <div className="relative w-full h-[228px]">
                 <Image
-                  src={imageUrl || "/placeholder.svg?height=400&width=400"}
+                  src={imageUrls[0] || "/placeholder.svg?height=400&width=400"}
                   alt={title}
                   fill
                   className="object-cover"
@@ -182,7 +210,7 @@ export default function DealPage() {
                   Enlarge
                 </Button>
               </div>
-            </div>
+            </div> */}
 
             {/* Deal Content */}
             <div className="flex-1 p-6">
@@ -265,27 +293,14 @@ export default function DealPage() {
   return (
     <div className="w-full px-4 lg:w-[1000px] lg:px-0 mx-auto">
       {/* Main Deal Card */}
-      <Card className="mb-6 overflow-hidden dark:bg-dark-secondary bg-[#fff] pt-[1.5em] pl-[1.5rem]">
+      <Card className="mb-6 overflow-hidden dark:bg-dark-secondary bg-[#fff] pt-[1.5em] pl-[1.5rem] pr-[1.5rem] pb-[1.5rem]">
+        {offerStatus}
         <div className="flex flex-col lg:flex-row">
           {/* Deal Image */}
           <div className="lg:w-[342px] lg:flex-shrink-0">
-            <div className="relative w-full h-[228px] lg:pr-[0.25rem] pt-[0.5em] flex items-center justify-center">
-              <Image
-                src={imageUrl || "/placeholder.svg?height=400&width=400"}
-                alt={title}
-                fill
-                className="object-cover"
-              />
-              <Button
-                variant="secondary"
-                size="sm"
-                className=" absolute bottom-2 right-2 rounded-[50vh] border border-[#dfe1e4] hover:border-[#d7d9dd] active:border-[#ced0d3] hover:bg-[#f3f5f7] active:bg-[#eceef0] text-[#6b6d70] hover:text-[#76787b] active:text-[#818386] cursor-pointer h-9 px-4 font-bold text-[0.875rem] whitespace-nowrap overflow-hidden text-ellipsis bg-white"
-              >
-                <MoveDiagonal className="h-8 w-8 scale-[1.5]" />
-                Enlarge
-              </Button>
+            <div className="w-full h-[228px] lg:pr-[0.25rem] pt-[0.5em] flex items-center justify-center">
+              <Carousel images={deal.imageUrls && deal.imageUrls.length > 0 ? deal.imageUrls.map(img => img.url) : ["/placeholder.svg?height=400&width=400"]} />
             </div>
-
           </div>
 
           {/* Deal Content */}
@@ -472,7 +487,7 @@ export default function DealPage() {
                     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                       <div className="aspect-square relative">
                         <Image
-                          src={relatedDeal.imageUrl || "/placeholder.svg?height=200&width=200"}
+                          src={relatedDeal.imageUrls?.[0]?.url || "/placeholder.svg?height=200&width=200"}
                           alt={relatedDeal.title}
                           fill
                           className="object-cover"

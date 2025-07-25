@@ -163,6 +163,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
                 dealUrl
                 expired
                 expiresAt
+                startAt
                 createdAt
                 score
                 commentCount
@@ -173,13 +174,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
                 userVote
                 imageUrls
               }
-            }
+            } 
           `,
             variables: { category, sort },
           }),
         })
 
         const { data } = await response.json()
+        
 
         const result = (data?.deals || []).map((deal: any) => ({
           ...deal,
@@ -190,7 +192,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             avatar: "", // default since avatarUrl is not queried
           },
         }))
-
+        console.log("this is the data datat is the is wefwhuefwufherwhf", result)
         setDeals(result)
         return result
       } catch (error) {
@@ -430,23 +432,71 @@ if (!token) {
     }
   }
 
-  const getDeal = async (id: string): Promise<Deal | undefined> => {
-    try {
-      const response = await fetch(`/api/deals/${id}`)
-      if (response.ok) {
-        return await response.json()
+  const getDeal = useCallback(
+    async (id: string): Promise<Deal | undefined> => {
+      setIsLoading(true)
+      try {
+        const response = await fetch("/api/graphql", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: `
+            query GetDeal($id: ID!) {
+              deal(id: $id) {
+                id
+                title
+                description
+                price
+                originalPrice
+                merchant
+                category
+                dealUrl
+                expired
+                expiresAt
+                startAt
+                createdAt
+                score
+                commentCount
+                postedBy {
+                  id
+                  username
+                }
+                userVote
+                imageUrls
+              }
+            }
+          `,
+          variables: { id },
+        }),
+      })
+      const { data } = await response.json()
+      const deal = data?.deal
+      if (!deal) return undefined
+      return {
+        ...deal,
+        imageUrl: deal.imageUrls?.[0] || "",
+        postedBy: {
+          id: deal.postedBy.id,
+          name: deal.postedBy.username,
+          avatar: "",
+        },
       }
-      return undefined
     } catch (error) {
       console.error("Error fetching deal:", error)
       toast({
         title: "Error",
-        description: "Failed to load deal details. Please try refreshing the page.",
+        description: "Failed to load deal. Please try refreshing the page.",
         variant: "destructive",
       })
       return undefined
+    } finally {
+      setIsLoading(false)
     }
-  }
+  },
+  [toast]
+)
 
   const getRelatedDeals = async (dealId: string, limit = 3): Promise<Deal[]> => {
     try {

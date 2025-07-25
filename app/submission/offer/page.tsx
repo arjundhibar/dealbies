@@ -19,7 +19,7 @@ import {
     ArrowRight,
     Plus,
     X,
-    Link,
+    Link as LinkIcon,
     Smile,
     Minus,
     List,
@@ -32,10 +32,20 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceStrict } from "date-fns"
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
+import Underline from '@tiptap/extension-underline';
+import TextAlign from '@tiptap/extension-text-align';
+import Placeholder from '@tiptap/extension-placeholder';
 
 // Import the separated components
 import { MobileOfferSubmission } from "./mobile-offer-submission"
 import { DesktopOfferSubmission } from "./desktop-offer-submission"
+
+
+
 
 interface DuplicateDeal {
     title: string
@@ -51,6 +61,8 @@ interface UploadedImage {
     file?: File
     isCover: boolean
 }
+
+
 
 export default function PostOfferPage() {
     // Shared state for both mobile and desktop
@@ -100,6 +112,8 @@ export default function PostOfferPage() {
     const [selectedCategories, setSelectedCategories] = useState<string[]>([])
 
     const [showMoreDescription, setShowMoreDescription] = useState(false)
+
+
 
     const editorRef = useRef<HTMLDivElement>(null)
 
@@ -307,7 +321,7 @@ export default function PostOfferPage() {
             if (editorRef.current) {
                 setDescription(editorRef.current.innerHTML);
             }
-            const plainText = editorRef.current?.innerText?.trim() || "";
+            const plainText = editor?.getText().trim() || "";
             if (!plainText) {
                 setDescriptionError("This field is required");
                 return;
@@ -872,7 +886,7 @@ export default function PostOfferPage() {
 
     function renderCase1Mobile() {
         return (
-            <div className="flex flex-col items-center justify-center flex-1 animate-fade-in-up !m-0 !p-0 px-4  " style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+            <div className="w-full max-w-2xl !mx-auto space-y-8 px-2" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
                 <div className="w-full max-w-2xl mx-auto space-y-8">
                     <h1 className="text-2xl md:text-3xl font-semibold text-[#000] dark:text-[#fff] text-left mb-8">
                         Let's start with the essential information
@@ -1150,6 +1164,557 @@ export default function PostOfferPage() {
         );
     }
 
+    function renderCase3Mobile() {
+        return (
+            <div className="flex items-center justify-center flex-1 p-2 animate-fade-in-up" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+                <div className="max-w-[682px] w-full space-y-8">
+                    {/* Header */}
+                    <div className="text-left">
+                        <h1 className="text-2xl font-semibold text-[#000] dark:text-[#fff]">
+                            Why is this offer worth sharing?
+                        </h1>
+                    </div>
+                    {/* Description Text Area */}
+                    <div className="">
+                        <div className="">
+                            {editor && <EditorContent editor={editor} />}
+                            {descriptionError && (
+                                <div className="text-red-500 text-xs mt-1">{descriptionError}</div>
+                            )}
+                            {/* Help Section for Description - animated */}
+                            <div
+                                className={cn(
+                                    "transition-[height] duration-300 ease-in-out overflow-hidden absolute top-[353px] left-2 right-2 z-10",
+                                    !descriptionFocused && "expand-leave-to",
+                                )}
+                                style={{ height: descriptionFocused ? 110 : 0 }}
+                            >
+                                <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1">
+                                    <div className="flex items-center">
+                                        <div className="flex items-center mr-1">
+                                            <Info className="w-[18px] h-[18px] dark:text-[hsla(0,0%,100%,0.75)] text-black" />
+                                        </div>
+                                        <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                            Tell us about your deal.
+                                        </span>
+                                    </div>
+                                    <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[rgba(4,8,13,0.59)] mt-1">
+                                        Add the details about the product,links to relevant info/reviews and why you think it's a good deal
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Formatting Toolbar */}
+                            <div className="relative -top-14 w-fit left-2 inline-flex items-center gap-1 bg-[#fff] dark:bg-[#1d1f20] rounded-xl p-[7px] border border-[rgba(3,12,25,0.1)] dark:border-[#1d1f20] shadow-lg overflow-x-auto">
+                                <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => editor?.chain().focus().toggleBold().run()}><Bold className="h-4 w-4 stroke-[3.2]" /></Button>
+                                <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => editor?.chain().focus().toggleStrike().run()}><Strikethrough className="h-4 w-4 stroke-[3.2]" /></Button>
+                                <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => editor?.chain().focus().toggleItalic().run()}><Italic className="h-4 w-4 stroke-[3.2]" /></Button>
+                                <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => editor?.chain().focus().toggleBulletList().run()}><List className="h-4 w-4 stroke-[3.2]" /></Button>
+                                <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => editor?.chain().focus().setHorizontalRule().run()}><Minus className="h-4 w-4 stroke-[3.2]" /></Button>
+                                <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={() => setShowEmojiPicker((v) => !v)}><Smile className="h-4 w-4 stroke-[3.2]" /></Button>
+                                {showEmojiPicker && (
+                                    <div className="absolute bottom-12 left-0 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-2 flex flex-wrap gap-1 z-50">
+                                        {emojiList.map((emoji) => (
+                                            <button key={emoji} className="text-xl p-1 hover:bg-gray-100 dark:hover:bg-[#363739] rounded" onMouseDown={e => e.preventDefault()} onClick={() => { editor?.chain().focus().insertContent(emoji).run(); setShowEmojiPicker(false); }}>{emoji}</button>
+                                        ))}
+                                    </div>
+                                )}
+                                <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => setShowLinkInput(true)}><LinkIcon className="h-4 w-4 stroke-[3.2]" /></Button>
+                                {showLinkInput && (
+                                    <div className="absolute bottom-12 m-4 left-24 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-6 flex flex-col gap-2 w-[350px]">
+                                        {/* Arrow pointer at the bottom */}
+                                        <div
+                                            className="absolute -bottom-2 left-36 w-0 h-0"
+                                            style={{
+                                                borderLeft: "8px solid transparent",
+                                                borderRight: "8px solid transparent",
+                                                borderTop: "8px solid #fff",
+                                            }}
+                                        />
+                                        {/* Heading with icon, text, and close button */}
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-1">
+                                                <Link2 className="h-6 w-6 text-black dark:text-white" />
+                                                <span className="font-semibold text-lg text-black dark:text-white">Link</span>
+                                            </div>
+                                            <button
+                                                onClick={() => setShowLinkInput(false)}
+                                                className="p-1 rounded-full hover:bg-[rgba(15,55,95,0.05)] dark:hover:bg-[#363739] text-[#6b6d70] hover:text-[#76787b] dark:hover:text-white"
+                                                aria-label="Close"
+                                            >
+                                                <X className="h-6 w-6" />
+                                            </button>
+                                        </div>
+                                        <div className="flex flex-col space-y-8">
+                                            <div className="flex flex-col space-y-2">
+                                                <label className="text-[12.25px] text-black dark:text-white font-semibold">URL</label>
+                                                <input
+                                                    type="text"
+                                                    value={linkURL}
+                                                    onChange={(e) => setLinkURL(e.target.value)}
+                                                    className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
+                                                />
+                                            </div>
+                                            <div className="flex flex-col space-y-2">
+                                                <label className="text-[12.25px] text-black dark:text-white font-semibold">Text</label>
+                                                <input
+                                                    type="text"
+                                                    value={linkText}
+                                                    onChange={(e) => setLinkText(e.target.value)}
+                                                    className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
+                                                />
+                                                <div className="pt-4">
+                                                    <button
+                                                        onClick={() => {
+                                                            if (!editorRef.current) return
+                                                            editorRef.current.focus()
+                                                            if (savedSelection) {
+                                                                const selection = window.getSelection()
+                                                                selection?.removeAllRanges()
+                                                                selection?.addRange(savedSelection)
+                                                            }
+                                                            const selection = window.getSelection()
+                                                            if (!selection || !selection.rangeCount) return
+                                                            const range = selection.getRangeAt(0)
+                                                            range.deleteContents()
+                                                            // Create a real <a> element
+                                                            const a = document.createElement("a")
+                                                            a.href = linkURL
+                                                            a.textContent = linkText || linkURL
+                                                            a.target = "_blank"
+                                                            a.rel = "noopener noreferrer"
+                                                            range.insertNode(a)
+                                                            // Move caret after link
+                                                            range.setStartAfter(a)
+                                                            range.collapse(true)
+                                                            selection.removeAllRanges()
+                                                            selection.addRange(range)
+                                                            setShowLinkInput(false)
+                                                            setLinkURL("")
+                                                            setLinkText("")
+                                                            setDescription(editorRef.current.innerHTML)
+                                                        }}
+                                                        disabled={!linkURL.trim()}
+                                                        className={
+                                                            `text-sm h-9 font-medium  text-white px-3 py-1 w-full rounded-full  ` +
+                                                            (!linkURL.trim()
+                                                                ? "bg-[#f3f5f7] text-[#a7a9ac] cursor-not-allowed"
+                                                                : "text-white bg-[#f7641b] hover:bg-[#eb611f] shadow-[#f7641b] hover:shadow-[#eb611f]")
+                                                        }
+                                                    >
+                                                        Insert
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="icon-button flex-shrink-0"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => {
+                                        setShowImageInput(true)
+                                        // Save the current selection
+                                        const selection = window.getSelection()
+                                        if (selection && selection.rangeCount > 0) {
+                                            setSavedSelection(selection.getRangeAt(0))
+                                        }
+                                    }}
+                                >
+                                    <ImageIcon className="h-4 w-4 stroke-[3.2]" />
+                                </Button>
+                                {showImageInput && (
+                                    <div className="absolute bottom-12 m-4 left-48 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-6 flex flex-col gap-2 z-50 w-[350px]">
+                                        {/* Arrow pointer at the bottom */}
+                                        <div
+                                            className="absolute -bottom-2 left-36 w-0 h-0"
+                                            style={{
+                                                borderLeft: "8px solid transparent",
+                                                borderRight: "8px solid transparent",
+                                                borderTop: "8px solid #fff",
+                                            }}
+                                        />
+                                        {/* Heading with icon, text, and close button */}
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-1">
+                                                <ImageIcon className="h-6 w-6 text-black dark:text-white" />
+                                                <span className="font-semibold text-lg text-black dark:text-white">Add Image</span>
+                                            </div>
+                                            <button
+                                                onClick={() => setShowImageInput(false)}
+                                                className="p-1 rounded-full hover:bg-[rgba(15,55,95,0.05)] dark:hover:bg-[#363739] text-[#6b6d70] hover:text-[#76787b] dark:hover:text-white"
+                                                aria-label="Close"
+                                            >
+                                                <X className="h-6 w-6" />
+                                            </button>
+                                        </div>
+                                        <div className="flex flex-col space-y-8">
+                                            {/* Upload image section */}
+                                            <div className="flex flex-col space-y-2">
+                                                <label className="text-[12.25px] text-black dark:text-white font-semibold">
+                                                    Upload image
+                                                </label>
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        className="hidden"
+                                                        id="image-upload-input"
+                                                        onChange={handleImageFileChange}
+                                                    />
+                                                    <label
+                                                        htmlFor="image-upload-input"
+                                                        className="px-3 py-2 h-9 rounded-full w-fit border border-[#f7641b] text-[#f7641b] bg-white hover:bg-[#fbece3] dark:bg-[#481802] dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] text-sm font-medium cursor-pointer"
+                                                    >
+                                                        Choose
+                                                    </label>
+                                                    <span className="text-sm text-[#a7a9ac] dark:text-[#8b8d90]">
+                                                        {imageInsertFile ? imageInsertFile.name : "Nothing selected"}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {/* Image from URL section */}
+                                            <div className="flex flex-col space-y-2">
+                                                <label className="text-[12.25px] text-black dark:text-white font-semibold">
+                                                    Image from URL
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Image URL"
+                                                    value={imageInsertUrl}
+                                                    onChange={handleImageUrlChange}
+                                                    className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
+                                                />
+                                                {/* Placement options */}
+                                                <span className="text-[12.25px] text-black dark:text-white font-semibold mr-2 pt-4">
+                                                    Placement:
+                                                </span>
+                                                <div className="flex flex-row mt-1 w-full">
+                                                    <button
+                                                        onClick={() => setSelected("left")}
+                                                        className={cn(
+                                                            "w-1/2 py-2 h-9 rounded-l-full border text-sm font-medium focus:outline-none flex flex-row justify-center items-center gap-1",
+                                                            selected === "left"
+                                                                ? "bg-[#f7641b] border-[#f7641b] text-white hover:bg-[#eb611f] hover:border-[#eb611f] "
+                                                                : "text-[#6b6d70] border-[#dfe1e4] hover:bg-white hover:text-[#f7641b] hover:border-[#dfe1e4] ",
+                                                        )}
+                                                    >
+                                                        <AlignLeft className="h-6 w-6" />
+                                                        <span>Left</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setSelected("middle")}
+                                                        className={cn(
+                                                            "w-1/2 py-2 h-9 -ml-[1px] rounded-r-full border text-sm font-medium focus:outline-none flex flex-row justify-center items-center gap-1",
+                                                            selected === "middle"
+                                                                ? "bg-[#f7641b] border-[#f7641b] text-white hover:bg-[#eb611f] hover:border-[#eb611f] "
+                                                                : "text-[#6b6d70] border-[#dfe1e4] hover:bg-white hover:text-[#f7641b] hover:border-[#dfe1e4] ",
+                                                        )}
+                                                    >
+                                                        <AlignCenter className="h-6 w-6" />
+                                                        <span>Middle</span>
+                                                    </button>
+                                                </div>
+
+                                                <div className="pt-4">
+                                                    <button
+                                                        onClick={handlePlaceImage}
+                                                        className="text-sm h-9 font-medium text-white px-3 py-1 w-full rounded-full bg-[#f7641b] hover:bg-[#eb611f] shadow-[#f7641b] hover:shadow-[#eb611f]"
+                                                        disabled={!imageInsertFile && !imageInsertUrl}
+                                                    >
+                                                        Place image
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    function renderCase3Desktop() {
+        // Use your existing desktop JSX for case 3 here (copy from your current case 3)
+        return (
+            <div className="flex items-center justify-center flex-1 p-2 md:p-0 animate-fade-in-up min-h-screen w-full" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
+                <div className="max-w-[682px] w-full space-y-8">
+                    {/* Header */}
+                    <div className="text-left">
+                        <h1 className="text-2xl md:text-[32px] leading-8 md:leading-10 font-semibold text-[#000] dark:text-[#fff]">
+                            Why is this offer worth sharing?
+                        </h1>
+                    </div>
+                    {/* Description Text Area */}
+                    <div className="space-y-4">
+                        <div className="relative h-[400px] ">
+                            {editor && <EditorContent editor={editor} />}
+                            {descriptionError && (
+                                <div className="text-red-500 text-xs mt-1">{descriptionError}</div>
+                            )}
+                            {/* Help Section for Description - animated */}
+                            <div
+                                className={cn(
+                                    "transition-[height] duration-300 ease-in-out overflow-hidden absolute top-[353px] left-2 right-2 z-10",
+                                    !descriptionFocused && "expand-leave-to",
+                                )}
+                                style={{ height: descriptionFocused ? 110 : 0 }}
+                            >
+                                <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1">
+                                    <div className="flex items-center">
+                                        <div className="flex items-center mr-1">
+                                            <Info className="w-[18px] h-[18px] dark:text-[hsla(0,0%,100%,0.75)] text-black" />
+                                        </div>
+                                        <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
+                                            Tell us about your deal.
+                                        </span>
+                                    </div>
+                                    <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[rgba(4,8,13,0.59)] mt-1">
+                                        Add the details about the product,links to relevant info/reviews and why you think it's a good deal
+                                    </div>
+                                </div>
+                            </div>
+                            {/* Formatting Toolbar */}
+                            <div className="relative -top-14 w-fit left-2 inline-flex items-center gap-1 bg-[#fff] dark:bg-[#1d1f20] rounded-xl p-[7px] border border-[rgba(3,12,25,0.1)] dark:border-[#1d1f20] shadow-lg overflow-x-auto">
+                                <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => editor?.chain().focus().toggleBold().run()}><Bold className="h-4 w-4 stroke-[3.2]" /></Button>
+                                <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => editor?.chain().focus().toggleStrike().run()}><Strikethrough className="h-4 w-4 stroke-[3.2]" /></Button>
+                                <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => editor?.chain().focus().toggleItalic().run()}><Italic className="h-4 w-4 stroke-[3.2]" /></Button>
+                                <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => editor?.chain().focus().toggleBulletList().run()}><List className="h-4 w-4 stroke-[3.2]" /></Button>
+                                <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => editor?.chain().focus().setHorizontalRule().run()}><Minus className="h-4 w-4 stroke-[3.2]" /></Button>
+                                <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={() => setShowEmojiPicker((v) => !v)}><Smile className="h-4 w-4 stroke-[3.2]" /></Button>
+                                {showEmojiPicker && (
+                                    <div className="absolute bottom-12 left-0 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-2 flex flex-wrap gap-1 z-50">
+                                        {emojiList.map((emoji) => (
+                                            <button key={emoji} className="text-xl p-1 hover:bg-gray-100 dark:hover:bg-[#363739] rounded" onMouseDown={e => e.preventDefault()} onClick={() => { editor?.chain().focus().insertContent(emoji).run(); setShowEmojiPicker(false); }}>{emoji}</button>
+                                        ))}
+                                    </div>
+                                )}
+                                <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => setShowLinkInput(true)}><LinkIcon className="h-4 w-4 stroke-[3.2]" /></Button>
+                                {showLinkInput && (
+                                    <div className="absolute bottom-12 m-4 left-24 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-6 flex flex-col gap-2 w-[350px]">
+                                        {/* Arrow pointer at the bottom */}
+                                        <div
+                                            className="absolute -bottom-2 left-36 w-0 h-0"
+                                            style={{
+                                                borderLeft: "8px solid transparent",
+                                                borderRight: "8px solid transparent",
+                                                borderTop: "8px solid #fff",
+                                            }}
+                                        />
+                                        {/* Heading with icon, text, and close button */}
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-1">
+                                                <Link2 className="h-6 w-6 text-black dark:text-white" />
+                                                <span className="font-semibold text-lg text-black dark:text-white">Link</span>
+                                            </div>
+                                            <button
+                                                onClick={() => setShowLinkInput(false)}
+                                                className="p-1 rounded-full hover:bg-[rgba(15,55,95,0.05)] dark:hover:bg-[#363739] text-[#6b6d70] hover:text-[#76787b] dark:hover:text-white"
+                                                aria-label="Close"
+                                            >
+                                                <X className="h-6 w-6" />
+                                            </button>
+                                        </div>
+                                        <div className="flex flex-col space-y-8">
+                                            <div className="flex flex-col space-y-2">
+                                                <label className="text-[12.25px] text-black dark:text-white font-semibold">URL</label>
+                                                <input
+                                                    type="text"
+                                                    value={linkURL}
+                                                    onChange={(e) => setLinkURL(e.target.value)}
+                                                    className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
+                                                />
+                                            </div>
+                                            <div className="flex flex-col space-y-2">
+                                                <label className="text-[12.25px] text-black dark:text-white font-semibold">Text</label>
+                                                <input
+                                                    type="text"
+                                                    value={linkText}
+                                                    onChange={(e) => setLinkText(e.target.value)}
+                                                    className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
+                                                />
+                                                <div className="pt-4">
+                                                    <button
+                                                        onClick={() => {
+                                                            if (!editorRef.current) return
+                                                            editorRef.current.focus()
+                                                            if (savedSelection) {
+                                                                const selection = window.getSelection()
+                                                                selection?.removeAllRanges()
+                                                                selection?.addRange(savedSelection)
+                                                            }
+                                                            const selection = window.getSelection()
+                                                            if (!selection || !selection.rangeCount) return
+                                                            const range = selection.getRangeAt(0)
+                                                            range.deleteContents()
+                                                            // Create a real <a> element
+                                                            const a = document.createElement("a")
+                                                            a.href = linkURL
+                                                            a.textContent = linkText || linkURL
+                                                            a.target = "_blank"
+                                                            a.rel = "noopener noreferrer"
+                                                            range.insertNode(a)
+                                                            // Move caret after link
+                                                            range.setStartAfter(a)
+                                                            range.collapse(true)
+                                                            selection.removeAllRanges()
+                                                            selection.addRange(range)
+                                                            setShowLinkInput(false)
+                                                            setLinkURL("")
+                                                            setLinkText("")
+                                                            setDescription(editorRef.current.innerHTML)
+                                                        }}
+                                                        disabled={!linkURL.trim()}
+                                                        className={
+                                                            `text-sm h-9 font-medium  text-white px-3 py-1 w-full rounded-full  ` +
+                                                            (!linkURL.trim()
+                                                                ? "bg-[#f3f5f7] text-[#a7a9ac] cursor-not-allowed"
+                                                                : "text-white bg-[#f7641b] hover:bg-[#eb611f] shadow-[#f7641b] hover:shadow-[#eb611f]")
+                                                        }
+                                                    >
+                                                        Insert
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="icon-button flex-shrink-0"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => {
+                                        setShowImageInput(true)
+                                        // Save the current selection
+                                        const selection = window.getSelection()
+                                        if (selection && selection.rangeCount > 0) {
+                                            setSavedSelection(selection.getRangeAt(0))
+                                        }
+                                    }}
+                                >
+                                    <ImageIcon className="h-4 w-4 stroke-[3.2]" />
+                                </Button>
+                                {showImageInput && (
+                                    <div className="absolute bottom-12 m-4 left-48 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-6 flex flex-col gap-2 z-50 w-[350px]">
+                                        {/* Arrow pointer at the bottom */}
+                                        <div
+                                            className="absolute -bottom-2 left-36 w-0 h-0"
+                                            style={{
+                                                borderLeft: "8px solid transparent",
+                                                borderRight: "8px solid transparent",
+                                                borderTop: "8px solid #fff",
+                                            }}
+                                        />
+                                        {/* Heading with icon, text, and close button */}
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-1">
+                                                <ImageIcon className="h-6 w-6 text-black dark:text-white" />
+                                                <span className="font-semibold text-lg text-black dark:text-white">Add Image</span>
+                                            </div>
+                                            <button
+                                                onClick={() => setShowImageInput(false)}
+                                                className="p-1 rounded-full hover:bg-[rgba(15,55,95,0.05)] dark:hover:bg-[#363739] text-[#6b6d70] hover:text-[#76787b] dark:hover:text-white"
+                                                aria-label="Close"
+                                            >
+                                                <X className="h-6 w-6" />
+                                            </button>
+                                        </div>
+                                        <div className="flex flex-col space-y-8">
+                                            {/* Upload image section */}
+                                            <div className="flex flex-col space-y-2">
+                                                <label className="text-[12.25px] text-black dark:text-white font-semibold">
+                                                    Upload image
+                                                </label>
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        className="hidden"
+                                                        id="image-upload-input"
+                                                        onChange={handleImageFileChange}
+                                                    />
+                                                    <label
+                                                        htmlFor="image-upload-input"
+                                                        className="px-3 py-2 h-9 rounded-full w-fit border border-[#f7641b] text-[#f7641b] bg-white hover:bg-[#fbece3] dark:bg-[#481802] dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] text-sm font-medium cursor-pointer"
+                                                    >
+                                                        Choose
+                                                    </label>
+                                                    <span className="text-sm text-[#a7a9ac] dark:text-[#8b8d90]">
+                                                        {imageInsertFile ? imageInsertFile.name : "Nothing selected"}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            {/* Image from URL section */}
+                                            <div className="flex flex-col space-y-2">
+                                                <label className="text-[12.25px] text-black dark:text-white font-semibold">
+                                                    Image from URL
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Image URL"
+                                                    value={imageInsertUrl}
+                                                    onChange={handleImageUrlChange}
+                                                    className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
+                                                />
+                                                {/* Placement options */}
+                                                <span className="text-[12.25px] text-black dark:text-white font-semibold mr-2 pt-4">
+                                                    Placement:
+                                                </span>
+                                                <div className="flex flex-row mt-1 w-full">
+                                                    <button
+                                                        onClick={() => setSelected("left")}
+                                                        className={cn(
+                                                            "w-1/2 py-2 h-9 rounded-l-full border text-sm font-medium focus:outline-none flex flex-row justify-center items-center gap-1",
+                                                            selected === "left"
+                                                                ? "bg-[#f7641b] border-[#f7641b] text-white hover:bg-[#eb611f] hover:border-[#eb611f] "
+                                                                : "text-[#6b6d70] border-[#dfe1e4] hover:bg-white hover:text-[#f7641b] hover:border-[#dfe1e4] ",
+                                                        )}
+                                                    >
+                                                        <AlignLeft className="h-6 w-6" />
+                                                        <span>Left</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setSelected("middle")}
+                                                        className={cn(
+                                                            "w-1/2 py-2 h-9 -ml-[1px] rounded-r-full border text-sm font-medium focus:outline-none flex flex-row justify-center items-center gap-1",
+                                                            selected === "middle"
+                                                                ? "bg-[#f7641b] border-[#f7641b] text-white hover:bg-[#eb611f] hover:border-[#eb611f] "
+                                                                : "text-[#6b6d70] border-[#dfe1e4] hover:bg-white hover:text-[#f7641b] hover:border-[#dfe1e4] ",
+                                                        )}
+                                                    >
+                                                        <AlignCenter className="h-6 w-6" />
+                                                        <span>Middle</span>
+                                                    </button>
+                                                </div>
+
+                                                <div className="pt-4">
+                                                    <button
+                                                        onClick={handlePlaceImage}
+                                                        className="text-sm h-9 font-medium text-white px-3 py-1 w-full rounded-full bg-[#f7641b] hover:bg-[#eb611f] shadow-[#f7641b] hover:shadow-[#eb611f]"
+                                                        disabled={!imageInsertFile && !imageInsertUrl}
+                                                    >
+                                                        Place image
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     const renderStepContent = () => {
         switch (currentStep) {
             case 0:
@@ -1162,7 +1727,7 @@ export default function PostOfferPage() {
             case 1:
                 return (
                     <>
-                        <div className="block md:hidden p-2">{renderCase1Mobile()}</div>
+                        <div className="block md:hidden h-screen overflow-y-auto p-2">{renderCase1Mobile()}</div>
                         <div className="hidden md:block w-full">
                             {/* Restore the original desktop JSX for case 1 here */}
                             <div
@@ -1449,7 +2014,7 @@ export default function PostOfferPage() {
             case 2:
                 return (
                     <div
-                        className="flex items-center justify-center flex-1 !p-0 !m-0 animate-fade-in-up px-4 md:px-0"
+                        className="flex items-center justify-center flex-1 p-2 md:p-0 animate-fade-in-up"
                         style={{ animationDelay: "0.1s", animationFillMode: "both" }}
                     >
                         <div className="max-w-[682px] space-y-8 w-full">
@@ -1516,7 +2081,7 @@ export default function PostOfferPage() {
                                                         className="hidden"
                                                     />
                                                     {uploadedImages.length === 0 ? (
-                                                        <div className="flex flex-col items-center">
+                                                        <div className="flex flex-col items-center z-20 pb-60 pl-36 fixed">
                                                             <Button
                                                                 onClick={(e) => {
                                                                     e.preventDefault()
@@ -1572,372 +2137,15 @@ export default function PostOfferPage() {
                 )
             case 3:
                 return (
-                    <div
-                        className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up px-4 md:px-0"
-                        style={{ animationDelay: "0.1s", animationFillMode: "both" }}
-                    >
-                        <div className="max-w-[682px] w-full space-y-8">
-                            {/* Header */}
-                            <div className="text-left">
-                                <h1 className="text-2xl md:text-[32px] leading-8 md:leading-10 font-semibold text-[#000] dark:text-[#fff]">
-                                    Why is this offer worth sharing?
-                                </h1>
-                            </div>
-
-                            {/* Description Text Area */}
-                            <div className="space-y-4">
-                                <div className="relative h-[400px]">
-                                    <div
-                                        ref={editorRef}
-                                        contentEditable
-                                        dir="ltr"
-                                        onInput={handleInput}
-                                        onBlur={() => {
-                                            setDescriptionFocused(false);
-                                            handleInput();
-                                        }}
-                                        suppressContentEditableWarning
-                                        onFocus={() => setDescriptionFocused(true)}
-                                        onClick={() => {
-                                            if (editorRef.current) {
-                                                editorRef.current.focus();
-                                            }
-                                        }}
-                                        className={cn(
-                                            "w-full min-h-[400px] bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black focus:outline-none dark:text-white rounded-lg p-4 pb-16 resize-none text-base leading-6 transition-all duration-300 ease-in-out flex-shrink-0 list-disc list-inside",
-                                            descriptionFocused ? "min-h-[510px]" : "min-h-[400px]",
-                                            descriptionError ? "border-red-500 focus:border-red-500" : ""
-                                        )}
-                                    />
-                                    {descriptionError && (
-                                        <div className="text-red-500 text-xs mt-1">{descriptionError}</div>
-                                    )}
-                                    {/* Help Section for Description - animated */}
-                                    <div
-                                        className={cn(
-                                            "transition-[height] duration-300 ease-in-out overflow-hidden absolute top-[353px] left-2 right-2 z-10",
-                                            !descriptionFocused && "expand-leave-to",
-                                        )}
-                                        style={{ height: descriptionFocused ? 110 : 0 }}
-                                    >
-                                        <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1">
-                                            <div className="flex items-center">
-                                                <div className="flex items-center mr-1">
-                                                    <Info className="w-[18px] h-[18px] dark:text-[hsla(0,0%,100%,0.75)] text-black" />
-                                                </div>
-                                                <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                                    Tell us about your deal.
-                                                </span>
-                                            </div>
-                                            <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[rgba(4,8,13,0.59)] mt-1">
-                                                Add the details about the product,links to relevant info/reviews and why you think it's a good
-                                                deal
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Formatting Toolbar */}
-                                    <div className="relative -top-14 w-fit left-2 inline-flex items-center gap-1 bg-[#fff] dark:bg-[#1d1f20] rounded-xl p-[7px] border border-[rgba(3,12,25,0.1)] dark:border-[#1d1f20] shadow-lg overflow-x-auto">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="icon-button flex-shrink-0"
-                                            onMouseDown={(e) => e.preventDefault()}
-                                            onClick={handleBold}
-                                        >
-                                            <Bold className="h-4 w-4 stroke-[3.2]" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="icon-button flex-shrink-0"
-                                            onMouseDown={(e) => e.preventDefault()}
-                                            onClick={handleStrikethrough}
-                                        >
-                                            <Strikethrough className="h-4 w-4 stroke-[3.2]" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="icon-button flex-shrink-0"
-                                            onMouseDown={(e) => e.preventDefault()}
-                                            onClick={handleItalic}
-                                        >
-                                            <Italic className="h-4 w-4 stroke-[3.2]" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="icon-button flex-shrink-0"
-                                            onMouseDown={(e) => e.preventDefault()}
-                                            onClick={handleList}
-                                        >
-                                            <List className="h-4 w-4 stroke-[3.2]" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="icon-button flex-shrink-0"
-                                            onMouseDown={(e) => e.preventDefault()}
-                                            onClick={handleHorizontalLine}
-                                        >
-                                            <Minus className="h-4 w-4 stroke-[3.2]" />
-                                        </Button>
-                                        <Button variant="ghost" size="sm" className="icon-button" onMouseDown={e => e.preventDefault()} onClick={() => setShowEmojiPicker((v) => !v)}>
-                                            <Smile className="h-4 w-4 stroke-[3.2]" />
-                                        </Button>
-                                        {showEmojiPicker && (
-                                            <div className="absolute bottom-12 left-0 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-2 flex flex-wrap gap-1 z-50">
-                                                {emojiList.map((emoji) => (
-                                                    <button
-                                                        key={emoji}
-                                                        className="text-xl p-1 hover:bg-gray-100 dark:hover:bg-[#363739] rounded"
-                                                        onMouseDown={e => e.preventDefault()}
-                                                        onClick={() => { handleEmoji(emoji); setShowEmojiPicker(false); }}
-                                                    >
-                                                        {emoji}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="icon-button flex-shrink-0"
-                                            onMouseDown={(e) => e.preventDefault()}
-                                            onClick={() => {
-                                                setShowLinkInput(true)
-                                                // Save the current selection
-                                                const selection = window.getSelection()
-                                                if (selection && selection.rangeCount > 0) {
-                                                    setSavedSelection(selection.getRangeAt(0))
-                                                }
-                                            }}
-                                        >
-                                            <Link className="h-4 w-4 stroke-[3.2]" />
-                                        </Button>
-                                        {showLinkInput && (
-                                            <div className="absolute bottom-12 m-4 left-24 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-6 flex flex-col gap-2 w-[350px]">
-                                                {/* Arrow pointer at the bottom */}
-                                                <div
-                                                    className="absolute -bottom-2 left-36 w-0 h-0"
-                                                    style={{
-                                                        borderLeft: "8px solid transparent",
-                                                        borderRight: "8px solid transparent",
-                                                        borderTop: "8px solid #fff",
-                                                    }}
-                                                />
-                                                {/* Heading with icon, text, and close button */}
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <div className="flex items-center gap-1">
-                                                        <Link2 className="h-6 w-6 text-black dark:text-white" />
-                                                        <span className="font-semibold text-lg text-black dark:text-white">Link</span>
-                                                    </div>
-                                                    <button
-                                                        onClick={() => setShowLinkInput(false)}
-                                                        className="p-1 rounded-full hover:bg-[rgba(15,55,95,0.05)] dark:hover:bg-[#363739] text-[#6b6d70] hover:text-[#76787b] dark:hover:text-white"
-                                                        aria-label="Close"
-                                                    >
-                                                        <X className="h-6 w-6" />
-                                                    </button>
-                                                </div>
-                                                <div className="flex flex-col space-y-8">
-                                                    <div className="flex flex-col space-y-2">
-                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">URL</label>
-                                                        <input
-                                                            type="text"
-                                                            value={linkURL}
-                                                            onChange={(e) => setLinkURL(e.target.value)}
-                                                            className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
-                                                        />
-                                                    </div>
-                                                    <div className="flex flex-col space-y-2">
-                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">Text</label>
-                                                        <input
-                                                            type="text"
-                                                            value={linkText}
-                                                            onChange={(e) => setLinkText(e.target.value)}
-                                                            className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
-                                                        />
-                                                        <div className="pt-4">
-                                                            <button
-                                                                onClick={() => {
-                                                                    if (!editorRef.current) return
-                                                                    editorRef.current.focus()
-                                                                    if (savedSelection) {
-                                                                        const selection = window.getSelection()
-                                                                        selection?.removeAllRanges()
-                                                                        selection?.addRange(savedSelection)
-                                                                    }
-                                                                    const selection = window.getSelection()
-                                                                    if (!selection || !selection.rangeCount) return
-                                                                    const range = selection.getRangeAt(0)
-                                                                    range.deleteContents()
-                                                                    // Create a real <a> element
-                                                                    const a = document.createElement("a")
-                                                                    a.href = linkURL
-                                                                    a.textContent = linkText || linkURL
-                                                                    a.target = "_blank"
-                                                                    a.rel = "noopener noreferrer"
-                                                                    range.insertNode(a)
-                                                                    // Move caret after link
-                                                                    range.setStartAfter(a)
-                                                                    range.collapse(true)
-                                                                    selection.removeAllRanges()
-                                                                    selection.addRange(range)
-                                                                    setShowLinkInput(false)
-                                                                    setLinkURL("")
-                                                                    setLinkText("")
-                                                                    setDescription(editorRef.current.innerHTML)
-                                                                }}
-                                                                disabled={!linkURL.trim()}
-                                                                className={
-                                                                    `text-sm h-9 font-medium  text-white px-3 py-1 w-full rounded-full  ` +
-                                                                    (!linkURL.trim()
-                                                                        ? "bg-[#f3f5f7] text-[#a7a9ac] cursor-not-allowed"
-                                                                        : "text-white bg-[#f7641b] hover:bg-[#eb611f] shadow-[#f7641b] hover:shadow-[#eb611f]")
-                                                                }
-                                                            >
-                                                                Insert
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="icon-button flex-shrink-0"
-                                            onMouseDown={(e) => e.preventDefault()}
-                                            onClick={() => {
-                                                setShowImageInput(true)
-                                                // Save the current selection
-                                                const selection = window.getSelection()
-                                                if (selection && selection.rangeCount > 0) {
-                                                    setSavedSelection(selection.getRangeAt(0))
-                                                }
-                                            }}
-                                        >
-                                            <ImageIcon className="h-4 w-4 stroke-[3.2]" />
-                                        </Button>
-                                        {showImageInput && (
-                                            <div className="absolute bottom-12 m-4 left-48 bg-white dark:bg-[#23272f] border border-gray-200 dark:border-[#23272f] rounded-lg shadow-lg p-6 flex flex-col gap-2 z-50 w-[350px]">
-                                                {/* Arrow pointer at the bottom */}
-                                                <div
-                                                    className="absolute -bottom-2 left-36 w-0 h-0"
-                                                    style={{
-                                                        borderLeft: "8px solid transparent",
-                                                        borderRight: "8px solid transparent",
-                                                        borderTop: "8px solid #fff",
-                                                    }}
-                                                />
-                                                {/* Heading with icon, text, and close button */}
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <div className="flex items-center gap-1">
-                                                        <ImageIcon className="h-6 w-6 text-black dark:text-white" />
-                                                        <span className="font-semibold text-lg text-black dark:text-white">Add Image</span>
-                                                    </div>
-                                                    <button
-                                                        onClick={() => setShowImageInput(false)}
-                                                        className="p-1 rounded-full hover:bg-[rgba(15,55,95,0.05)] dark:hover:bg-[#363739] text-[#6b6d70] hover:text-[#76787b] dark:hover:text-white"
-                                                        aria-label="Close"
-                                                    >
-                                                        <X className="h-6 w-6" />
-                                                    </button>
-                                                </div>
-                                                <div className="flex flex-col space-y-8">
-                                                    {/* Upload image section */}
-                                                    <div className="flex flex-col space-y-2">
-                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">
-                                                            Upload image
-                                                        </label>
-                                                        <div className="flex items-center gap-3">
-                                                            <input
-                                                                type="file"
-                                                                accept="image/*"
-                                                                className="hidden"
-                                                                id="image-upload-input"
-                                                                onChange={handleImageFileChange}
-                                                            />
-                                                            <label
-                                                                htmlFor="image-upload-input"
-                                                                className="px-3 py-2 h-9 rounded-full w-fit border border-[#f7641b] text-[#f7641b] bg-white hover:bg-[#fbece3] dark:bg-[#481802] dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] text-sm font-medium cursor-pointer"
-                                                            >
-                                                                Choose
-                                                            </label>
-                                                            <span className="text-sm text-[#a7a9ac] dark:text-[#8b8d90]">
-                                                                {imageInsertFile ? imageInsertFile.name : "Nothing selected"}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    {/* Image from URL section */}
-                                                    <div className="flex flex-col space-y-2">
-                                                        <label className="text-[12.25px] text-black dark:text-white font-semibold">
-                                                            Image from URL
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Image URL"
-                                                            value={imageInsertUrl}
-                                                            onChange={handleImageUrlChange}
-                                                            className="pt-[9px] pb-[9px] pl-[16px] pr-[16px] rounded-lg border border-[rgba(3,12,25,0.23)] dark:bg-[#2d2f31] focus:border-[#f7641b] outline-none dark:text-white text-black text-sm"
-                                                        />
-                                                        {/* Placement options */}
-                                                        <span className="text-[12.25px] text-black dark:text-white font-semibold mr-2 pt-4">
-                                                            Placement:
-                                                        </span>
-                                                        <div className="flex flex-row mt-1 w-full">
-                                                            <button
-                                                                onClick={() => setSelected("left")}
-                                                                className={cn(
-                                                                    "w-1/2 py-2 h-9 rounded-l-full border text-sm font-medium focus:outline-none flex flex-row justify-center items-center gap-1",
-                                                                    selected === "left"
-                                                                        ? "bg-[#f7641b] border-[#f7641b] text-white hover:bg-[#eb611f] hover:border-[#eb611f] "
-                                                                        : "text-[#6b6d70] border-[#dfe1e4] hover:bg-white hover:text-[#f7641b] hover:border-[#dfe1e4] ",
-                                                                )}
-                                                            >
-                                                                <AlignLeft className="h-6 w-6" />
-                                                                <span>Left</span>
-                                                            </button>
-                                                            <button
-                                                                onClick={() => setSelected("middle")}
-                                                                className={cn(
-                                                                    "w-1/2 py-2 h-9 -ml-[1px] rounded-r-full border text-sm font-medium focus:outline-none flex flex-row justify-center items-center gap-1",
-                                                                    selected === "middle"
-                                                                        ? "bg-[#f7641b] border-[#f7641b] text-white hover:bg-[#eb611f] hover:border-[#eb611f] "
-                                                                        : "text-[#6b6d70] border-[#dfe1e4] hover:bg-white hover:text-[#f7641b] hover:border-[#dfe1e4] ",
-                                                                )}
-                                                            >
-                                                                <AlignCenter className="h-6 w-6" />
-                                                                <span>Middle</span>
-                                                            </button>
-                                                        </div>
-
-                                                        <div className="pt-4">
-                                                            <button
-                                                                onClick={handlePlaceImage}
-                                                                className="text-sm h-9 font-medium text-white px-3 py-1 w-full rounded-full bg-[#f7641b] hover:bg-[#eb611f] shadow-[#f7641b] hover:shadow-[#eb611f]"
-                                                                disabled={!imageInsertFile && !imageInsertUrl}
-                                                            >
-                                                                Place image
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <>
+                        <div className="block md:hidden min-h-screen w-full">{renderCase3Mobile()}</div>
+                        <div className="hidden md:block min-h-screen w-full">{renderCase3Desktop()}</div>
+                    </>
                 )
             case 4:
                 return (
                     <div
-                        className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up px-4 md:px-0"
+                        className="flex items-center justify-center flex-1 p-2 md:p-0 animate-fade-in-up"
                         style={{ animationDelay: "0.1s", animationFillMode: "both" }}
                     >
                         <div className="max-w-[682px] w-full space-y-8">
@@ -2060,7 +2268,7 @@ export default function PostOfferPage() {
             case 5:
                 return (
                     <div
-                        className="flex items-center justify-center flex-1 !p-0 !m-0 animate-fade-in-up px-4 md:px-0"
+                        className="flex items-center justify-center flex-1 p-2 md:p-0 animate-fade-in-up"
                         style={{ animationDelay: "0.1s", animationFillMode: "both" }}
                     >
                         <div className="max-w-[682px] w-full space-y-2 mb-[84px]">
@@ -2217,10 +2425,48 @@ export default function PostOfferPage() {
         }
     }
 
+    // TIPTAP EDITOR INIT
+    const editor = useEditor({
+        extensions: [
+            StarterKit,
+            Link.configure({ openOnClick: false }),
+            Image,
+            Underline,
+            TextAlign.configure({ types: ['heading', 'paragraph'] }),
+            Placeholder.configure({
+                placeholder: 'Add the details about the product, links to relevant info/reviews and why you think it\'s a good deal',
+            }),
+        ],
+        content: description,
+        immediatelyRender: false,
+        onUpdate: ({ editor }) => {
+            setDescription(editor.getHTML());
+        },
+        editorProps: {
+            attributes: {
+                class: cn(
+                    "w-full min-h-[400px] bg-white dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black focus:outline-none dark:text-white rounded-lg p-4 pb-16 resize-none text-base leading-6 transition-all duration-300 ease-in-out flex-shrink-0 list-disc list-inside",
+                    descriptionFocused ? "min-h-[510px]" : "min-h-[400px]",
+                    descriptionError ? "border-red-500 focus:border-red-500" : ""
+                ),
+            },
+            handleDOMEvents: {
+                focus: () => {
+                    setDescriptionFocused(true);
+                    return false;
+                },
+                blur: () => {
+                    setDescriptionFocused(false);
+                    return false;
+                },
+            },
+        },
+    });
+
     return (
         <div className="fixed inset-0 w-screen h-screen min-h-screen bg-[#fff] dark:bg-[#1d1f20] flex z-30">
             {/* Mobile Layout */}
-            <div className="block md:hidden w-full">
+            <div className="block md:hidden w-full overflow-y-auto h-screen">
                 <MobileOfferSubmission {...sharedProps} renderStepContent={renderStepContent} />
             </div>
 

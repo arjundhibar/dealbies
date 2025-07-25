@@ -2,12 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* @font-face {
+@font-face {
   font-family: 'Averta CY';
   src: url('/fonts/AvertaCY.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
-} */
+}
  @font-face {
    font-family: 'Poppins';
    src: url('/fonts/poppins/Poppins-Regular.ttf') format('truetype');
@@ -46,6 +46,9 @@
     --input: 0 0% 90%;
     --ring: 14 100% 50%;
     --radius: 0.375rem;
+    --textStatusInfo: #005498;
+    --bgStatusInfoMuted: #f0f6fc;
+    
 
   }
 

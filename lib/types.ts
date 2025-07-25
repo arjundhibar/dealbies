@@ -10,14 +10,14 @@ export interface Deal {
   id: string
   title: string
   description: string
-  imageUrl?: string
   price: number
   originalPrice?: number
   merchant: string
   category: string
   dealUrl: string
   expired: boolean
-  expiresAt?: string
+  startAt?: string | null;
+  expiresAt?: string | null;
   createdAt: string
   score: number
   commentCount: number
@@ -27,6 +27,7 @@ export interface Deal {
     avatar?: string
   }
   userVote?: "up" | "down"
+  imageUrls?: { url: string }[];
 }
 
 export interface Comment {

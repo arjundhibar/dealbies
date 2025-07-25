@@ -20,6 +20,7 @@ export const typeDefs = gql`
     dealUrl: String!
     expired: Boolean!
     expiresAt: String
+    startAt: String
     createdAt: String!
     score: Int!
     commentCount: Int!
@@ -29,5 +30,6 @@ export const typeDefs = gql`
 
   type Query {
     deals(category: String, sort: String): [Deal!]!
+    deal(id: ID!): Deal
   }
 `

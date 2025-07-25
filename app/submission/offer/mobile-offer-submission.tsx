@@ -1,6 +1,7 @@
 import React from "react"
 import { Button } from "@/components/ui/button"
 import { Pencil, CircleCheck } from "lucide-react"
+import { useOfferSubmission } from "@/hooks/use-offer-submission";
 
 export function MobileOfferSubmission(props: any) {
   const {
@@ -12,7 +13,39 @@ export function MobileOfferSubmission(props: any) {
     renderStepContent,
     handleBack,
     handleNext,
-  } = props
+    title,
+    description,
+    priceOffer,
+    lowestPrice,
+    discountCode,
+    availability,
+    postageCosts,
+    shippingFrom,
+    startDate,
+    startTime,
+    endDate,
+    endTime,
+    selectedCategories,
+    linkValue,
+    uploadedImages,
+  } = props;
+
+  const { handleSubmitDeal, isLoading } = useOfferSubmission(uploadedImages, title);
+
+  const payloadBase = {
+    title,
+    description,
+    price: parseFloat(priceOffer) || 0,
+    originalPrice: parseFloat(lowestPrice) || null,
+    discountCode: discountCode || null,
+    availability,
+    postageCosts: postageCosts ? parseFloat(postageCosts) : null,
+    shippingFrom: shippingFrom || null,
+    startAt: startDate && startTime ? new Date(`${startDate}T${startTime}`).toISOString() : null,
+    expiresAt: endDate && endTime ? new Date(`${endDate}T${endTime}`).toISOString() : null,
+    category: selectedCategories[0] || null,
+    dealUrl: linkValue,
+  };
 
   console.log("MobileOfferSubmission renderStepContent:", renderStepContent)
   console.log("MobileOfferSubmission currentStep:", currentStep)
@@ -44,13 +77,13 @@ export function MobileOfferSubmission(props: any) {
                     (isActive
                       ? " text-black bg-white dark:text-[#f97936]"
                       : isCompleted
-                      ? " text-[#238012] dark:text-green-400"
-                      : " text-black dark:text-[#525457]") +
+                        ? " text-[#238012] dark:text-green-400"
+                        : " text-black dark:text-[#525457]") +
                     (isFuture ? " cursor-not-allowed opacity-35 text-[rgba(4,9,18,0.35)]" : "")
                   }
                 >
                   <div className="flex flex-row gap-3 whitespace-normal">
-                  <IconComponent className="h-5 w-5" />
+                    <IconComponent className="h-5 w-5" />
                     <span className=" whitespace-nowrap">{step.title}</span>
                   </div>
                 </button>
@@ -62,10 +95,10 @@ export function MobileOfferSubmission(props: any) {
       </div>
 
       {/* Mobile: Main Content Area */}
-      <div className="flex flex-col overflow-auto md:hidden">
+      <div className="flex flex-col overflow-auto md:hidden pb-12">
         <div>{renderStepContent && renderStepContent()}</div>
         {currentStep > 0 && (
-          <div className="border-t border-[#dfe1e4] dark:border-[#46484b] p-6 flex justify-between">
+          <div className="border-t border-[#dfe1e4] dark:border-[#46484b] p-4 flex justify-between sticky bottom-0 bg-white dark:bg-[#1d1f20]">
             <Button
               onClick={handleBack}
               variant="outline"
@@ -74,10 +107,22 @@ export function MobileOfferSubmission(props: any) {
               Back
             </Button>
             <Button
-              onClick={handleNext}
-              disabled={currentStep === steps.length - 1}
+              onClick={() => {
+                if (currentStep === steps.length - 1) {
+                  handleSubmitDeal(payloadBase)
+                } else {
+                  handleNext()
+                }
+              }}
+              disabled={isLoading}
               className="border rounded-full h-9 px-4 border-[#f7641b] hover:border-[#eb611f] text-[#f7641b] hover:bg-[#fbf3ef] hover:text-[#eb611f] bg-[#fff] dark:border-[#f97936] dark:text-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] dark:bg-[#1d1f20]"
             >
+              {isLoading && (
+                <svg className="animate-spin mr-2 h-4 w-4 text-[#f7641b]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+              )}
               {currentStep === steps.length - 1 ? "Publish" : "Next"}
             </Button>
           </div>
