@@ -26,7 +26,7 @@ export function DealCard({ deal }: DealCardProps) {
     id,
     title,
     description,
-    imageUrl,
+    imageUrls,
     price,
     originalPrice,
     merchant,
@@ -82,7 +82,7 @@ export function DealCard({ deal }: DealCardProps) {
               {/* Product Image */}
               <div className="relative w-[7rem] h-[7rem]">
                 <Image
-                  src={imageUrl || "/placeholder.svg?height=400&width=400&query=product"}
+                  src={typeof imageUrls?.[0] === 'string' ? imageUrls[0] : imageUrls?.[0]?.url || "/placeholder.svg?height=400&width=400&query=product"}
                   alt={title}
                   fill
                   className="object-cover z-5 rounded-lg"
@@ -197,7 +197,7 @@ export function DealCard({ deal }: DealCardProps) {
           <div className="w-[14.125rem] p-[0.75rem]  relative bg-[#0f375f0d] dark:bg-dark-tertiary">
             <div className="relative h-full">
               <Image
-                src={imageUrl || "/placeholder.svg?height=400&width=600&query=product"}
+                src={typeof imageUrls?.[0] === 'string' ? imageUrls[0] : imageUrls?.[0]?.url || "/placeholder.svg?height=400&width=600&query=product"}
                 alt={title}
                 fill
                 className="object-cover rounded-lg"

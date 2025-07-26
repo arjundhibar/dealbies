@@ -1,7 +1,6 @@
 "use client"
 
-import type React from "react"
-import { createContext, useContext, useState, useEffect, useCallback } from "react"
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react"
 import type { Deal, Comment, User, Coupon } from "./types"
 import { useAuth } from "@/lib/auth-context"
 import { useToast } from "@/hooks/use-toast"
@@ -498,18 +497,21 @@ if (!token) {
   [toast]
 )
 
-  const getRelatedDeals = async (dealId: string, limit = 3): Promise<Deal[]> => {
-    try {
-      const response = await fetch(`/api/deals/${dealId}/related?limit=${limit}`)
-      if (response.ok) {
-        return await response.json()
+  const getRelatedDeals = useCallback(
+    async (dealId: string, limit = 3): Promise<Deal[]> => {
+      try {
+        const response = await fetch(`/api/deals/${dealId}/related?limit=${limit}`)
+        if (response.ok) {
+          return await response.json()
+        }
+        return []
+      } catch (error) {
+        console.error("Error fetching related deals:", error)
+        return []
       }
-      return []
-    } catch (error) {
-      console.error("Error fetching related deals:", error)
-      return []
-    }
-  }
+    },
+    []
+  )
 
   const saveDeal = async (dealId: string): Promise<void> => {
     if (!currentUser) throw new Error("You must be logged in to save deals")
@@ -553,7 +555,7 @@ if (!token) {
 
   return (
     <DataContext.Provider
-      value={{
+      value={React.useMemo(() => ({
         deals,
         comments,
         savedDeals,
@@ -571,7 +573,7 @@ if (!token) {
         fetchDeals,
         fetchCoupons,
         isLoading,
-      }}
+      }), [deals, comments, savedDeals, currentUser, addDeal, addComment, voteDeal, voteComment, getDeal, getRelatedDeals, saveDeal, unsaveDeal, isSaved, fetchDeals, fetchCoupons, isLoading])}
     >
       {children}
     </DataContext.Provider>

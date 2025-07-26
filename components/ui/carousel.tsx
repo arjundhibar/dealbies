@@ -42,17 +42,17 @@ export function Carousel({ images }: { images: string[] }) {
       >
         {images.map((img, idx) => (
           <button
-            key={img + idx}
+            key={`${idx}-${img || 'placeholder'}`}
             data-thumb
-            className={`border-2 rounded-lg overflow-hidden flex-shrink-0 md:w-16 md:h-16 w-16 h-16 focus:outline-none transition-all duration-200 ${
-              idx === active ? "border-blue-500" : "border-transparent"
+            className={`border rounded-lg overflow-hidden flex-shrink-0 md:w-16 md:h-16 w-16 h-16 focus:outline-none transition-all duration-200 ${
+              idx === active ? "border-[var(--borderAccentBrand)]" : "border-transparent"
             }`}
             onClick={() => handleThumbClick(idx)}
             aria-label={`Show image ${idx + 1}`}
             tabIndex={0}
           >
             <Image
-              src={img}
+              src={img || "/placeholder.svg?height=64&width=64"}
               alt={`Thumbnail ${idx + 1}`}
               width={64}
               height={64}
@@ -71,7 +71,7 @@ export function Carousel({ images }: { images: string[] }) {
           <ChevronLeft className="h-6 w-6" />
         </button>
         <Image
-          src={images[active]}
+          src={images[active] || "/placeholder.svg?height=400&width=400"}
           alt={`Image ${active + 1}`}
           fill
           className="object-cover rounded-lg"

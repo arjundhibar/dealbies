@@ -48,6 +48,17 @@
     --radius: 0.375rem;
     --textStatusInfo: #005498;
     --bgStatusInfoMuted: #f0f6fc;
+    --textStatusNegative: #ce1734;
+    --bgStatusNegativeMuted: #fcf3f2;
+    --background-default: #f7641b;
+    --background-hover: #eb611f;
+    --background-active: #da5a1c;
+    --shadow-default: #f7641b;
+    --shadow-hover: #eb611f;
+    --spinner-bg-color: #fff;
+    --spinner-bar-color: #fff;
+    --borderAccentBrand: #f7641b;
+
     
 
   }

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ThumbsUp, ThumbsDown, ExternalLink, Share2, MessageCircle, ChevronDown, ChevronUp, MoveDiagonal, Clock } from "lucide-react"
+import {  ExternalLink, Share2, MessageCircle, ChevronDown, ChevronUp, MoveDiagonal, Clock, ArrowBigDown, ArrowBigUp } from "lucide-react"
 import { formatDistanceToNow, isPast, format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -299,7 +299,7 @@ export default function DealPage() {
           {/* Deal Image */}
           <div className="lg:w-[342px] lg:flex-shrink-0">
             <div className="w-full h-[228px] lg:pr-[0.25rem] pt-[0.5em] flex items-center justify-center">
-              <Carousel images={deal.imageUrls && deal.imageUrls.length > 0 ? deal.imageUrls.map(img => img.url) : ["/placeholder.svg?height=400&width=400"]} />
+              <Carousel images={deal.imageUrls && deal.imageUrls.length > 0 ? deal.imageUrls.map(img => typeof img === 'string' ? img : img.url) : ["/placeholder.svg?height=400&width=400"]} />
             </div>
           </div>
 
@@ -309,31 +309,31 @@ export default function DealPage() {
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 {/* Voting buttons */}
-                <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "down" && "text-blue-500")}
-                    onClick={() => handleVote("down")}
-                    disabled={isVoting}
-                  >
-                    <ChevronDown className="h-5 w-5" />
-                    <span className="sr-only">Downvote</span>
-                  </Button>
+                <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary" onClick={(e) => e.stopPropagation()}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "down" && "text-blue-500")}
+                  onClick={(e) => { e.stopPropagation(); handleVote("down") }}
+                  disabled={isVoting}
+                >
+                  <ArrowBigDown className="h-6 w-6 scale-[1.5] scale-x-[1.1]  text-[#005498] dark:text-[#5aa4f1]" strokeWidth={1.5} />
+                  <span className="sr-only">Downvote</span>
+                </Button>
 
-                  <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
+                <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
 
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "up" && "text-dealhunter-red")}
-                    onClick={() => handleVote("up")}
-                    disabled={isVoting}
-                  >
-                    <ChevronUp className="h-5 w-5" />
-                    <span className="sr-only">Upvote</span>
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "up" && "text-dealhunter-red")}
+                  onClick={(e) => { e.stopPropagation(); handleVote("up") }}
+                  disabled={isVoting}
+                >
+                  <ArrowBigUp className="h-6 w-6 scale-[1.5] scale-x-[1.1] text-[#ce1734] dark:text-[#f97778]" strokeWidth={1.5} />
+                  <span className="sr-only">Upvote</span>
+                </Button>
+              </div>
               </div>
 
               {/* Action buttons */}
@@ -364,10 +364,11 @@ export default function DealPage() {
             </p>
 
             {/* Deal button */}
-            <Button size="lg" className="w-full lg:w-auto bg-orange-500 hover:bg-orange-600 rounded-full" asChild>
+            <Button size="lg" className="w-1/2 h-14 flex items-center justify-center bg-[var(--background-default)] hover:bg-[var(--background-hover)] rounded-full text-lg" asChild>
               <a href={dealUrl} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 h-5 w-5" />
+                
                 To deal
+                <ExternalLink className="mr-2 h-6 w-6" strokeWidth={3} />
               </a>
             </Button>
           </div>
