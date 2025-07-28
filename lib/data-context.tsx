@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import type { Deal, Comment, User, Coupon } from "./types"
 import { useAuth } from "@/lib/auth-context"
 import { useToast } from "@/hooks/use-toast"
+import { getSupabase } from "@/lib/supabase"
 
 interface DataContextType {
   deals: Deal[]
@@ -14,6 +15,7 @@ interface DataContextType {
   addDeal: (deal: Omit<Deal, "id" | "createdAt" | "score" | "commentCount" | "postedBy" | "userVote">) => Promise<Deal>
   addComment: (dealId: string, content: string, parentId?: string) => Promise<Comment>
   voteDeal: (dealId: string, voteType: "up" | "down") => Promise<void>
+  updateDealVote: (dealId: string, newScore: number, newUserVote: "up" | "down" | undefined) => void
   voteComment: (dealId: string, commentId: string, voteType: "up" | "down") => Promise<void>
   getDeal: (id: string) => Promise<Deal | undefined>
   getRelatedDeals: (dealId: string, limit?: number) => Promise<Deal[]>
@@ -347,55 +349,111 @@ if (!token) {
     return newComment
   }
 
-  const voteDeal = async (dealId: string, voteType: "up" | "down"): Promise<void> => {
-    if (!currentUser) throw new Error("You must be logged in to vote")
-    const token = localStorage.getItem("auth_token")
-    console.log("Token:", token)
-    if (!token) throw new Error("Missing auth token")
-    console.log("Attempting to vote for deal:", dealId, "Vote Type:", voteType)
-    const response = await fetch("/api/votes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-         "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        dealId,
-        voteType,
-      }),
-    })
+  const voteDeal = useCallback(
+    async (dealId: string, voteType: "up" | "down"): Promise<void> => {
+      if (!currentUser) throw new Error("You must be logged in to vote")
+      
+      // Get the current session from Supabase
+      const supabase = getSupabase()
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError || !session?.access_token) {
+        throw new Error("Missing authentication token")
+      }
+      
+      // Get current deal state for optimistic update
+      const currentDeal = deals.find(d => d.id === dealId)
+      if (!currentDeal) throw new Error("Deal not found")
+      
+      // Optimistically update the UI
+      const currentScore = currentDeal.score
+      const currentUserVote = currentDeal.userVote
+      let optimisticScore = currentScore
+      let optimisticUserVote: "up" | "down" | undefined = voteType
 
-    if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.message || "Failed to vote")
-    }
+      if (currentUserVote === voteType) {
+        // Remove vote
+        optimisticScore = voteType === "up" ? currentScore - 1 : currentScore + 1
+        optimisticUserVote = undefined
+      } else if (currentUserVote) {
+        // Change vote
+        optimisticScore = voteType === "up" ? currentScore + 2 : currentScore - 2
+      } else {
+        // New vote
+        optimisticScore = voteType === "up" ? currentScore + 1 : currentScore - 1
+      }
 
-    const result = await response.json()
+      // Apply optimistic update immediately
+      setDeals((prevDeals) =>
+        prevDeals.map((deal) => {
+          if (deal.id !== dealId) return deal
+          return { ...deal, score: optimisticScore, userVote: optimisticUserVote }
+        }),
+      )
+      
+      console.log("Attempting to vote for deal:", dealId, "Vote Type:", voteType)
+      const response = await fetch("/api/votes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          dealId,
+          voteType,
+        }),
+      })
 
-    // Update the deal in state
+      if (!response.ok) {
+        // Revert optimistic update on error
+        setDeals((prevDeals) =>
+          prevDeals.map((deal) => {
+            if (deal.id !== dealId) return deal
+            return { ...deal, score: currentScore, userVote: currentUserVote }
+          }),
+        )
+        const error = await response.json()
+        throw new Error(error.message || "Failed to vote")
+      }
+
+      const result = await response.json()
+
+      // Update with actual server response
+      setDeals((prevDeals) =>
+        prevDeals.map((deal) => {
+          if (deal.id !== dealId) return deal
+
+          // Calculate new score based on the action
+          let newScore = deal.score
+          let newUserVote = deal.userVote
+
+          if (result.action === "removed") {
+            newScore = voteType === "up" ? deal.score - 1 : deal.score + 1
+            newUserVote = undefined
+          } else if (result.action === "updated") {
+            newScore = voteType === "up" ? deal.score + 2 : deal.score - 2
+            newUserVote = voteType
+          } else if (result.action === "created") {
+            newScore = voteType === "up" ? deal.score + 1 : deal.score - 1
+            newUserVote = voteType
+          }
+
+          return { ...deal, score: newScore, userVote: newUserVote }
+        }),
+      )
+    },
+    [currentUser, deals]
+  )
+
+  // Helper function to update a single deal's vote state
+  const updateDealVote = useCallback((dealId: string, newScore: number, newUserVote: "up" | "down" | undefined) => {
     setDeals((prevDeals) =>
       prevDeals.map((deal) => {
         if (deal.id !== dealId) return deal
-
-        // Calculate new score based on the action
-        let newScore = deal.score
-        let newUserVote = deal.userVote
-
-        if (result.action === "removed") {
-          newScore = voteType === "up" ? deal.score - 1 : deal.score + 1
-          newUserVote = undefined
-        } else if (result.action === "updated") {
-          newScore = voteType === "up" ? deal.score + 2 : deal.score - 2
-          newUserVote = voteType
-        } else if (result.action === "created") {
-          newScore = voteType === "up" ? deal.score + 1 : deal.score - 1
-          newUserVote = voteType
-        }
-
         return { ...deal, score: newScore, userVote: newUserVote }
       }),
     )
-  }
+  }, [])
 
   const voteComment = async (dealId: string, commentId: string, voteType: "up" | "down"): Promise<void> => {
     if (!currentUser) throw new Error("You must be logged in to vote")
@@ -564,6 +622,7 @@ if (!token) {
         addDeal,
         addComment,
         voteDeal,
+        updateDealVote,
         voteComment,
         getDeal,
         getRelatedDeals,
@@ -573,7 +632,7 @@ if (!token) {
         fetchDeals,
         fetchCoupons,
         isLoading,
-      }), [deals, comments, savedDeals, currentUser, addDeal, addComment, voteDeal, voteComment, getDeal, getRelatedDeals, saveDeal, unsaveDeal, isSaved, fetchDeals, fetchCoupons, isLoading])}
+      }), [deals, comments, savedDeals, currentUser, addDeal, addComment, voteDeal, updateDealVote, voteComment, getDeal, getRelatedDeals, saveDeal, unsaveDeal, isSaved, fetchDeals, fetchCoupons, isLoading])}
     >
       {children}
     </DataContext.Provider>

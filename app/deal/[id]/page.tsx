@@ -22,7 +22,7 @@ import { Carousel } from "@/components/ui/carousel";
 export default function DealPage() {
   const params = useParams()
   const id = params.id as string
-  const { getDeal, getRelatedDeals, voteDeal } = useData()
+  const { getDeal, getRelatedDeals, voteDeal, updateDealVote } = useData()
   const [deal, setDeal] = useState<Deal | undefined>(undefined)
   const [relatedDeals, setRelatedDeals] = useState<Deal[]>([])
   const [loading, setLoading] = useState(true)
@@ -86,18 +86,49 @@ export default function DealPage() {
 
 
   const handleVote = async (voteType: "up" | "down") => {
-    if (isVoting) return
+    if (isVoting || !deal) return
 
     try {
       setIsVoting(true)
+      
+      // Optimistically update the UI
+      const currentScore = deal.score
+      const currentUserVote = deal.userVote
+      let newScore = currentScore
+      let newUserVote: "up" | "down" | undefined = voteType
+
+      if (currentUserVote === voteType) {
+        // Remove vote
+        newScore = voteType === "up" ? currentScore - 1 : currentScore + 1
+        newUserVote = undefined
+      } else if (currentUserVote) {
+        // Change vote
+        newScore = voteType === "up" ? currentScore + 2 : currentScore - 2
+      } else {
+        // New vote
+        newScore = voteType === "up" ? currentScore + 1 : currentScore - 1
+      }
+
+      // Update local state immediately
+      setDeal(prev => prev ? { ...prev, score: newScore, userVote: newUserVote } : prev)
+      
+      // Update global state
+      updateDealVote(id, newScore, newUserVote)
+
+      // Make API call
       await voteDeal(id, voteType)
     } catch (error: any) {
+      // Revert optimistic update on error
+      if (deal) {
+        setDeal(prev => prev ? { ...prev, score: deal.score, userVote: deal.userVote } : prev)
+        updateDealVote(id, deal.score, deal.userVote)
+      }
+      
       toast({
         title: "Error",
         description: error.message || "You must be logged in to vote.",
         variant: "destructive",
       })
-
     } finally {
       setIsVoting(false)
     }

@@ -32,40 +32,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing dealId or voteType" }, { status: 400 })
     }
 
-    const existingVote = await prisma.vote.findUnique({
+    const existingVote = await prisma.vote.findFirst({
       where: {
-        userId_dealId_couponId_commentId: {
-          userId,
-          dealId,
-          couponId: '',
-          commentId: '',
-        },
+        userId,
+        dealId,
+        couponId: null,
+        commentId: null,
       },
     })
 
     if (existingVote) {
       if (existingVote.voteType === voteType) {
         await prisma.vote.delete({
-          where: {
-            userId_dealId_couponId_commentId: {
-              userId,
-              dealId,
-              couponId: '',
-              commentId: '',
-            },
-          },
+          where: { id: existingVote.id },
         })
         return NextResponse.json({ action: "removed" }, { status: 200 })
       } else {
         await prisma.vote.update({
-          where: {
-            userId_dealId_couponId_commentId: {
-              userId,
-              dealId,
-              couponId: '',
-              commentId: '',
-            },
-          },
+          where: { id: existingVote.id },
           data: { voteType },
         })
         return NextResponse.json({ action: "updated" }, { status: 200 })

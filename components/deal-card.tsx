@@ -31,17 +31,20 @@ export function DealCard({ deal }: DealCardProps) {
     originalPrice,
     merchant,
     category,
-    score,
     commentCount,
     createdAt,
     postedBy,
     dealUrl,
-    userVote,
     expired,
     expiresAt,
   } = deal
 
-  const { voteDeal, currentUser } = useData()
+  const { voteDeal, updateDealVote, currentUser, deals: globalDeals } = useData()
+  
+  // Get the current vote state from the global deals array
+  const currentDeal = globalDeals.find(d => d.id === id)
+  const score = currentDeal?.score ?? deal.score
+  const userVote = currentDeal?.userVote ?? deal.userVote
   const { toast } = useToast()
   const router = useRouter()
   const [isVoting, setIsVoting] = useState(false)
@@ -56,6 +59,8 @@ export function DealCard({ deal }: DealCardProps) {
 
     try {
       setIsVoting(true)
+      
+      // Make API call - the voteDeal function will handle all state updates
       await voteDeal(id, voteType)
     } catch (error: any) {
       toast({
@@ -95,7 +100,7 @@ export function DealCard({ deal }: DealCardProps) {
                   variant="ghost"
                   size="sm"
                   className={cn("h-7 w-7 p-0 rounded-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]", userVote === "down" && "text-blue-500")}
-                  onClick={(e) => { e.stopPropagation(); handleVote("down") }}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote("down") }}
                   disabled={isVoting}
                 >
                   <ArrowBigDown className="h-6 w-6 scale-[1.5] scale-x-[1] text-[#005498] dark:text-[#5aa4f1]" strokeWidth={1.5} />
@@ -105,7 +110,7 @@ export function DealCard({ deal }: DealCardProps) {
                   variant="ghost"
                   size="sm"
                   className={cn("h-7 w-7 p-0 rounded-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]", userVote === "up" && "text-dealhunter-red")}
-                  onClick={(e) => { e.stopPropagation(); handleVote("up") }}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote("up") }}
                   disabled={isVoting}
                 >
                   <ArrowBigUp className="h-6 w-6 scale-[1.5] scale-x-[1] text-[#ce1734] dark:text-[#f97778]" strokeWidth={1.5} />
@@ -222,7 +227,7 @@ export function DealCard({ deal }: DealCardProps) {
                   variant="outline"
                   size="icon"
                   className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "down" && "text-blue-500")}
-                  onClick={(e) => { e.stopPropagation(); handleVote("down") }}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote("down") }}
                   disabled={isVoting}
                 >
                   <ArrowBigDown className="h-6 w-6 scale-[1.5] scale-x-[1.1]  text-[#005498] dark:text-[#5aa4f1]" strokeWidth={1.5} />
@@ -235,7 +240,7 @@ export function DealCard({ deal }: DealCardProps) {
                   variant="outline"
                   size="icon"
                   className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "up" && "text-dealhunter-red")}
-                  onClick={(e) => { e.stopPropagation(); handleVote("up") }}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote("up") }}
                   disabled={isVoting}
                 >
                   <ArrowBigUp className="h-6 w-6 scale-[1.5] scale-x-[1.1] text-[#ce1734] dark:text-[#f97778]" strokeWidth={1.5} />
