@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {  ExternalLink, Share2, MessageCircle, ChevronDown, ChevronUp, MoveDiagonal, Clock, ArrowBigDown, ArrowBigUp } from "lucide-react"
 import { formatDistanceToNow, isPast, format } from "date-fns"
-import { cn } from "@/lib/utils"
+import { cn, formatCurrency } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { CommentSection } from "@/components/comment-section"
 import type { Deal } from "@/lib/types"
@@ -169,6 +169,7 @@ export default function DealPage() {
     )
   }
 
+  
   const {
     title,
     description,
@@ -198,7 +199,7 @@ export default function DealPage() {
   let offerStatus = null;
   if (startAtDate && now < startAtDate) {
     offerStatus = (
-      <div className="flex items-center gap-2 mb-4 w-full justify-center text-[var(--textStatusInfo)] dark:text-blue-400 text-base font-normal text-center bg-[var(--bgStatusInfoMuted)] dark:bg-blue-900 rounded-md py-4 mr-2">
+      <div className="flex items-center gap-2 mb-4 w-full justify-center text-[var(--textStatusInfo)] dark:text-blue-400 text-base font-normal text-center bg-[var(--bgStatusInfoMuted)] dark:bg-[var(--bgStatusInfoMuted)] rounded-md py-4 mr-2">
         <Clock className="h-5 w-5" />
         <span>
           This offer will start on {format(startAtDate, "MMMM d, yyyy 'at' HH:mm")}
@@ -327,15 +328,15 @@ export default function DealPage() {
       <Card className="mb-6 overflow-hidden dark:bg-dark-secondary bg-[#fff] pt-[1.5em] pl-[1.5rem] pr-[1.5rem] pb-[1.5rem]">
         {offerStatus}
         <div className="flex flex-col lg:flex-row">
-          {/* Deal Image */}
-          <div className="lg:w-[342px] lg:flex-shrink-0">
-            <div className="w-full h-[228px] lg:pr-[0.25rem] pt-[0.5em] flex items-center justify-center">
+          {/* Deal Image - 40% width */}
+          <div className="lg:w-[40%] lg:flex-shrink-0 lg:h-[400px]">
+            <div className="w-full h-full lg:pr-[0.25rem] pt-[1.5em] flex items-center justify-center">
               <Carousel images={deal.imageUrls && deal.imageUrls.length > 0 ? deal.imageUrls.map(img => typeof img === 'string' ? img : img.url) : ["/placeholder.svg?height=400&width=400"]} />
             </div>
           </div>
 
-          {/* Deal Content */}
-          <div className="flex-1 p-6">
+          {/* Deal Content - 60% width */}
+          <div className="lg:w-[60%] p-6">
             {/* Header with voting and actions */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -382,16 +383,29 @@ export default function DealPage() {
             </div>
 
             {/* Posted time */}
-            <p className="text-sm text-muted-foreground mb-3">
+            <p className="text-sm text-[var(--textTranslucentSecondary)] mb-3">
               Posted {formatDistanceToNow(postedAtDate, { addSuffix: true })}
             </p>
 
             {/* Deal title */}
             <h1 className="text-2xl font-bold mb-4">{title}</h1>
 
+            {/* Price section */}
+            <div className="flex items-center gap-2 mb-1 leading-none">
+                  <span className="text-[2em] font-bold text-[#f7641b] dark:text-[var(--textAccentPrice)]">{formatCurrency(Number(price))}</span>
+                  {originalPrice && (
+                    <>
+                      <span className="text-xl text-muted-foreground dark:text-[var(--textTranslucentSecondary)] line-through">
+                        {formatCurrency(Number(originalPrice))}
+                      </span>
+                      <span className="text-[var(--textStatusPositive)] bg-[var(--bgStatusPositiveMuted)] text-[16px] font-bold px-2 py-1 rounded-md">{discount}%</span>
+                    </>
+                  )}
+                </div>
+
             {/* Merchant info */}
             <p className="text-muted-foreground mb-6">
-              Available at <span className="text-black font-medium">{merchant}</span>
+              Available at <span className="text-black dark:text-white font-medium">{merchant}</span>
             </p>
 
             {/* Deal button */}
@@ -417,7 +431,7 @@ export default function DealPage() {
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" className="gap-2">
-              <span className="text-blue-500">❄️</span>
+              <span className="text-red-500">❄️</span>
               Cold
             </Button>
             <Button variant="outline" size="sm" className="gap-2">

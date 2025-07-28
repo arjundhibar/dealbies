@@ -365,31 +365,38 @@ if (!token) {
       const currentDeal = deals.find(d => d.id === dealId)
       if (!currentDeal) throw new Error("Deal not found")
       
-      // Optimistically update the UI
+      // Simple optimistic update - just apply the vote change
       const currentScore = currentDeal.score
       const currentUserVote = currentDeal.userVote
-      let optimisticScore = currentScore
-      let optimisticUserVote: "up" | "down" | undefined = voteType
-
+      
+      // If clicking the same vote type, remove it
       if (currentUserVote === voteType) {
         // Remove vote
-        optimisticScore = voteType === "up" ? currentScore - 1 : currentScore + 1
-        optimisticUserVote = undefined
-      } else if (currentUserVote) {
-        // Change vote
-        optimisticScore = voteType === "up" ? currentScore + 2 : currentScore - 2
+        const optimisticScore = voteType === "up" ? currentScore - 1 : currentScore + 1
+        const optimisticUserVote = undefined
+        
+        // Apply optimistic update
+        setDeals((prevDeals) =>
+          prevDeals.map((deal) => {
+            if (deal.id !== dealId) return deal
+            return { ...deal, score: optimisticScore, userVote: optimisticUserVote }
+          }),
+        )
       } else {
-        // New vote
-        optimisticScore = voteType === "up" ? currentScore + 1 : currentScore - 1
+        // Add or change vote
+        const optimisticScore = voteType === "up" ? currentScore + 1 : currentScore - 1
+        const optimisticUserVote = voteType
+        
+        // Apply optimistic update
+        setDeals((prevDeals) =>
+          prevDeals.map((deal) => {
+            if (deal.id !== dealId) return deal
+            return { ...deal, score: optimisticScore, userVote: optimisticUserVote }
+          }),
+        )
       }
 
-      // Apply optimistic update immediately
-      setDeals((prevDeals) =>
-        prevDeals.map((deal) => {
-          if (deal.id !== dealId) return deal
-          return { ...deal, score: optimisticScore, userVote: optimisticUserVote }
-        }),
-      )
+
       
       console.log("Attempting to vote for deal:", dealId, "Vote Type:", voteType)
       const response = await fetch("/api/votes", {

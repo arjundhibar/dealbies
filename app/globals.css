@@ -58,6 +58,10 @@
     --spinner-bg-color: #fff;
     --spinner-bar-color: #fff;
     --borderAccentBrand: #f7641b;
+    --textTranslucentSecondary: rgba(4, 8, 13, 0.59);
+    --bgStatusPositiveMuted: #eef8ec;
+    --textStatusPositive: #238012;
+    
 
     
 
@@ -83,6 +87,12 @@
     --border: 0 0% 25%;
     --input: 0 0% 25%;
     --ring: 14 100% 50%;
+    --textStatusPositive: #78c86b;
+    --textTranslucentSecondary: hsla(0, 0%, 100%, 0.75);
+    --bgStatusPositiveMuted: #052f01;
+    --textAccentPrice: #f97936
+    --bgStatusInfoMuted: #052e53;
+    
   }
 }
 
