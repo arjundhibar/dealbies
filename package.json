@@ -12,6 +12,8 @@
   "dependencies": {
     "@apollo/server": "^4.12.2",
     "@as-integrations/next": "^3.2.0",
+    "@emoji-mart/data": "^1.2.1",
+    "@emoji-mart/react": "^1.1.1",
     "@hookform/resolvers": "latest",
     "@neondatabase/serverless": "latest",
     "@prisma/client": "latest",

@@ -1,20 +1,22 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
-import { getSupabase } from "@/lib/supabase"
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { cookies } from "next/headers"
 
 export async function GET(request: Request) {
   try {
+    console.log("GET /api/users/saved-deals called")
     // Get user from session
-    const supabase = getSupabase()
-    if (!supabase) {
-      return NextResponse.json({ error: "Authentication service unavailable" }, { status: 500 })
-    }
-
+    const supabase = createServerComponentClient({ cookies })
     const {
       data: { session },
     } = await supabase.auth.getSession()
 
+    console.log("GET - Session user:", session?.user?.email)
+    console.log("GET - Session exists:", !!session)
+
     if (!session?.user) {
+      console.log("GET - No session found, returning 401")
       return NextResponse.json({ error: "You must be logged in to view saved deals" }, { status: 401 })
     }
 
@@ -71,7 +73,7 @@ export async function GET(request: Request) {
         id: deal.id,
         title: deal.title,
         description: deal.description,
-        imageUrl: deal.imageUrl,
+        imageUrl: (deal as any).imageUrl, 
         price: deal.price,
         originalPrice: deal.originalPrice,
         merchant: deal.merchant,
@@ -100,41 +102,52 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    console.log("POST /api/users/saved-deals called")
     const { dealId } = await request.json()
+    console.log("Request body dealId:", dealId)
 
     // Get user from session
-    const supabase = getSupabase()
-    if (!supabase) {
-      return NextResponse.json({ error: "Authentication service unavailable" }, { status: 500 })
-    }
-
+    const supabase = createServerComponentClient({ cookies })
     const {
       data: { session },
     } = await supabase.auth.getSession()
 
+    console.log("Session user:", session?.user?.email)
+    console.log("Session exists:", !!session)
+
     if (!session?.user) {
+      console.log("No session found, returning 401")
       return NextResponse.json({ error: "You must be logged in to save deals" }, { status: 401 })
     }
 
     // Find user in our database
+    console.log("Looking for user with email:", session.user.email)
     const user = await prisma.user.findUnique({
       where: { email: session.user.email! },
     })
 
+    console.log("Found user:", user?.id)
+
     if (!user) {
+      console.log("User not found in database")
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     // Check if deal exists
+    console.log("Looking for deal with id:", dealId)
     const deal = await prisma.deal.findUnique({
       where: { id: dealId },
     })
 
+    console.log("Found deal:", deal?.id)
+
     if (!deal) {
+      console.log("Deal not found")
       return NextResponse.json({ error: "Deal not found" }, { status: 404 })
     }
 
     // Check if already saved
+    console.log("Checking if deal is already saved")
     const existingSave = await prisma.savedDeal.findFirst({
       where: {
         userId: user.id,
@@ -142,11 +155,15 @@ export async function POST(request: Request) {
       },
     })
 
+    console.log("Existing save found:", !!existingSave)
+
     if (existingSave) {
+      console.log("Deal already saved, returning 400")
       return NextResponse.json({ error: "Deal already saved" }, { status: 400 })
     }
 
     // Save the deal
+    console.log("Creating saved deal record")
     const savedDeal = await prisma.savedDeal.create({
       data: {
         userId: user.id,
@@ -154,9 +171,11 @@ export async function POST(request: Request) {
       },
     })
 
+    console.log("Saved deal created:", savedDeal.id)
     return NextResponse.json(savedDeal, { status: 201 })
   } catch (error) {
     console.error("Error saving deal:", error)
+    console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace")
     return NextResponse.json({ error: "An error occurred while saving the deal" }, { status: 500 })
   }
 }

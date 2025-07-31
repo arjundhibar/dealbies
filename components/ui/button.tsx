@@ -19,6 +19,7 @@ const buttonVariants = cva(
         navbar: "hover:bg-accent hover:text-accent-foreground",
         ghost: "shadow-none focus:outline-none focus:ring-0 hover:text-dealhunter-red",
         link: "text-primary underline-offset-4 hover:underline",
+        custom: "rounded-full",
       },
       size: {
         default: "h-10 px-4 py-2",

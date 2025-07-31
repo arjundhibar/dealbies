@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import type { Comment } from "@/lib/types"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { TipTapEditor } from "@/components/tiptap-editor"
 
 interface CommentSectionProps {
   dealId: string
@@ -22,9 +23,7 @@ interface CommentSectionProps {
 export function CommentSection({ dealId }: CommentSectionProps) {
   const { currentUser, addComment, voteComment } = useData()
   const [dealComments, setDealComments] = useState<Comment[]>([])
-  const [newComment, setNewComment] = useState("")
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  const [replyContent, setReplyContent] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -54,67 +53,9 @@ export function CommentSection({ dealId }: CommentSectionProps) {
     fetchComments()
   }, [dealId])
 
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newComment.trim()) return
 
-    setIsSubmitting(true)
-    try {
-      await addComment(dealId, newComment)
-      setNewComment("")
 
-      // Refetch comments to get the updated list
-      const response = await fetch(`/api/deals/${dealId}/comments`)
-      if (response.ok) {
-        const data = await response.json()
-        setDealComments(data)
-      }
 
-      toast({
-        title: "Comment posted",
-        description: "Your comment has been posted successfully.",
-      })
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to post comment.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  const handleSubmitReply = async (parentId: string) => {
-    if (!replyContent.trim()) return
-
-    setIsSubmitting(true)
-    try {
-      await addComment(dealId, replyContent, parentId)
-
-      // Refresh comments to get the updated structure with replies
-      const response = await fetch(`/api/deals/${dealId}/comments`)
-      if (response.ok) {
-        const data = await response.json()
-        setDealComments(data)
-      }
-
-      setReplyContent("")
-      setReplyingTo(null)
-      toast({
-        title: "Reply posted",
-        description: "Your reply has been posted successfully.",
-      })
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to post reply.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
 
   const handleVote = async (commentId: string, voteType: "up" | "down") => {
     try {
@@ -140,7 +81,7 @@ export function CommentSection({ dealId }: CommentSectionProps) {
     const isReplying = replyingTo === id
 
     return (
-      <div key={id} className="border-b py-4 last:border-0">
+      <div key={id} className="border-b py-4 last:border-0 bg-white">
         <div className="flex gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={postedBy.avatar || "/placeholder.svg?height=40&width=40&text=U"} alt={postedBy.name} />
@@ -151,7 +92,7 @@ export function CommentSection({ dealId }: CommentSectionProps) {
               <span className="font-medium">{postedBy.name}</span>
               <span className="text-xs text-muted-foreground">{formatRelativeTime(new Date(createdAt))}</span>
             </div>
-            <p className="mt-1">{content}</p>
+            <div className="mt-1 prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
             <div className="mt-2 flex items-center gap-4">
               <div className="flex items-center gap-1">
                 <Button
@@ -174,18 +115,8 @@ export function CommentSection({ dealId }: CommentSectionProps) {
                         : "",
                   )}
                 >
-                  {score}
+                  Like
                 </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn("h-6 w-6 p-0", userVote === "down" && "text-red-600 dark:text-red-400")}
-                  onClick={() => handleVote(id, "down")}
-                  disabled={!currentUser}
-                >
-                  <ThumbsDown className="h-4 w-4" />
-                  <span className="sr-only">Downvote</span>
-                </Button>
               </div>
               {currentUser && (
                 <Button
@@ -202,31 +133,59 @@ export function CommentSection({ dealId }: CommentSectionProps) {
 
             {isReplying && (
               <div className="mt-3">
-                <Textarea
-                  placeholder="Write a reply..."
-                  value={replyContent}
-                  onChange={(e) => setReplyContent(e.target.value)}
-                  className="mb-2"
-                  disabled={isSubmitting}
-                />
-                <div className="flex justify-end gap-2">
+                <div className="flex items-start gap-3">
+                  <Avatar className="h-6 w-6 flex-shrink-0">
+                    <AvatarImage src={currentUser?.avatarUrl || ""} alt={currentUser?.username || "User"} />
+                    <AvatarFallback className="text-xs">
+                      {currentUser?.username?.charAt(0).toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <TipTapEditor
+                      placeholder="Write a reply..."
+                      onSubmit={async (content) => {
+                        setIsSubmitting(true)
+                        try {
+                          await addComment(dealId, content, id)
+                          
+                          // Refresh comments to get the updated structure with replies
+                          const response = await fetch(`/api/deals/${dealId}/comments`)
+                          if (response.ok) {
+                            const data = await response.json()
+                            setDealComments(data)
+                          }
+                          
+                          setReplyingTo(null)
+                          
+                          toast({
+                            title: "Reply posted",
+                            description: "Your reply has been posted successfully.",
+                          })
+                        } catch (error: any) {
+                          toast({
+                            title: "Error",
+                            description: error.message || "Failed to post reply.",
+                            variant: "destructive",
+                          })
+                        } finally {
+                          setIsSubmitting(false)
+                        }
+                      }}
+                      disabled={isSubmitting}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      setReplyingTo(null)
-                      setReplyContent("")
+                                                setReplyingTo(null)
                     }}
                     disabled={isSubmitting}
                   >
                     Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => handleSubmitReply(id)}
-                    disabled={isSubmitting || !replyContent.trim()}
-                  >
-                    {isSubmitting ? "Posting..." : "Reply"}
                   </Button>
                 </div>
               </div>
@@ -240,9 +199,9 @@ export function CommentSection({ dealId }: CommentSectionProps) {
   }
 
   return (
-    <div className="rounded-lg border" id="comments">
+    <div className="rounded-lg border bg-white" id="comments">
       <div className="border-b p-4">
-        <h2 className="text-xl font-bold">Comments ({dealComments.length})</h2>
+        <h2 className="text-xl font-bold">{dealComments.length} Comments </h2>
       </div>
 
       <div className="p-4">
@@ -253,20 +212,58 @@ export function CommentSection({ dealId }: CommentSectionProps) {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmitComment} className="mb-6">
-          <Textarea
-            placeholder={currentUser ? "Write a comment..." : "Log in to comment"}
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            disabled={!currentUser || isSubmitting}
-            className="mb-2"
-          />
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting || !newComment.trim() || !currentUser}>
-              {isSubmitting ? "Posting..." : "Post Comment"}
-            </Button>
+        <div className="mb-6">
+          <div className="flex items-start gap-3">
+            <Avatar className="h-8 w-8 flex-shrink-0">
+              <AvatarImage src={currentUser?.avatarUrl || ""} alt={currentUser?.username || "User"} />
+              <AvatarFallback>
+                {currentUser?.username?.charAt(0).toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <TipTapEditor
+                placeholder={currentUser ? "Write a comment..." : "Log in to comment"}
+                onSubmit={async (content) => {
+                  if (!currentUser) {
+                    toast({
+                      title: "Error",
+                      description: "You must be logged in to comment.",
+                      variant: "destructive",
+                    })
+                    return
+                  }
+                  
+                  setIsSubmitting(true)
+                  try {
+                    await addComment(dealId, content)
+                    
+                    // Refetch comments to get the updated list
+                    const response = await fetch(`/api/deals/${dealId}/comments`)
+                    if (response.ok) {
+                      const data = await response.json()
+                      setDealComments(data)
+                    }
+
+                    toast({
+                      title: "Comment posted",
+                      description: "Your comment has been posted successfully.",
+                    })
+                  } catch (error: any) {
+                    toast({
+                      title: "Error",
+                      description: error.message || "Failed to post comment.",
+                      variant: "destructive",
+                    })
+                  } finally {
+                    setIsSubmitting(false)
+                  }
+                }}
+                disabled={!currentUser || isSubmitting}
+                className="w-full"
+              />
+            </div>
           </div>
-        </form>
+        </div>
 
         {loading ? (
           <div className="space-y-4">

@@ -4,6 +4,9 @@ export interface User {
   username: string
   avatarUrl?: string
   createdAt: string
+  dealsPosted?: number
+  votesGiven?: number
+  commentsPosted?: number
 }
 
 export interface Deal {

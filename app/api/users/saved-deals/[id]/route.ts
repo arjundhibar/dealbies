@@ -1,17 +1,14 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
-import { getSupabase } from "@/lib/supabase"
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { cookies } from "next/headers"
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const dealId = params.id
 
     // Get user from session
-    const supabase = getSupabase()
-    if (!supabase) {
-      return NextResponse.json({ error: "Authentication service unavailable" }, { status: 500 })
-    }
-
+    const supabase = createServerComponentClient({ cookies })
     const {
       data: { session },
     } = await supabase.auth.getSession()

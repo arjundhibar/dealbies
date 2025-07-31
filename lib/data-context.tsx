@@ -42,17 +42,24 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   // Fetch user profile when auth user changes
   useEffect(() => {
     const fetchUserProfile = async () => {
+      console.log("fetchUserProfile called, user:", user)
       if (!user) {
+        console.log("No user found, setting currentUser to null")
         setCurrentUser(null)
         return
       }
 
       try {
+        console.log("Fetching user profile from API...")
         const response = await fetch(`/api/users/profile`)
+        console.log("User profile response status:", response.status)
+        
         if (response.ok) {
           const userData = await response.json()
+          console.log("User profile data:", userData)
           setCurrentUser(userData)
         } else {
+          console.log("User profile not found, creating new user...")
           // If user doesn't exist in our database yet, create them
           const createResponse = await fetch("/api/users", {
             method: "POST",
@@ -64,10 +71,14 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             }),
           })
 
+          console.log("Create user response status:", createResponse.status)
+          
           if (createResponse.ok) {
             const newUser = await createResponse.json()
+            console.log("New user created:", newUser)
             setCurrentUser(newUser)
           } else {
+            console.log("Failed to create user, setting temporary user object")
             // If we can't create the user, set a temporary user object
             setCurrentUser({
               id: user.id,
@@ -97,16 +108,29 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   // Fetch user's saved deals when user changes
   useEffect(() => {
     const fetchSavedDeals = async () => {
+      console.log("fetchSavedDeals called, user:", user)
       if (!user) {
+        console.log("No user found, setting savedDeals to empty array")
         setSavedDeals([])
         return
       }
 
       try {
+        console.log("Fetching saved deals from API...")
         const response = await fetch(`/api/users/saved-deals`)
+        console.log("Saved deals response status:", response.status)
+        
         if (response.ok) {
           const data = await response.json()
-          setSavedDeals(data.map((item: any) => item.dealId || item.id))
+          console.log("Saved deals API response:", data)
+          // The API returns full deal objects, so we need to extract the deal IDs
+          const dealIds = data.map((deal: any) => deal.id)
+          console.log("Extracted deal IDs:", dealIds)
+          setSavedDeals(dealIds)
+        } else {
+          console.error("Failed to fetch saved deals, status:", response.status)
+          const errorText = await response.text()
+          console.error("Error response:", errorText)
         }
       } catch (error) {
         console.error("Error fetching saved deals:", error)
@@ -579,8 +603,12 @@ if (!token) {
   )
 
   const saveDeal = async (dealId: string): Promise<void> => {
+    console.log("saveDeal called with dealId:", dealId)
+    console.log("currentUser:", currentUser)
+    
     if (!currentUser) throw new Error("You must be logged in to save deals")
 
+    console.log("Making API call to save deal...")
     const response = await fetch("/api/users/saved-deals", {
       method: "POST",
       headers: {
@@ -591,31 +619,80 @@ if (!token) {
       }),
     })
 
+    console.log("Save deal response status:", response.status)
+    console.log("Save deal response headers:", Object.fromEntries(response.headers.entries()))
+    
     if (!response.ok) {
-      const error = await response.json()
+      const errorText = await response.text()
+      console.error("Save deal error response text:", errorText)
+      
+      let error
+      try {
+        error = JSON.parse(errorText)
+      } catch (e) {
+        error = { message: errorText }
+      }
+      
+      console.error("Save deal parsed error:", error)
       throw new Error(error.message || "Failed to save deal")
     }
 
-    setSavedDeals((prev) => [...prev, dealId])
+    const responseData = await response.json()
+    console.log("Save deal success response:", responseData)
+
+    console.log("Deal saved successfully, updating state")
+    setSavedDeals((prev) => {
+      const newState = [...prev, dealId]
+      console.log("New saved deals state:", newState)
+      return newState
+    })
   }
 
   const unsaveDeal = async (dealId: string): Promise<void> => {
+    console.log("unsaveDeal called with dealId:", dealId)
+    console.log("currentUser:", currentUser)
+    
     if (!currentUser) throw new Error("You must be logged in to unsave deals")
 
+    console.log("Making API call to unsave deal...")
     const response = await fetch(`/api/users/saved-deals/${dealId}`, {
       method: "DELETE",
     })
 
+    console.log("Unsave deal response status:", response.status)
+    console.log("Unsave deal response headers:", Object.fromEntries(response.headers.entries()))
+    
     if (!response.ok) {
-      const error = await response.json()
+      const errorText = await response.text()
+      console.error("Unsave deal error response text:", errorText)
+      
+      let error
+      try {
+        error = JSON.parse(errorText)
+      } catch (e) {
+        error = { message: errorText }
+      }
+      
+      console.error("Unsave deal parsed error:", error)
       throw new Error(error.message || "Failed to unsave deal")
     }
 
-    setSavedDeals((prev) => prev.filter((id) => id !== dealId))
+    const responseData = await response.json()
+    console.log("Unsave deal success response:", responseData)
+
+    console.log("Deal unsaved successfully, updating state")
+    setSavedDeals((prev) => {
+      const newState = prev.filter((id) => id !== dealId)
+      console.log("New saved deals state:", newState)
+      return newState
+    })
   }
 
   const isSaved = (dealId: string): boolean => {
-    return savedDeals.includes(dealId)
+    const saved = savedDeals.includes(dealId)
+    console.log(`isSaved check for dealId ${dealId}:`, saved)
+    console.log("Current savedDeals array:", savedDeals)
+    return saved
   }
 
   return (

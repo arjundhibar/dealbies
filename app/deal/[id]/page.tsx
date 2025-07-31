@@ -1,13 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useParams, notFound } from "next/navigation"
 import { useData } from "@/lib/data-context"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {  ExternalLink, Share2, MessageCircle, ChevronDown, ChevronUp, MoveDiagonal, Clock, ArrowBigDown, ArrowBigUp } from "lucide-react"
+import {  ExternalLink, Share2, MessageCircle, ChevronDown, ChevronUp, Clock, ArrowBigDown, ArrowBigUp, CalendarDays, Tag, ThumbsUp, MessageSquare, Hourglass, Flag } from "lucide-react"
 import { formatDistanceToNow, isPast, format } from "date-fns"
 import { cn, formatCurrency } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -29,6 +28,31 @@ export default function DealPage() {
   const { toast } = useToast()
   const [isVoting, setIsVoting] = useState(false)
   const isMobile = useIsMobile()
+  const [showStickyNav, setShowStickyNav] = useState(false)
+  const dealCardRef = useRef<HTMLDivElement>(null)
+  const [isColdPressed, setIsColdPressed] = useState(false)
+  const [isCalledPressed, setIsCalledPressed] = useState(false)
+  const [showSnow, setShowSnow] = useState(false);
+  const [posterUser, setPosterUser] = useState<any>(null)
+  const [posterLoading, setPosterLoading] = useState(true)
+
+  // Add effect to hide navbar when sticky nav is shown
+  useEffect(() => {
+    const navbar = document.querySelector('header')
+    if (navbar) {
+      if (showStickyNav) {
+        navbar.style.display = 'none'
+      } else {
+        navbar.style.display = 'block'
+      }
+    }
+
+    return () => {
+      if (navbar) {
+        navbar.style.display = 'block'
+      }
+    }
+  }, [showStickyNav])
 
   useEffect(() => {
     const fetchDealData = async () => {
@@ -40,7 +64,22 @@ export default function DealPage() {
         //   notFound()
         // }
         setDeal(dealData)
-       
+
+        // Fetch poster user data
+        if (dealData?.postedBy?.id) {
+          try {
+            // We need to fetch user by ID instead of email since postedBy doesn't have email
+            const userResponse = await fetch(`/api/users/${dealData.postedBy.id}`)
+            if (userResponse.ok) {
+              const userData = await userResponse.json()
+              setPosterUser(userData)
+            }
+          } catch (error) {
+            console.error("Error fetching poster user:", error)
+          } finally {
+            setPosterLoading(false)
+          }
+        }
 
         const related = await getRelatedDeals(id)
         setRelatedDeals(related)
@@ -55,6 +94,28 @@ export default function DealPage() {
     fetchDealData()
   }, [id, getDeal, getRelatedDeals])
 
+  // Handle scroll for sticky navigation
+  useEffect(() => {
+    const handleScroll = () => {
+      if (dealCardRef.current) {
+        const rect = dealCardRef.current.getBoundingClientRect()
+        setShowStickyNav(rect.top <= 0)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const handleColdClick = () => {
+  setIsColdPressed((prev) => !prev);
+  setShowSnow(true);
+
+  // Remove emoji after animation (600ms matches animation duration)
+  setTimeout(() => setShowSnow(false), 600);
+};
+
+  
   // useEffect(() => {
   //   const fetchDealData = async () => {
   //     const cached = localStorage.getItem(`deal-${id}`)
@@ -208,7 +269,7 @@ export default function DealPage() {
     );
   } else if (expiresAtDate) {
     offerStatus = (
-      <div className="flex items-center gap-2 mb-4 text-red-600 dark:text-red-400 text-sm font-medium">
+      <div className="flex items-center gap-2 mb-4 w-full justify-center text-[var(--textStatusInfo)] dark:text-blue-400 text-base font-normal text-center bg-[var(--bgStatusInfoMuted)] dark:bg-[var(--bgStatusInfoMuted)] rounded-md py-4 mr-2">
         <Clock className="h-5 w-5" />
         <span>
           This offer expires on {format(expiresAtDate, "MMMM d, yyyy 'at' HH:mm")}
@@ -220,9 +281,57 @@ export default function DealPage() {
   // Mobile layout
   if (isMobile) {
     return (
-      <div className="w-full px-4">
+      <div className={`w-full px-4 ${showStickyNav ? 'pt-16' : ''}`}>
+        {/* Sticky Navigation for Mobile */}
+        {showStickyNav && (
+                  <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#1d1f20] border-b border-[#dfe1e4] dark:border-[#46484b] shadow-sm h-16">
+          <div className="flex items-center justify-between h-full px-4">
+              {/* Voting buttons */}
+              <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "down" && "text-blue-500")}
+                  onClick={() => handleVote("down")}
+                  disabled={isVoting}
+                >
+                  <ChevronDown className="h-5 w-5" />
+                  <span className="sr-only">Downvote</span>
+                </Button>
+
+                <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "up" && "text-dealhunter-red")}
+                  onClick={() => handleVote("up")}
+                  disabled={isVoting}
+                >
+                  <ChevronUp className="h-5 w-5" />
+                  <span className="sr-only">Upvote</span>
+                </Button>
+              </div>
+
+              {/* Deal title (truncated) */}
+              <div className="flex-1 mx-3">
+                <h2 className="text-sm font-semibold truncate">
+                  {title}
+                </h2>
+              </div>
+
+              {/* Deal button */}
+              <Button size="sm" className="bg-orange-500 hover:bg-orange-600 rounded-full" asChild>
+                <a href={dealUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Main Deal Card */}
-        <Card className="mb-6 overflow-hidden dark:bg-dark-secondary">
+        <Card ref={dealCardRef} className="mb-6 overflow-hidden dark:bg-dark-secondary">
           <div className="flex flex-col">
             {/* Deal Image */}
             {/* <div className="w-full">
@@ -287,7 +396,10 @@ export default function DealPage() {
                     <Share2 className="h-4 w-4" />
                     To share
                   </Button>
-                  <DealCardSaveButton dealId={id} />
+                   <div className="flex items-center gap-1">
+    <DealCardSaveButton dealId={id} />
+    <span className="text-sm font-medium">Save</span>
+  </div>
                 </div>
               </div>
 
@@ -315,28 +427,150 @@ export default function DealPage() {
           </div>
         </Card>
 
-        {/* Rest of the mobile layout components */}
-        {/* ... (keep the rest of the mobile components) ... */}
+        {/* About this offer section for mobile */}
+        <Card className="mb-6">
+          <div className="p-6">
+            <h2 className="text-xl font-bold mb-6">About this offer</h2>
+
+            {/* Posted by info */}
+            <div className="flex items-center gap-3 mb-6">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={postedBy.avatar || "/placeholder.svg"} alt={postedBy.name} />
+                <AvatarFallback>{postedBy.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-xs">Posted by <span className="text-sm font-bold"> {postedBy.name} </span></p>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  {posterLoading ? (
+                    <>
+                      <span className="flex items-center gap-1">📅 Loading...</span>
+                      <span className="flex items-center gap-1">🏷️ Loading...</span>
+                      <span className="flex items-center gap-1">👍 Loading...</span>
+                    </>
+                  ) : posterUser ? (
+                    <>
+                      <span className="flex items-center gap-1">
+                        <CalendarDays className="h-4 w-4" /> Member since {new Date(posterUser.createdAt).getFullYear()}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Tag className="h-4 w-4" /> {posterUser.dealsPosted || 0} deals
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <ThumbsUp className="h-4 w-4" /> {posterUser.votesGiven || 0} votes
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="flex items-center gap-1">
+                        <CalendarDays className="h-4 w-4" /> Member since {new Date(createdAt).getFullYear()}
+                      </span>
+                      <span className="flex items-center gap-1">🏷️ --</span>
+                      <span className="flex items-center gap-1">👍 --</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="prose max-w-none dark:prose-invert mb-6">
+              <div 
+                className="rich-text-content"
+                dangerouslySetInnerHTML={{ __html: description }}
+              />
+            </div>
+
+            {/* More details link */}
+            <Button variant="outline" size="sm" className="gap-2">
+              📄 More details at {merchant}
+            </Button>
+
+            {/* Disclaimer */}
+            <div className="mt-6 pt-4 border-t text-xs text-muted-foreground">
+              <p className="mt-2">
+                If you click on a link and/or order something, dealhunter may receive a payment from the seller. This has
+                no influence on the decision to place an offer or not. For more information, see the FAQ and About Us
+                page.
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        {/* Comments section */}
+        <CommentSection dealId={id} />
       </div>
     )
   }
 
   // Desktop layout
   return (
-    <div className="w-full px-4 lg:w-[1000px] lg:px-0 mx-auto">
+    <div className={`w-full px-4 lg:w-[1000px] lg:px-0 mx-auto ${showStickyNav ? 'pt-16' : ''}`}>
+      {/* Sticky Navigation */}
+      {showStickyNav && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#1d1f20] border-b border-[#dfe1e4] dark:border-[#46484b] shadow-sm h-16">
+          <div className="w-full px-4 lg:w-[1000px] lg:px-0 mx-auto h-full">
+            <div className="flex items-center justify-between h-full px-4">
+              {/* Voting buttons */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "down" && "text-blue-500")}
+                    onClick={(e) => { e.stopPropagation(); handleVote("down") }}
+                    disabled={isVoting}
+                  >
+                    <ArrowBigDown className="h-6 w-6 scale-[1.5] scale-x-[1.1] text-[#005498] dark:text-[#5aa4f1]" strokeWidth={1.5} />
+                    <span className="sr-only">Downvote</span>
+                  </Button>
+
+                  <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
+
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "up" && "text-dealhunter-red")}
+                    onClick={(e) => { e.stopPropagation(); handleVote("up") }}
+                    disabled={isVoting}
+                  >
+                    <ArrowBigUp className="h-6 w-6 scale-[1.5] scale-x-[1.1] text-[#ce1734] dark:text-[#f97778]" strokeWidth={1.5} />
+                    <span className="sr-only">Upvote</span>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Deal title (truncated) */}
+              <div className="flex-1 mx-4">
+                <h2 className="text-lg font-semibold truncate max-w-md lg:max-w-lg xl:max-w-xl">
+                  {title}
+                </h2>
+              </div>
+
+              {/* Deal button */}
+              <Button size="sm" className="bg-[var(--background-default)] hover:bg-[var(--background-hover)] rounded-full" asChild>
+                <a href={dealUrl} target="_blank" rel="noopener noreferrer">
+                  To deal
+                  <ExternalLink className="ml-2 h-4 w-4" strokeWidth={3} />
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Deal Card */}
-      <Card className="mb-6 overflow-hidden dark:bg-dark-secondary bg-[#fff] pt-[1.5em] pl-[1.5rem] pr-[1.5rem] pb-[1.5rem]">
+      <Card ref={dealCardRef} className="mb-2 overflow-hidden dark:bg-dark-secondary bg-[#fff] pt-[1.5em] pl-[1.5rem] pr-[1.5rem] pb-[1.5rem]">
         {offerStatus}
         <div className="flex flex-col lg:flex-row">
           {/* Deal Image - 40% width */}
-          <div className="lg:w-[40%] lg:flex-shrink-0 lg:h-[400px]">
+          <div className="lg:w-[45%] lg:flex-shrink-0 lg:h-[400px]">
             <div className="w-full h-full lg:pr-[0.25rem] pt-[1.5em] flex items-center justify-center">
               <Carousel images={deal.imageUrls && deal.imageUrls.length > 0 ? deal.imageUrls.map(img => typeof img === 'string' ? img : img.url) : ["/placeholder.svg?height=400&width=400"]} />
             </div>
           </div>
 
           {/* Deal Content - 60% width */}
-          <div className="lg:w-[60%] p-6">
+          <div className="lg:w-[55%] p-6">
             {/* Header with voting and actions */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -378,7 +612,10 @@ export default function DealPage() {
                   <Share2 className="h-4 w-4" />
                   To share
                 </Button>
-                <DealCardSaveButton dealId={id} />
+                 <div className="flex items-center hover:text-dealhunter-redHover">
+    <DealCardSaveButton dealId={id} />
+    <span className="text-sm font-medium">Save</span>
+  </div>
               </div>
             </div>
 
@@ -421,21 +658,45 @@ export default function DealPage() {
       </Card>
 
       {/* Voting feedback section */}
-      <Card className="mb-6 p-6">
+      <Card className="mb-2 py-8 px-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">Your vote helps us show you the best deals. What do you think?</span>
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0 rounded-full">
-              <span className="text-xs">?</span>
-            </Button>
+          <div className="flex items-center gap-4">
+            <span className="text-xl font-semibold">Your vote helps us show you the best deals. What do you think?</span>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
-              <span className="text-red-500">❄️</span>
-              Cold
-            </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <span className="text-red-500">🔥</span>
+          <div className="flex gap-2 mr-24">
+            <div className="relative inline-block">
+  {/* ❄️ Falling Snow Emoji */}
+  {showSnow && (
+    <span className="absolute left-1/2 top-[-10px] -translate-x-1/2 text-xl text-[#005498] animate-drop pointer-events-none select-none">
+      ❄️
+    </span>
+  )}
+
+  {/* Cold Button */}
+  <Button
+    onClick={handleColdClick}
+    variant="custom"
+    className={cn(
+      "gap-2 rounded-full min-w-[69.125px] py-[14px] h-9 border transition-all duration-300",
+      isColdPressed
+        ? "bg-[#dbecfe] border-[#005498] text-[#005498]"
+        : "hover:bg-[#f0f6fc] hover:border-[#e5f0fc] dark:active:bg-[#0c4b84] dark:hover:bg-[#052e53] dark:hover:border-[#023b6a]"
+    )}
+  >
+    <ArrowBigDown
+      className={cn(
+        "h-6 w-6 scale-[1.5] scale-x-[1.1] transition-colors duration-300",
+        isColdPressed ? "text-[#005498]" : "text-[#005498] dark:text-[#5aa4f1]"
+      )}
+      strokeWidth={1.5}
+    />
+    Cold
+  </Button>
+</div>
+
+
+            <Button variant="custom" className="gap-2 rounded-full min-w-[69.125px] py-[14px] h-9 border active:bg-[#ffe4e2] hover:bg-[#fcf3f2] hover:border-[#fdeae9] dark:hover:border-[#690a18] dark:hover:bg-[#] ">
+              <ArrowBigUp className="h-6 w-6 scale-[1.5] scale-x-[1.1] text-[#ce1734] dark:text-[#f97778]" strokeWidth={1.5} />
               Is called
             </Button>
           </div>
@@ -443,7 +704,7 @@ export default function DealPage() {
       </Card>
 
       {/* About this offer section */}
-      <Card className="mb-6">
+      <Card className="">
         <div className="p-6">
           <h2 className="text-xl font-bold mb-6">About this offer</h2>
 
@@ -454,22 +715,48 @@ export default function DealPage() {
               <AvatarFallback>{postedBy.name.charAt(0)}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-medium">Posted by {postedBy.name}</p>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span className="flex items-center gap-1">📅 Member since 2020</span>
-                <span className="flex items-center gap-1">🏷️ 47</span>
-                <span className="flex items-center gap-1">👍 907</span>
+              <p className="text-xs">Posted by <span className="text-sm font-bold"> {postedBy.name} </span></p>
+              <div className="flex items-center gap-4 text-xs text-black dark:text-white cursor-pointer">
+                {posterLoading ? (
+                  <>
+                    <span className="flex items-center gap-1">📅 Loading...</span>
+                    <span className="flex items-center gap-1">🏷️ Loading...</span>
+                    <span className="flex items-center gap-1">👍 Loading...</span>
+                  </>
+                ) : posterUser ? (
+                  <>
+                    <span className="flex items-center gap-1 ">
+                     <CalendarDays className="h-4 w-4" /> Member since {new Date(posterUser.createdAt).getFullYear()}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Tag className="h-4 w-4" /> {posterUser.dealsPosted || 0} 
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <ThumbsUp className="h-4 w-4" /> {posterUser.votesGiven || 0} 
+                    </span>
+                  </>
+                ) : (
+                  <>
+                        <span className="flex items-center gap-1">
+                          <CalendarDays className="h-4 w-4" /> Member since {new Date(createdAt).getFullYear()} </span>
+                    <span className="flex items-center gap-1">🏷️ --</span>
+                    <span className="flex items-center gap-1">👍 --</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
           {/* Description */}
           <div className="prose max-w-none dark:prose-invert mb-6">
-            <p>{description}</p>
+            <div 
+              className="rich-text-content"
+              dangerouslySetInnerHTML={{ __html: description }}
+            />
           </div>
 
           {/* Price info */}
-          {(price || originalPrice) && (
+          {/* {(price || originalPrice) && (
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-2">
                 {price && <span className="text-2xl font-bold text-primary">₹{Number(price).toFixed(2)}</span>}
@@ -481,23 +768,30 @@ export default function DealPage() {
                 {discount && <Badge className="bg-red-500">-{discount}%</Badge>}
               </div>
             </div>
-          )}
+          )} */}
 
           {/* Additional info */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+          {/* <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
             <Badge variant="outline">{category}</Badge>
             <Badge variant="outline">{merchant}</Badge>
             {isExpired && <Badge variant="destructive">Expired</Badge>}
-          </div>
+          </div> */}
 
           {/* More details link */}
-          <Button variant="outline" size="sm" className="gap-2">
-            📄 More details at {merchant}
+          <span className="text-sm font-bold">More details at</span>
+          <Button
+            variant="custom"
+            className="text-sm -mx-3 dark:text-[#f97936] hover:underline text-[#eb611f]"
+            asChild
+          >
+            <a href={`https://${merchant}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+              {merchant}
+              <ExternalLink className="h-4 w-4 -mx-2" strokeWidth={3} />
+            </a>
           </Button>
 
           {/* Disclaimer */}
           <div className="mt-6 pt-4 border-t text-xs text-muted-foreground">
-            <p className="italic">Modified by moderator, {formatDistanceToNow(postedAtDate, { addSuffix: true })}</p>
             <p className="mt-2">
               If you click on a link and/or order something, dealhunter may receive a payment from the seller. This has
               no influence on the decision to place an offer or not. For more information, see the FAQ and About Us
@@ -505,21 +799,42 @@ export default function DealPage() {
             </p>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex gap-2 mt-4">
-            <Button variant="outline" size="sm" className="gap-2">
-              💬 New response
-            </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              📌 Save
-            </Button>
-          </div>
+          {/* Action buttons - full-width, black background, flat buttons */}
+{/* <div className="w-full bg-black px-4 py-3 mt-6 rounded-b-md flex items-center justify-between">
+  <button className="flex items-center gap-1 text-white text-sm hover:text-gray-300 transition-colors">
+    💬 New response
+  </button>
+  <button className="flex items-center gap-1 text-white text-sm hover:text-gray-300 transition-colors">
+    📌 Save
+  </button>
+</div> */}
         </div>
       </Card>
+      <Card className="rounded-t-none border-t-0 bg-[#f3f5f7] dark:bg-[#28292a] text-white mb-2 -mt-1">
+  <div className="flex items-center px-6 py-2 w-full">
+    <Button variant="ghost" size="sm" className="gap-2 text-[#6b6d70] dark:text-[#c5c7ca] hover:text-dealhunter-redHover dark:hover:text-[#f97936] text-sm font-semibold">
+      <MessageSquare className="" size={20} strokeWidth={3.5}/> <span>New response</span>
+          </Button>
+          <Button variant="ghost" size="sm" className="gap-2 text-[#6b6d70] dark:text-[#c5c7ca] hover:text-dealhunter-redHover dark:hover:text-[#f97936] text-sm font-semibold">
+      <Hourglass className="" size={20} strokeWidth={3.5}/> <span>Expired?</span>
+          </Button>
+          <Button variant="ghost" size="sm" className="gap-2 text-[#6b6d70] dark:text-[#c5c7ca] hover:text-dealhunter-redHover dark:hover:text-[#f97936] text-sm font-semibold">
+      <Flag className="" size={20} strokeWidth={3.5}/> <span>Report</span>
+    </Button>
+    {/* <Button variant="ghost" size="sm" className="gap-2 text-white hover:text-dealhunter-redHover">
+      📌 <span>Save</span>
+    </Button> */}
+          <div className="flex items-center gap-1 hover:text-dealhunter-redHover dark:text-[#c5c7ca] dark:hover:text-[#f97936] text-sm font-semibold text-[#6b6d70] cursor-pointer">
+    <DealCardSaveButton dealId={id} />
+    <span className="text-sm font-medium">Save</span>
+  </div>
+  </div>
+</Card>
+
 
       {/* Related deals section */}
       {relatedDeals.length > 0 && (
-        <Card className="mb-6">
+        <Card className="mb-2">
           <div className="p-6">
             <h2 className="text-xl font-bold mb-6">You might also like</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">

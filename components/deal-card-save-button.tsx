@@ -19,18 +19,36 @@ export function DealCardSaveButton({ dealId }: DealCardSaveButtonProps) {
 
   const handleToggleSave = async () => {
     try {
+      console.log("Save button clicked for deal:", dealId)
+      console.log("Current user:", currentUser)
+      console.log("Currently saved:", saved)
+      
+      // Test authentication by making a simple API call
+      console.log("Testing authentication...")
+      const authTest = await fetch("/api/users/profile")
+      console.log("Auth test response status:", authTest.status)
+      
+      if (authTest.status === 401) {
+        console.log("User not authenticated, redirecting to login")
+        router.push("/login")
+        throw new Error("You must be logged in to save deals")
+      }
+      
       if (!currentUser) {
+        console.log("No currentUser, redirecting to login")
         router.push("/login")
         throw new Error("You must be logged in to save deals")
       }
 
       if (saved) {
+        console.log("Unsaving deal:", dealId)
         await unsaveDeal(dealId)
         toast({
           title: "Deal removed",
           description: "Deal removed from your saved items",
         })
       } else {
+        console.log("Saving deal:", dealId)
         await saveDeal(dealId)
         toast({
           title: "Deal saved",
@@ -38,6 +56,7 @@ export function DealCardSaveButton({ dealId }: DealCardSaveButtonProps) {
         })
       }
     } catch (error: any) {
+      console.error("Error in handleToggleSave:", error)
       toast({
         title: "Error",
         description: error.message || "An error occurred",

@@ -45,7 +45,7 @@ export default function PostDealPage() {
                 ],
             },
             icon: Scissors,
-            href: "/post/discount-code",
+            href: "/submission/discount-code",
             available: true,
         },
         {

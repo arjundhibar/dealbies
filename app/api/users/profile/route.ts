@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
-import { supabase } from "@/lib/supabase"
-import { error } from "console"
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { cookies } from "next/headers"
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const email = searchParams.get("email")
-    if (!supabase) {
-      return NextResponse.json({error : "Internal Server Error!"})
-    }
+    const supabase = createServerComponentClient({ cookies })
 
     // Get user from session if email not provided
     if (!email) {
@@ -29,6 +27,13 @@ export async function GET(request: Request) {
           username: true,
           avatarUrl: true,
           createdAt: true,
+          _count: {
+            select: {
+              deals: true,
+              votes: true,
+              comments: true,
+            }
+          }
         },
       })
 
@@ -36,7 +41,13 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "User not found" }, { status: 404 })
       }
 
-      return NextResponse.json(user)
+      return NextResponse.json({
+        ...user,
+        dealsPosted: user._count.deals,
+        votesGiven: user._count.votes,
+        commentsPosted: user._count.comments,
+        _count: undefined
+      })
     }
 
     // Get user by email
@@ -48,6 +59,13 @@ export async function GET(request: Request) {
         username: true,
         avatarUrl: true,
         createdAt: true,
+        _count: {
+          select: {
+            deals: true,
+            votes: true,
+            comments: true,
+          }
+        }
       },
     })
 
@@ -55,7 +73,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    return NextResponse.json(user)
+    return NextResponse.json({
+      ...user,
+      dealsPosted: user._count.deals,
+      votesGiven: user._count.votes,
+      commentsPosted: user._count.comments,
+      _count: undefined
+    })
   } catch (error) {
     console.error("Error fetching user:", error)
     return NextResponse.json({ error: "An error occurred while fetching the user" }, { status: 500 })
@@ -63,10 +87,8 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  if (!supabase) {
-      return NextResponse.json({error : "Internal Server Error!"})
-    }
   try {
+    const supabase = createServerComponentClient({ cookies })
     const {
       data: { session },
     } = await supabase.auth.getSession()
