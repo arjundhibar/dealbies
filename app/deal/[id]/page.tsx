@@ -114,10 +114,14 @@ export default function DealPage() {
     const handleScroll = () => {
       if (dealCardRef.current) {
         const rect = dealCardRef.current.getBoundingClientRect()
+        // Show sticky nav when the deal card starts going out of view
         setShowStickyNav(rect.top <= 0)
       }
     }
 
+    // Initial check
+    handleScroll()
+    
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
@@ -437,16 +441,16 @@ export default function DealPage() {
     );
   }
 
-  // Mobile layout
+    // Mobile layout
   if (isMobile) {
     return (
-      <div className={`w-full px-4 ${showStickyNav ? 'pt-16' : ''}`}>
+      <div className={`w-full ${showStickyNav ? 'pt-16' : ''}`}>
         {/* Sticky Navigation for Mobile */}
         {showStickyNav && (
-                  <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#1d1f20] border-b border-[#dfe1e4] dark:border-[#46484b] shadow-sm h-16">
-          <div className="flex items-center justify-between h-full px-4">
+          <div className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-[#1d1f20] border-b border-[#dfe1e4] dark:border-[#46484b] shadow-sm h-16">
+            <div className="flex items-center justify-between h-full px-4">
               {/* Voting buttons */}
-              <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary">
+              <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary flex-shrink-0">
                 <Button
                   variant="outline"
                   size="icon"
@@ -479,16 +483,17 @@ export default function DealPage() {
               </div>
 
               {/* Deal title (truncated) */}
-              <div className="flex-1 mx-3">
+              <div className="flex-1 mx-3 min-w-0">
                 <h2 className="text-sm font-semibold truncate">
                   {title}
                 </h2>
               </div>
 
               {/* Deal button */}
-              <Button size="sm" className="bg-orange-500 hover:bg-orange-600 rounded-full" asChild>
+              <Button size="sm" className="h-9 bg-[var(--background-default)] hover:bg-[var(--background-hover)] rounded-full flex-shrink-0 px-3 text-xs" asChild>
                 <a href={dealUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-4 w-4" />
+                  Deal
+                  <ExternalLink className="ml-1 h-3 w-3" strokeWidth={3} />
                 </a>
               </Button>
             </div>
@@ -496,110 +501,201 @@ export default function DealPage() {
         )}
 
         {/* Main Deal Card */}
-        <Card ref={dealCardRef} className="mb-6 overflow-hidden dark:bg-dark-secondary">
+        <Card ref={dealCardRef} className="mb-2 overflow-hidden dark:bg-dark-secondary bg-[#fff] pt-[1.5em] pl-[1.5rem] pr-[1.5rem] pb-[1.5rem]">
+          {offerStatus}
           <div className="flex flex-col">
-            {/* Deal Image */}
-            {/* <div className="w-full">
-              <div className="relative w-full h-[228px]">
-                <Image
-                  src={imageUrls[0] || "/placeholder.svg?height=400&width=400"}
-                  alt={title}
-                  fill
-                  className="object-cover"
-                />
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="absolute bottom-2 right-2 rounded-[50vh] border border-[#dfe1e4] hover:border-[#d7d9dd] active:border-[#ced0d3] hover:bg-[#f3f5f7] active:bg-[#eceef0] text-[#6b6d70] hover:text-[#76787b] active:text-[#818386] cursor-pointer h-9 px-4 font-bold text-[0.875rem] whitespace-nowrap overflow-hidden text-ellipsis bg-white"
-                >
-                  <MoveDiagonal />
-                  Enlarge
-                </Button>
+            {/* Deal Image - Full width for mobile */}
+            <div className="w-full mb-4">
+              <div className="w-full h-[300px]">
+                <Carousel images={deal.imageUrls && deal.imageUrls.length > 0 ? deal.imageUrls.map(img => typeof img === 'string' ? img : img.url) : ["/placeholder.svg?height=400&width=400"]} />
               </div>
-            </div> */}
+            </div>
 
             {/* Deal Content */}
-            <div className="flex-1 p-6">
+            <div className="flex-1">
               {/* Header with voting and actions */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   {/* Voting buttons */}
-                                <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className={cn(
-                    "rounded-full border h-7 w-7",
-                    (userVote === "down" || isColdPressed) ? "bg-[#005498] text-white border-[#005498]" : "border-gray-300"
-                  )}
-                  onClick={() => handleVote("down")}
-                  disabled={isVoting}
-                >
-                  <ChevronDown className="h-5 w-5" />
-                  <span className="sr-only">Downvote</span>
-                </Button>
+                  <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary" onClick={(e) => e.stopPropagation()}>
+                    {/* Downvote Button */}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className={cn(
+                        "rounded-full border h-7 w-7",
+                        (userVote === "down" || isColdPressed) ? "bg-[#005498] text-white border-[#005498]" : "border-[hsla(0,0%,100%,0.35)]"
+                      )}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleVote("down")
+                      }}
+                      disabled={isVoting}
+                    >
+                      <ArrowBigDown
+                        className={cn(
+                          "h-6 w-6 scale-[1.5] scale-x-[1.1]",
+                          (userVote === "down" || isColdPressed) ? "text-white" : "text-[#005498] dark:text-[#5aa4f1]"
+                        )}
+                        strokeWidth={1.5}
+                      />
+                      <span className="sr-only">Downvote</span>
+                    </Button>
 
-                <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
+                    {/* Score */}
+                    <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
 
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className={cn(
-                    "rounded-full border h-7 w-7",
-                    (userVote === "up" || isCalledPressed) ? "bg-[#ce1734] text-white border-[#ce1734]" : "border-gray-300"
-                  )}
-                  onClick={() => handleVote("up")}
-                  disabled={isVoting}
-                >
-                  <ChevronUp className="h-5 w-5" />
-                  <span className="sr-only">Upvote</span>
-                </Button>
-              </div>
+                    {/* Upvote Button */}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className={cn(
+                        "rounded-full border h-7 w-7",
+                        (userVote === "up" || isCalledPressed) ? "bg-[#ce1734] text-white border-[#ce1734]" : "border-[hsla(0,0%,100%,0.35)]"
+                      )}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleVote("up")
+                      }}
+                      disabled={isVoting}
+                    >
+                      <ArrowBigUp
+                        className={cn(
+                          "h-6 w-6 scale-[1.5] scale-x-[1.1]",
+                          (userVote === "up" || isCalledPressed) ? "text-white" : "text-[#ce1734] dark:text-[#f97778]"
+                        )}
+                        strokeWidth={1.5}
+                      />
+                      <span className="sr-only">Upvote</span>
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="sm" className="gap-1 hover:text-dealhunter-redHover">
-                    <MessageCircle className="h-4 w-4" />
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" onClick={scrollsToComment} className=" hover:text-dealhunter-redHover text-[#6b6d70] dark:text-[#c5c7ca] font-medium">
+                    <MessageSquare className="h-4 w-4" strokeWidth={3} />
                     {commentCount}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={handleShare} className="gap-1 hover:text-dealhunter-redHover">
-                    <Share2 className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" onClick={handleShare} className="gap-1 hover:text-dealhunter-redHover text-[#6b6d70] dark:text-[#c5c7ca] font-medium">
+                    <Share2 className="h-4 w-4" strokeWidth={3} />
                     To share
                   </Button>
-                   <div className="flex items-center gap-1">
-    <DealCardSaveButton dealId={id} />
-    <span className="text-sm font-medium">Save</span>
-  </div>
+                  <div className="flex items-center hover:text-dealhunter-redHover text-[#6b6d70] dark:text-[#c5c7ca] font-medium">
+                    <DealCardSaveButton dealId={id} />
+                    <span className="text-sm font-medium">Save</span>
+                  </div>
                 </div>
               </div>
 
               {/* Posted time */}
-              <p className="text-sm text-muted-foreground mb-3">
+              <p className="text-sm text-[var(--textTranslucentSecondary)] mb-3">
                 Posted {formatDistanceToNow(postedAtDate, { addSuffix: true })}
               </p>
 
               {/* Deal title */}
               <h1 className="text-2xl font-bold mb-4">{title}</h1>
 
+              {/* Price section */}
+              <div className="flex items-center gap-2 mb-1 leading-none">
+                <span className="text-[2em] font-bold text-[#f7641b] dark:text-[var(--textAccentPrice)]">{formatCurrency(Number(price))}</span>
+                {originalPrice && (
+                  <>
+                    <span className="text-xl text-muted-foreground dark:text-[var(--textTranslucentSecondary)] line-through">
+                      {formatCurrency(Number(originalPrice))}
+                    </span>
+                    <span className="text-[var(--textStatusPositive)] bg-[var(--bgStatusPositiveMuted)] text-[16px] font-bold px-2 py-1 rounded-md">{discount}%</span>
+                  </>
+                )}
+              </div>
+
               {/* Merchant info */}
               <p className="text-muted-foreground mb-6">
-                Available at <span className="text-black font-medium">{merchant}</span>
+                Available at <span className="text-black dark:text-white font-medium">{merchant}</span>
               </p>
 
               {/* Deal button */}
-              <Button size="lg" className="w-full bg-orange-500 hover:bg-orange-600 rounded-full" asChild>
+              <Button size="lg" className="w-full h-14 flex items-center justify-center bg-[var(--background-default)] hover:bg-[var(--background-hover)] rounded-full text-lg" asChild>
                 <a href={dealUrl} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="mr-2 h-5 w-5" />
                   To deal
+                  <ExternalLink className="mr-2 h-6 w-6" strokeWidth={3} />
                 </a>
               </Button>
             </div>
           </div>
         </Card>
 
-        {/* About this offer section for mobile */}
-        <Card className="mb-6">
+        {/* Voting feedback section */}
+        <Card className="mb-2 py-8 px-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <span className="text-xl font-semibold">Your vote helps us show you the best deals. What do you think?</span>
+            </div>
+            <div className="flex gap-2">
+              <div className="relative inline-block">
+                {/* ❄️ Falling Snow Emoji */}
+                {showSnow && (
+                  <span className="absolute left-1/2 top-[-10px] -translate-x-1/2 text-xl text-[#005498] animate-drop pointer-events-none select-none">
+                    ❄️
+                  </span>
+                )}
+
+                {/* Cold Button */}
+                <Button
+                  onClick={handleColdClick}
+                  variant="custom"
+                  className={cn(
+                    "gap-2 rounded-full min-w-[69.125px] py-[14px] h-9 border transition-all duration-300",
+                    (isColdPressed || userVote === "down")
+                      ? "bg-[#dbecfe] border-[#005498] text-[#005498]"
+                      : "hover:bg-[#f0f6fc] hover:border-[#e5f0fc] dark:active:bg-[#0c4b84] dark:hover:bg-[#052e53] dark:hover:border-[#023b6a]"
+                  )}
+                >
+                  <ArrowBigDown
+                    className={cn(
+                      "h-6 w-6 scale-[1.5] scale-x-[1.1] transition-colors duration-300",
+                      (isColdPressed || userVote === "down") ? "text-[#005498]" : "text-[#005498] dark:text-[#5aa4f1]"
+                    )}
+                    strokeWidth={1.5}
+                  />
+                  Cold
+                </Button>
+              </div>
+
+              <div className="relative inline-block">
+                {/* 🔥 Falling Fire Emoji */}
+                {showFire && (
+                  <span className="absolute left-1/2 top-[-10px] -translate-x-1/2 text-xl text-[#ce1734] animate-drop pointer-events-none select-none">
+                    🔥
+                  </span>
+                )}
+
+                <Button 
+                  onClick={handleCalledClick}
+                  variant="custom" 
+                  className={cn(
+                    "gap-2 rounded-full min-w-[69.125px] py-[14px] h-9 border transition-all duration-300",
+                    (isCalledPressed || userVote === "up")
+                      ? "bg-[#ffe4e2] border-[#ce1734] text-[#ce1734]"
+                      : "hover:bg-[#fcf3f2] hover:border-[#fdeae9] dark:hover:border-[#690a18] dark:hover:bg-[#]"
+                  )}
+                >
+                  <ArrowBigUp 
+                    className={cn(
+                      "h-6 w-6 scale-[1.5] scale-x-[1.1] transition-colors duration-300",
+                      (isCalledPressed || userVote === "up") ? "text-[#ce1734]" : "text-[#ce1734] dark:text-[#f97778]"
+                    )} 
+                    strokeWidth={1.5} 
+                  />
+                  Is called
+                </Button>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* About this offer section */}
+        <Card className="">
           <div className="p-6">
             <h2 className="text-xl font-bold mb-6">About this offer</h2>
 
@@ -611,7 +707,7 @@ export default function DealPage() {
               </Avatar>
               <div>
                 <p className="text-xs">Posted by <span className="text-sm font-bold"> {postedBy.name} </span></p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-4 text-xs text-black dark:text-white cursor-pointer">
                   {posterLoading ? (
                     <>
                       <span className="flex items-center gap-1">📅 Loading...</span>
@@ -620,21 +716,20 @@ export default function DealPage() {
                     </>
                   ) : posterUser ? (
                     <>
-                      <span className="flex items-center gap-1">
-                        <CalendarDays className="h-4 w-4" /> Member since {new Date(posterUser.createdAt).getFullYear()}
+                      <span className="flex items-center gap-1 ">
+                       <CalendarDays className="h-4 w-4" /> Member since {new Date(posterUser.createdAt).getFullYear()}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Tag className="h-4 w-4" /> {posterUser.dealsPosted || 0} deals
+                        <Tag className="h-4 w-4" /> {posterUser.dealsPosted || 0} 
                       </span>
                       <span className="flex items-center gap-1">
-                        <ThumbsUp className="h-4 w-4" /> {posterUser.votesGiven || 0} votes
+                        <ThumbsUp className="h-4 w-4" /> {posterUser.votesGiven || 0} 
                       </span>
                     </>
                   ) : (
                     <>
-                      <span className="flex items-center gap-1">
-                        <CalendarDays className="h-4 w-4" /> Member since {new Date(createdAt).getFullYear()}
-                      </span>
+                          <span className="flex items-center gap-1">
+                            <CalendarDays className="h-4 w-4" /> Member since {new Date(createdAt).getFullYear()} </span>
                       <span className="flex items-center gap-1">🏷️ --</span>
                       <span className="flex items-center gap-1">👍 --</span>
                     </>
@@ -652,8 +747,16 @@ export default function DealPage() {
             </div>
 
             {/* More details link */}
-            <Button variant="outline" size="sm" className="gap-2">
-              📄 More details at {merchant}
+            <span className="text-sm font-bold">More details at</span>
+            <Button
+              variant="custom"
+              className="text-sm -mx-3 dark:text-[#f97936] hover:underline text-[#eb611f]"
+              asChild
+            >
+              <a href={`https://${merchant}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                {merchant}
+                <ExternalLink className="h-4 w-4 -mx-2" strokeWidth={3} />
+              </a>
             </Button>
 
             {/* Disclaimer */}
@@ -667,8 +770,77 @@ export default function DealPage() {
           </div>
         </Card>
 
+        <Card className="rounded-t-none border-t-0 bg-[#f3f5f7] dark:bg-[#28292a] text-white mb-2 -mt-1">
+          <div className="flex items-center px-6 py-2 w-full">
+            <Button variant="ghost" size="sm" className="gap-2 text-[#6b6d70] dark:text-[#c5c7ca] hover:text-dealhunter-redHover dark:hover:text-[#f97936] text-sm font-semibold">
+              <MessageSquare className="" size={20} strokeWidth={3.5}/> <span>New response</span>
+            </Button>
+            <Button variant="ghost" size="sm" className="gap-2 text-[#6b6d70] dark:text-[#c5c7ca] hover:text-dealhunter-redHover dark:hover:text-[#f97936] text-sm font-semibold">
+              <Hourglass className="" size={20} strokeWidth={3.5}/> <span>Expired?</span>
+            </Button>
+            <Button variant="ghost" size="sm" className="gap-2 text-[#6b6d70] dark:text-[#c5c7ca] hover:text-dealhunter-redHover dark:hover:text-[#f97936] text-sm font-semibold">
+              <Flag className="" size={20} strokeWidth={3.5}/> <span>Report</span>
+            </Button>
+            <div className="flex items-center gap-1 hover:text-dealhunter-redHover dark:text-[#c5c7ca] dark:hover:text-[#f97936] text-sm font-semibold text-[#6b6d70] cursor-pointer">
+              <DealCardSaveButton dealId={id} />
+              <span className="text-sm font-medium">Save</span>
+            </div>
+          </div>
+        </Card>
+
+        {/* Related deals section */}
+        {relatedDeals.length > 0 && (
+          <Card className="mb-2">
+            <div className="p-6">
+              <h2 className="text-xl font-bold mb-6">You might also like</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                {relatedDeals.slice(0, 6).map((relatedDeal) => {
+                  const relatedDiscount = relatedDeal.originalPrice
+                    ? Math.round(((relatedDeal.originalPrice - relatedDeal.price) / relatedDeal.originalPrice) * 100)
+                    : null
+
+                  return (
+                    <Link key={relatedDeal.id} href={`/deal/${relatedDeal.id}`}>
+                      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                        <div className="aspect-square relative">
+                          <Image
+                            src={relatedDeal.imageUrls?.[0]?.url || "/placeholder.svg?height=200&width=200"}
+                            alt={relatedDeal.title}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="p-3">
+                          <h3 className="font-medium text-sm line-clamp-2 mb-2">{relatedDeal.title}</h3>
+                          <div className="flex items-center gap-1 text-sm">
+                            {relatedDeal.price === 0 ? (
+                              <span className="font-bold text-green-600">FREE</span>
+                            ) : (
+                              <span className="font-bold text-primary">₹{Number(relatedDeal.price).toFixed(2)}</span>
+                            )}
+                            {relatedDeal.originalPrice && relatedDeal.originalPrice > relatedDeal.price && (
+                              <span className="text-xs text-muted-foreground line-through">
+                                ₹{Number(relatedDeal.originalPrice).toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                          {relatedDiscount && (
+                            <span className="text-xs text-green-600 font-medium">-{relatedDiscount}%</span>
+                          )}
+                        </div>
+                      </Card>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Comments section */}
-        <CommentSection dealId={id} />
+        <div ref={commentRef}>
+          <CommentSection dealId={id} />
+        </div>
       </div>
     )
   }
