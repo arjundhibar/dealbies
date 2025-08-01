@@ -33,8 +33,15 @@ export default function DealPage() {
   const [isColdPressed, setIsColdPressed] = useState(false)
   const [isCalledPressed, setIsCalledPressed] = useState(false)
   const [showSnow, setShowSnow] = useState(false);
+  const [showFire, setShowFire] = useState(false);
   const [posterUser, setPosterUser] = useState<any>(null)
   const [posterLoading, setPosterLoading] = useState(true)
+
+  const commentRef = useRef<HTMLDivElement>(null)
+
+  const scrollsToComment = () => {
+    commentRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   // Add effect to hide navbar when sticky nav is shown
   useEffect(() => {
@@ -94,6 +101,14 @@ export default function DealPage() {
     fetchDealData()
   }, [id, getDeal, getRelatedDeals])
 
+  // Sync local vote states with actual vote state
+  useEffect(() => {
+    if (deal) {
+      setIsColdPressed(deal.userVote === "down");
+      setIsCalledPressed(deal.userVote === "up");
+    }
+  }, [deal?.userVote]);
+
   // Handle scroll for sticky navigation
   useEffect(() => {
     const handleScroll = () => {
@@ -107,13 +122,137 @@ export default function DealPage() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const handleColdClick = () => {
-  setIsColdPressed((prev) => !prev);
-  setShowSnow(true);
+  const handleColdClick = async () => {
+    if (isVoting || !deal) return;
 
-  // Remove emoji after animation (600ms matches animation duration)
-  setTimeout(() => setShowSnow(false), 600);
-};
+    try {
+      setIsVoting(true);
+      
+      // Reset other states
+      setIsCalledPressed(false);
+      
+      // Toggle cold state
+      const newColdState = !isColdPressed;
+      setIsColdPressed(newColdState);
+      setShowSnow(true);
+
+      // Remove emoji after animation (600ms matches animation duration)
+      setTimeout(() => setShowSnow(false), 600);
+
+      // If turning cold on, vote down. If turning off, remove vote
+      const voteType = newColdState ? "down" : (userVote === "down" ? "down" : "up");
+      
+      // Optimistically update the UI
+      const currentScore = deal.score;
+      const currentUserVote = deal.userVote;
+      let newScore = currentScore;
+      let newUserVote: "up" | "down" | undefined = newColdState ? "down" : undefined;
+
+      if (currentUserVote === "down") {
+        // Remove vote
+        newScore = currentScore + 1;
+        newUserVote = undefined;
+      } else if (currentUserVote) {
+        // Change vote
+        newScore = currentScore + 2;
+      } else {
+        // New vote
+        newScore = currentScore - 1;
+      }
+
+      // Update local state immediately
+      setDeal(prev => prev ? { ...prev, score: newScore, userVote: newUserVote } : prev);
+      
+      // Update global state
+      updateDealVote(id, newScore, newUserVote);
+
+      // Make API call
+      await voteDeal(id, voteType);
+    } catch (error: any) {
+      // Revert optimistic update on error
+      if (deal) {
+        setDeal(prev => prev ? { ...prev, score: deal.score, userVote: deal.userVote } : prev);
+        updateDealVote(id, deal.score, deal.userVote);
+      }
+      
+      // Reset local states on error
+      setIsColdPressed(false);
+      
+      toast({
+        title: "Error",
+        description: error.message || "You must be logged in to vote.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsVoting(false);
+    }
+  };
+
+  const handleCalledClick = async () => {
+    if (isVoting || !deal) return;
+
+    try {
+      setIsVoting(true);
+      
+      // Reset other states
+      setIsColdPressed(false);
+      
+      // Toggle called state
+      const newCalledState = !isCalledPressed;
+      setIsCalledPressed(newCalledState);
+      setShowFire(true);
+
+      // Remove emoji after animation (600ms matches animation duration)
+      setTimeout(() => setShowFire(false), 600);
+
+      // If turning called on, vote up. If turning off, remove vote
+      const voteType = newCalledState ? "up" : (userVote === "up" ? "up" : "down");
+      
+      // Optimistically update the UI
+      const currentScore = deal.score;
+      const currentUserVote = deal.userVote;
+      let newScore = currentScore;
+      let newUserVote: "up" | "down" | undefined = newCalledState ? "up" : undefined;
+
+      if (currentUserVote === "up") {
+        // Remove vote
+        newScore = currentScore - 1;
+        newUserVote = undefined;
+      } else if (currentUserVote) {
+        // Change vote
+        newScore = currentScore - 2;
+      } else {
+        // New vote
+        newScore = currentScore + 1;
+      }
+
+      // Update local state immediately
+      setDeal(prev => prev ? { ...prev, score: newScore, userVote: newUserVote } : prev);
+      
+      // Update global state
+      updateDealVote(id, newScore, newUserVote);
+
+      // Make API call
+      await voteDeal(id, voteType);
+    } catch (error: any) {
+      // Revert optimistic update on error
+      if (deal) {
+        setDeal(prev => prev ? { ...prev, score: deal.score, userVote: deal.userVote } : prev);
+        updateDealVote(id, deal.score, deal.userVote);
+      }
+      
+      // Reset local states on error
+      setIsCalledPressed(false);
+      
+      toast({
+        title: "Error",
+        description: error.message || "You must be logged in to vote.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsVoting(false);
+    }
+  };
 
   
   // useEffect(() => {
@@ -152,6 +291,19 @@ export default function DealPage() {
     try {
       setIsVoting(true)
       
+      // Update local vote states based on vote type
+      if (voteType === "down") {
+        setIsColdPressed(true);
+        setIsCalledPressed(false);
+        setShowSnow(true);
+        setTimeout(() => setShowSnow(false), 600);
+      } else if (voteType === "up") {
+        setIsCalledPressed(true);
+        setIsColdPressed(false);
+        setShowFire(true);
+        setTimeout(() => setShowFire(false), 600);
+      }
+      
       // Optimistically update the UI
       const currentScore = deal.score
       const currentUserVote = deal.userVote
@@ -162,6 +314,9 @@ export default function DealPage() {
         // Remove vote
         newScore = voteType === "up" ? currentScore - 1 : currentScore + 1
         newUserVote = undefined
+        // Reset local states when removing vote
+        setIsColdPressed(false);
+        setIsCalledPressed(false);
       } else if (currentUserVote) {
         // Change vote
         newScore = voteType === "up" ? currentScore + 2 : currentScore - 2
@@ -184,6 +339,10 @@ export default function DealPage() {
         setDeal(prev => prev ? { ...prev, score: deal.score, userVote: deal.userVote } : prev)
         updateDealVote(id, deal.score, deal.userVote)
       }
+      
+      // Reset local states on error
+      setIsColdPressed(false);
+      setIsCalledPressed(false);
       
       toast({
         title: "Error",
@@ -291,7 +450,10 @@ export default function DealPage() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "down" && "text-blue-500")}
+                  className={cn(
+                    "rounded-full border h-7 w-7",
+                    (userVote === "down" || isColdPressed) ? "bg-[#005498] text-white border-[#005498]" : "border-gray-300"
+                  )}
                   onClick={() => handleVote("down")}
                   disabled={isVoting}
                 >
@@ -304,7 +466,10 @@ export default function DealPage() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "up" && "text-dealhunter-red")}
+                  className={cn(
+                    "rounded-full border h-7 w-7",
+                    (userVote === "up" || isCalledPressed) ? "bg-[#ce1734] text-white border-[#ce1734]" : "border-gray-300"
+                  )}
                   onClick={() => handleVote("up")}
                   disabled={isVoting}
                 >
@@ -359,31 +524,37 @@ export default function DealPage() {
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   {/* Voting buttons */}
-                  <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "down" && "text-blue-500")}
-                      onClick={() => handleVote("down")}
-                      disabled={isVoting}
-                    >
-                      <ChevronDown className="h-5 w-5" />
-                      <span className="sr-only">Downvote</span>
-                    </Button>
+                                <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    "rounded-full border h-7 w-7",
+                    (userVote === "down" || isColdPressed) ? "bg-[#005498] text-white border-[#005498]" : "border-gray-300"
+                  )}
+                  onClick={() => handleVote("down")}
+                  disabled={isVoting}
+                >
+                  <ChevronDown className="h-5 w-5" />
+                  <span className="sr-only">Downvote</span>
+                </Button>
 
-                    <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
+                <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
 
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className={cn("rounded-full border-gray-300 h-7 w-7", userVote === "up" && "text-dealhunter-red")}
-                      onClick={() => handleVote("up")}
-                      disabled={isVoting}
-                    >
-                      <ChevronUp className="h-5 w-5" />
-                      <span className="sr-only">Upvote</span>
-                    </Button>
-                  </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className={cn(
+                    "rounded-full border h-7 w-7",
+                    (userVote === "up" || isCalledPressed) ? "bg-[#ce1734] text-white border-[#ce1734]" : "border-gray-300"
+                  )}
+                  onClick={() => handleVote("up")}
+                  disabled={isVoting}
+                >
+                  <ChevronUp className="h-5 w-5" />
+                  <span className="sr-only">Upvote</span>
+                </Button>
+              </div>
                 </div>
 
                 {/* Action buttons */}
@@ -516,11 +687,20 @@ export default function DealPage() {
                   <Button
                     variant="outline"
                     size="icon"
-                    className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "down" && "text-blue-500")}
+                    className={cn(
+                      "rounded-full border h-7 w-7",
+                      (userVote === "down" || isColdPressed) ? "bg-[#005498] text-white border-[#005498]" : "border-[hsla(0,0%,100%,0.35)]"
+                    )}
                     onClick={(e) => { e.stopPropagation(); handleVote("down") }}
                     disabled={isVoting}
                   >
-                    <ArrowBigDown className="h-6 w-6 scale-[1.5] scale-x-[1.1] text-[#005498] dark:text-[#5aa4f1]" strokeWidth={1.5} />
+                    <ArrowBigDown 
+                      className={cn(
+                        "h-6 w-6 scale-[1.5] scale-x-[1.1]",
+                        (userVote === "down" || isColdPressed) ? "text-white" : "text-[#005498] dark:text-[#5aa4f1]"
+                      )} 
+                      strokeWidth={1.5} 
+                    />
                     <span className="sr-only">Downvote</span>
                   </Button>
 
@@ -529,11 +709,20 @@ export default function DealPage() {
                   <Button
                     variant="outline"
                     size="icon"
-                    className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "up" && "text-dealhunter-red")}
+                    className={cn(
+                      "rounded-full border h-7 w-7",
+                      (userVote === "up" || isCalledPressed) ? "bg-[#ce1734] text-white border-[#ce1734]" : "border-[hsla(0,0%,100%,0.35)]"
+                    )}
                     onClick={(e) => { e.stopPropagation(); handleVote("up") }}
                     disabled={isVoting}
                   >
-                    <ArrowBigUp className="h-6 w-6 scale-[1.5] scale-x-[1.1] text-[#ce1734] dark:text-[#f97778]" strokeWidth={1.5} />
+                    <ArrowBigUp 
+                      className={cn(
+                        "h-6 w-6 scale-[1.5] scale-x-[1.1]",
+                        (userVote === "up" || isCalledPressed) ? "text-white" : "text-[#ce1734] dark:text-[#f97778]"
+                      )} 
+                      strokeWidth={1.5} 
+                    />
                     <span className="sr-only">Upvote</span>
                   </Button>
                 </div>
@@ -576,43 +765,71 @@ export default function DealPage() {
               <div className="flex items-center gap-3">
                 {/* Voting buttons */}
                 <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary" onClick={(e) => e.stopPropagation()}>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "down" && "text-blue-500")}
-                  onClick={(e) => { e.stopPropagation(); handleVote("down") }}
-                  disabled={isVoting}
-                >
-                  <ArrowBigDown className="h-6 w-6 scale-[1.5] scale-x-[1.1]  text-[#005498] dark:text-[#5aa4f1]" strokeWidth={1.5} />
-                  <span className="sr-only">Downvote</span>
-                </Button>
+  {/* Downvote Button */}
+  <Button
+    variant="outline"
+    size="icon"
+    className={cn(
+      "rounded-full border h-7 w-7",
+      (userVote === "down" || isColdPressed) ? "bg-[#005498] text-white border-[#005498]" : "border-[hsla(0,0%,100%,0.35)]"
+    )}
+    onClick={(e) => {
+      e.stopPropagation()
+      handleVote("down")
+    }}
+    disabled={isVoting}
+  >
+    <ArrowBigDown
+      className={cn(
+        "h-6 w-6 scale-[1.5] scale-x-[1.1]",
+        (userVote === "down" || isColdPressed) ? "text-white" : "text-[#005498] dark:text-[#5aa4f1]"
+      )}
+      strokeWidth={1.5}
+    />
+    <span className="sr-only">Downvote</span>
+  </Button>
 
-                <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
+  {/* Score */}
+  <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
 
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "up" && "text-dealhunter-red")}
-                  onClick={(e) => { e.stopPropagation(); handleVote("up") }}
-                  disabled={isVoting}
-                >
-                  <ArrowBigUp className="h-6 w-6 scale-[1.5] scale-x-[1.1] text-[#ce1734] dark:text-[#f97778]" strokeWidth={1.5} />
-                  <span className="sr-only">Upvote</span>
-                </Button>
-              </div>
+  {/* Upvote Button */}
+  <Button
+    variant="outline"
+    size="icon"
+    className={cn(
+      "rounded-full border h-7 w-7",
+      (userVote === "up" || isCalledPressed) ? "bg-[#ce1734] text-white border-[#ce1734]" : "border-[hsla(0,0%,100%,0.35)]"
+    )}
+    onClick={(e) => {
+      e.stopPropagation()
+      handleVote("up")
+    }}
+    disabled={isVoting}
+  >
+    <ArrowBigUp
+      className={cn(
+        "h-6 w-6 scale-[1.5] scale-x-[1.1]",
+        (userVote === "up" || isCalledPressed) ? "text-white" : "text-[#ce1734] dark:text-[#f97778]"
+      )}
+      strokeWidth={1.5}
+    />
+    <span className="sr-only">Upvote</span>
+  </Button>
+</div>
+
               </div>
 
               {/* Action buttons */}
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" className="gap-1 hover:text-dealhunter-redHover">
-                  <MessageCircle className="h-4 w-4" />
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" onClick={scrollsToComment} className=" hover:text-dealhunter-redHover text-[#6b6d70] dark:text-[#c5c7ca] font-medium">
+                  <MessageSquare className="h-4 w-4" strokeWidth={3} />
                   {commentCount}
                 </Button>
-                <Button variant="ghost" size="sm" onClick={handleShare} className="gap-1 hover:text-dealhunter-redHover">
-                  <Share2 className="h-4 w-4" />
+                <Button variant="ghost" size="sm" onClick={handleShare} className="gap-1 hover:text-dealhunter-redHover text-[#6b6d70] dark:text-[#c5c7ca] font-medium">
+                  <Share2 className="h-4 w-4" strokeWidth={3} />
                   To share
                 </Button>
-                 <div className="flex items-center hover:text-dealhunter-redHover">
+                 <div className="flex items-center hover:text-dealhunter-redHover text-[#6b6d70] dark:text-[#c5c7ca] font-medium">
     <DealCardSaveButton dealId={id} />
     <span className="text-sm font-medium">Save</span>
   </div>
@@ -663,7 +880,7 @@ export default function DealPage() {
           <div className="flex items-center gap-4">
             <span className="text-xl font-semibold">Your vote helps us show you the best deals. What do you think?</span>
           </div>
-          <div className="flex gap-2 mr-24">
+                      <div className="flex gap-2 mr-24">
             <div className="relative inline-block">
   {/* ❄️ Falling Snow Emoji */}
   {showSnow && (
@@ -678,7 +895,7 @@ export default function DealPage() {
     variant="custom"
     className={cn(
       "gap-2 rounded-full min-w-[69.125px] py-[14px] h-9 border transition-all duration-300",
-      isColdPressed
+      (isColdPressed || userVote === "down")
         ? "bg-[#dbecfe] border-[#005498] text-[#005498]"
         : "hover:bg-[#f0f6fc] hover:border-[#e5f0fc] dark:active:bg-[#0c4b84] dark:hover:bg-[#052e53] dark:hover:border-[#023b6a]"
     )}
@@ -686,7 +903,7 @@ export default function DealPage() {
     <ArrowBigDown
       className={cn(
         "h-6 w-6 scale-[1.5] scale-x-[1.1] transition-colors duration-300",
-        isColdPressed ? "text-[#005498]" : "text-[#005498] dark:text-[#5aa4f1]"
+        (isColdPressed || userVote === "down") ? "text-[#005498]" : "text-[#005498] dark:text-[#5aa4f1]"
       )}
       strokeWidth={1.5}
     />
@@ -694,11 +911,34 @@ export default function DealPage() {
   </Button>
 </div>
 
+            <div className="relative inline-block">
+              {/* 🔥 Falling Fire Emoji */}
+              {showFire && (
+                <span className="absolute left-1/2 top-[-10px] -translate-x-1/2 text-xl text-[#ce1734] animate-drop pointer-events-none select-none">
+                  🔥
+                </span>
+              )}
 
-            <Button variant="custom" className="gap-2 rounded-full min-w-[69.125px] py-[14px] h-9 border active:bg-[#ffe4e2] hover:bg-[#fcf3f2] hover:border-[#fdeae9] dark:hover:border-[#690a18] dark:hover:bg-[#] ">
-              <ArrowBigUp className="h-6 w-6 scale-[1.5] scale-x-[1.1] text-[#ce1734] dark:text-[#f97778]" strokeWidth={1.5} />
-              Is called
-            </Button>
+              <Button 
+                onClick={handleCalledClick}
+                variant="custom" 
+                className={cn(
+                  "gap-2 rounded-full min-w-[69.125px] py-[14px] h-9 border transition-all duration-300",
+                  (isCalledPressed || userVote === "up")
+                    ? "bg-[#ffe4e2] border-[#ce1734] text-[#ce1734]"
+                    : "hover:bg-[#fcf3f2] hover:border-[#fdeae9] dark:hover:border-[#690a18] dark:hover:bg-[#]"
+                )}
+              >
+                <ArrowBigUp 
+                  className={cn(
+                    "h-6 w-6 scale-[1.5] scale-x-[1.1] transition-colors duration-300",
+                    (isCalledPressed || userVote === "up") ? "text-[#ce1734]" : "text-[#ce1734] dark:text-[#f97778]"
+                  )} 
+                  strokeWidth={1.5} 
+                />
+                Is called
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
@@ -882,7 +1122,9 @@ export default function DealPage() {
       )}
 
       {/* Comments section */}
-      <CommentSection dealId={id} />
+      <div ref={commentRef}>
+        <CommentSection dealId={id} />
+      </div>
     </div>
   )
 }

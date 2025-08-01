@@ -84,7 +84,7 @@ export function CommentSection({ dealId }: CommentSectionProps) {
       <div key={id} className="border-b py-4 last:border-0 bg-white">
         <div className="flex gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={postedBy.avatar || "/placeholder.svg?height=40&width=40&text=U"} alt={postedBy.name} />
+            <AvatarImage src={postedBy.avatar || "/kishan.jpeg"} alt={postedBy.name} />
             <AvatarFallback>{postedBy.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
@@ -134,8 +134,8 @@ export function CommentSection({ dealId }: CommentSectionProps) {
             {isReplying && (
               <div className="mt-3">
                 <div className="flex items-start gap-3">
-                  <Avatar className="h-6 w-6 flex-shrink-0">
-                    <AvatarImage src={currentUser?.avatarUrl || ""} alt={currentUser?.username || "User"} />
+                  <Avatar className="h-10 w-10 flex-shrink-0">
+                    <AvatarImage src={currentUser?.avatarUrl || "/kishan.jpeg"} alt={currentUser?.username || "User"} />
                     <AvatarFallback className="text-xs">
                       {currentUser?.username?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
@@ -214,8 +214,8 @@ export function CommentSection({ dealId }: CommentSectionProps) {
 
         <div className="mb-6">
           <div className="flex items-start gap-3">
-            <Avatar className="h-8 w-8 flex-shrink-0">
-              <AvatarImage src={currentUser?.avatarUrl || ""} alt={currentUser?.username || "User"} />
+            <Avatar className="h-14 w-14 flex-shrink-0">
+              <AvatarImage src={currentUser?.avatarUrl || "/kishan.jpeg"} alt={currentUser?.username || "User"} />
               <AvatarFallback>
                 {currentUser?.username?.charAt(0).toUpperCase() || "U"}
               </AvatarFallback>
