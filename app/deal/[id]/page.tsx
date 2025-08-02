@@ -6,7 +6,7 @@ import { useData } from "@/lib/data-context"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {  ExternalLink, Share2, MessageCircle, ChevronDown, ChevronUp, Clock, ArrowBigDown, ArrowBigUp, CalendarDays, Tag, ThumbsUp, MessageSquare, Hourglass, Flag } from "lucide-react"
+import {  ExternalLink, Share2, MessageCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Clock, ArrowBigDown, ArrowBigUp, CalendarDays, Tag, ThumbsUp, MessageSquare, Hourglass, Flag } from "lucide-react"
 import { formatDistanceToNow, isPast, format } from "date-fns"
 import { cn, formatCurrency } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
@@ -423,7 +423,10 @@ export default function DealPage() {
   let offerStatus = null;
   if (startAtDate && now < startAtDate) {
     offerStatus = (
-      <div className="flex items-center gap-2 mb-4 w-full justify-center text-[var(--textStatusInfo)] dark:text-blue-400 text-base font-normal text-center bg-[var(--bgStatusInfoMuted)] dark:bg-[var(--bgStatusInfoMuted)] rounded-md py-4 mr-2">
+      <div className="flex items-center gap-2 mb-4 w-full justify-center 
+  text-[var(--textStatusInfo)] dark:text-blue-400 text-base font-normal text-center 
+  bg-[var(--bgStatusInfoMuted)] dark:bg-[var(--bgStatusInfoMuted)] 
+  rounded-md py-4 px-4 sm:p-4 mr-2">
         <Clock className="h-5 w-5" />
         <span>
           This offer will start on {format(startAtDate, "MMMM d, yyyy 'at' HH:mm")}
@@ -432,7 +435,10 @@ export default function DealPage() {
     );
   } else if (expiresAtDate) {
     offerStatus = (
-      <div className="flex items-center gap-2 mb-4 w-full justify-center text-[var(--textStatusInfo)] dark:text-blue-400 text-base font-normal text-center bg-[var(--bgStatusInfoMuted)] dark:bg-[var(--bgStatusInfoMuted)] rounded-md py-4 mr-2">
+      <div className="flex items-center gap-2 mb-4 w-full justify-center 
+  text-[var(--textStatusInfo)] dark:text-blue-400 text-base font-normal text-center 
+  bg-[var(--bgStatusInfoMuted)] dark:bg-[var(--bgStatusInfoMuted)] 
+  rounded-md py-4 px-4 sm:p-4 mr-2">
         <Clock className="h-5 w-5" />
         <span>
           This offer expires on {format(expiresAtDate, "MMMM d, yyyy 'at' HH:mm")}
@@ -501,7 +507,7 @@ export default function DealPage() {
         )}
 
         {/* Main Deal Card */}
-        <Card ref={dealCardRef} className="mb-2 overflow-hidden dark:bg-dark-secondary bg-[#fff] pt-[1.5em] pl-[1.5rem] pr-[1.5rem] pb-[1.5rem]">
+        <Card ref={dealCardRef} className="mb-2 overflow-hidden dark:bg-dark-secondary bg-[#fff] px-4 py-2">
           {offerStatus}
           <div className="flex flex-col">
             {/* Deal Image - Full width for mobile */}
@@ -594,28 +600,28 @@ export default function DealPage() {
               </p>
 
               {/* Deal title */}
-              <h1 className="text-2xl font-bold mb-4">{title}</h1>
+              <h1 className="text-xl font-semibold mb-4">{title}</h1>
 
               {/* Price section */}
               <div className="flex items-center gap-2 mb-1 leading-none">
-                <span className="text-[2em] font-bold text-[#f7641b] dark:text-[var(--textAccentPrice)]">{formatCurrency(Number(price))}</span>
+                <span className="text-xl font-bold text-[#f7641b] dark:text-[var(--textAccentPrice)]">{formatCurrency(Number(price))}</span>
                 {originalPrice && (
                   <>
                     <span className="text-xl text-muted-foreground dark:text-[var(--textTranslucentSecondary)] line-through">
                       {formatCurrency(Number(originalPrice))}
                     </span>
-                    <span className="text-[var(--textStatusPositive)] bg-[var(--bgStatusPositiveMuted)] text-[16px] font-bold px-2 py-1 rounded-md">{discount}%</span>
+                    <span className="text-[var(--textStatusPositive)] bg-[var(--bgStatusPositiveMuted)] text-[14px] font-semibold px-2 py-1 rounded-md">{discount}%</span>
                   </>
                 )}
               </div>
 
               {/* Merchant info */}
-              <p className="text-muted-foreground mb-6">
-                Available at <span className="text-black dark:text-white font-medium">{merchant}</span>
+              <p className="text-muted-foreground mb-6 text-base">
+                Available at <span className="text-black text-base dark:text-white font-medium">{merchant}</span>
               </p>
 
               {/* Deal button */}
-              <Button size="lg" className="w-full h-14 flex items-center justify-center bg-[var(--background-default)] hover:bg-[var(--background-hover)] rounded-full text-lg" asChild>
+              <Button size="lg" className="w-full h-9 flex items-center justify-center bg-[var(--background-default)] hover:bg-[var(--background-hover)] rounded-full text-lg" asChild>
                 <a href={dealUrl} target="_blank" rel="noopener noreferrer">
                   To deal
                   <ExternalLink className="mr-2 h-6 w-6" strokeWidth={3} />
@@ -626,10 +632,10 @@ export default function DealPage() {
         </Card>
 
         {/* Voting feedback section */}
-        <Card className="mb-2 py-8 px-6">
-          <div className="flex items-center justify-between">
+        <Card className="mb-2 py-6 px-6">
+          <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
-              <span className="text-xl font-semibold">Your vote helps us show you the best deals. What do you think?</span>
+              <span className="text-lg font-semibold">Your vote helps us show you the best deals. What do you think?</span>
             </div>
             <div className="flex gap-2">
               <div className="relative inline-block">
@@ -645,7 +651,7 @@ export default function DealPage() {
                   onClick={handleColdClick}
                   variant="custom"
                   className={cn(
-                    "gap-2 rounded-full min-w-[69.125px] py-[14px] h-9 border transition-all duration-300",
+                    "gap-2 rounded-full min-w-[69.125px] py-[14px] h-9 border transition-all duration-300 text-[#6b6d70]",
                     (isColdPressed || userVote === "down")
                       ? "bg-[#dbecfe] border-[#005498] text-[#005498]"
                       : "hover:bg-[#f0f6fc] hover:border-[#e5f0fc] dark:active:bg-[#0c4b84] dark:hover:bg-[#052e53] dark:hover:border-[#023b6a]"
@@ -674,7 +680,7 @@ export default function DealPage() {
                   onClick={handleCalledClick}
                   variant="custom" 
                   className={cn(
-                    "gap-2 rounded-full min-w-[69.125px] py-[14px] h-9 border transition-all duration-300",
+                    "gap-2 rounded-full min-w-[69.125px] py-[14px] h-9 border transition-all duration-300 text-[#6b6d70]",
                     (isCalledPressed || userVote === "up")
                       ? "bg-[#ffe4e2] border-[#ce1734] text-[#ce1734]"
                       : "hover:bg-[#fcf3f2] hover:border-[#fdeae9] dark:hover:border-[#690a18] dark:hover:bg-[#]"
@@ -697,12 +703,12 @@ export default function DealPage() {
         {/* About this offer section */}
         <Card className="">
           <div className="p-6">
-            <h2 className="text-xl font-bold mb-6">About this offer</h2>
+            <h2 className="text-lg font-medium mb-6">About this offer</h2>
 
             {/* Posted by info */}
             <div className="flex items-center gap-3 mb-6">
               <Avatar className="h-12 w-12">
-                <AvatarImage src={postedBy.avatar || "/placeholder.svg"} alt={postedBy.name} />
+                <AvatarImage src={postedBy.avatar || "/kishan.jpeg"} alt={postedBy.name} />
                 <AvatarFallback>{postedBy.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
@@ -771,17 +777,17 @@ export default function DealPage() {
         </Card>
 
         <Card className="rounded-t-none border-t-0 bg-[#f3f5f7] dark:bg-[#28292a] text-white mb-2 -mt-1">
-          <div className="flex items-center px-6 py-2 w-full">
-            <Button variant="ghost" size="sm" className="gap-2 text-[#6b6d70] dark:text-[#c5c7ca] hover:text-dealhunter-redHover dark:hover:text-[#f97936] text-sm font-semibold">
-              <MessageSquare className="" size={20} strokeWidth={3.5}/> <span>New response</span>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-2 px-4 py-2 w-full">
+            <Button variant="ghost" size="sm" className="gap-2 text-[#6b6d70] dark:text-[#c5c7ca] hover:text-dealhunter-redHover dark:hover:text-[#f97936] text-sm font-medium">
+              <MessageSquare className="" size={20} strokeWidth={2.5}/> <span>New response</span>
             </Button>
-            <Button variant="ghost" size="sm" className="gap-2 text-[#6b6d70] dark:text-[#c5c7ca] hover:text-dealhunter-redHover dark:hover:text-[#f97936] text-sm font-semibold">
-              <Hourglass className="" size={20} strokeWidth={3.5}/> <span>Expired?</span>
+            <Button variant="ghost" size="sm" className="gap-2 text-[#6b6d70] dark:text-[#c5c7ca] hover:text-dealhunter-redHover dark:hover:text-[#f97936] text-sm font-medium">
+              <Hourglass className="" size={20} strokeWidth={2.5}/> <span>Expired?</span>
             </Button>
-            <Button variant="ghost" size="sm" className="gap-2 text-[#6b6d70] dark:text-[#c5c7ca] hover:text-dealhunter-redHover dark:hover:text-[#f97936] text-sm font-semibold">
-              <Flag className="" size={20} strokeWidth={3.5}/> <span>Report</span>
+            <Button variant="ghost" size="sm" className="gap-2 text-[#6b6d70] dark:text-[#c5c7ca] hover:text-dealhunter-redHover dark:hover:text-[#f97936] text-sm font-medium">
+              <Flag className="" size={20} strokeWidth={2.5}/> <span>Report</span>
             </Button>
-            <div className="flex items-center gap-1 hover:text-dealhunter-redHover dark:text-[#c5c7ca] dark:hover:text-[#f97936] text-sm font-semibold text-[#6b6d70] cursor-pointer">
+            <div className="flex items-center gap-1 hover:text-dealhunter-redHover dark:text-[#c5c7ca] dark:hover:text-[#f97936] text-sm font-medium text-[#6b6d70] cursor-pointer">
               <DealCardSaveButton dealId={id} />
               <span className="text-sm font-medium">Save</span>
             </div>
@@ -792,46 +798,79 @@ export default function DealPage() {
         {relatedDeals.length > 0 && (
           <Card className="mb-2">
             <div className="p-6">
-              <h2 className="text-xl font-bold mb-6">You might also like</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                {relatedDeals.slice(0, 6).map((relatedDeal) => {
-                  const relatedDiscount = relatedDeal.originalPrice
-                    ? Math.round(((relatedDeal.originalPrice - relatedDeal.price) / relatedDeal.originalPrice) * 100)
-                    : null
+              <h2 className="text-lg font-medium mb-6">You might also like</h2>
+              <div className="relative">
+                {/* Left Arrow */}
+                <button 
+                  className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-[#1d1f20] border border-[#dfe1e4] dark:border-[#46484b] rounded-full p-2 shadow-md hover:bg-gray-50 dark:hover:bg-[#2a2c2d] transition-colors"
+                  onClick={() => {
+                    const container = document.getElementById('related-deals-scroll');
+                    if (container) {
+                      container.scrollBy({ left: -300, behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  <ChevronLeft className="h-4 w-4 text-[#6b6d70] dark:text-[#c5c7ca]" />
+                </button>
 
-                  return (
-                    <Link key={relatedDeal.id} href={`/deal/${relatedDeal.id}`}>
-                      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-                        <div className="aspect-square relative">
-                          <Image
-                            src={relatedDeal.imageUrls?.[0]?.url || "/placeholder.svg?height=200&width=200"}
-                            alt={relatedDeal.title}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div className="p-3">
-                          <h3 className="font-medium text-sm line-clamp-2 mb-2">{relatedDeal.title}</h3>
-                          <div className="flex items-center gap-1 text-sm">
-                            {relatedDeal.price === 0 ? (
-                              <span className="font-bold text-green-600">FREE</span>
-                            ) : (
-                              <span className="font-bold text-primary">₹{Number(relatedDeal.price).toFixed(2)}</span>
-                            )}
-                            {relatedDeal.originalPrice && relatedDeal.originalPrice > relatedDeal.price && (
-                              <span className="text-xs text-muted-foreground line-through">
-                                ₹{Number(relatedDeal.originalPrice).toFixed(2)}
-                              </span>
+                {/* Right Arrow */}
+                <button 
+                  className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white dark:bg-[#1d1f20] border border-[#dfe1e4] dark:border-[#46484b] rounded-full p-2 shadow-md hover:bg-gray-50 dark:hover:bg-[#2a2c2d] transition-colors"
+                  onClick={() => {
+                    const container = document.getElementById('related-deals-scroll');
+                    if (container) {
+                      container.scrollBy({ left: 300, behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  <ChevronRight className="h-4 w-4 text-[#6b6d70] dark:text-[#c5c7ca]" />
+                </button>
+
+                {/* Horizontal Scroll Container */}
+                <div 
+                  id="related-deals-scroll"
+                  className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-2"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  {relatedDeals.slice(0, 10).map((relatedDeal) => {
+                    const relatedDiscount = relatedDeal.originalPrice
+                      ? Math.round(((relatedDeal.originalPrice - relatedDeal.price) / relatedDeal.originalPrice) * 100)
+                      : null
+
+                    return (
+                      <Link key={relatedDeal.id} href={`/deal/${relatedDeal.id}`} className="flex-shrink-0">
+                        <Card className="w-36 overflow-hidden hover:shadow-lg transition-shadow">
+                          <div className="aspect-square relative">
+                            <Image
+                              src={relatedDeal.imageUrls?.[0]?.url || "/placeholder.svg?height=200&width=200"}
+                              alt={relatedDeal.title}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <div className="p-3">
+                            <h3 className="font-medium text-sm line-clamp-2 mb-2 leading-tight">{relatedDeal.title}</h3>
+                            <div className="flex items-center gap-1 text-sm">
+                              {relatedDeal.price === 0 ? (
+                                <span className="font-bold text-green-600">FREE</span>
+                              ) : (
+                                <span className="font-bold text-primary">₹{Number(relatedDeal.price).toFixed(2)}</span>
+                              )}
+                              {relatedDeal.originalPrice && relatedDeal.originalPrice > relatedDeal.price && (
+                                <span className="text-xs text-muted-foreground line-through">
+                                  ₹{Number(relatedDeal.originalPrice).toFixed(2)}
+                                </span>
+                              )}
+                            </div>
+                            {relatedDiscount && (
+                              <span className="text-xs text-green-600 font-medium">-{relatedDiscount}%</span>
                             )}
                           </div>
-                          {relatedDiscount && (
-                            <span className="text-xs text-green-600 font-medium">-{relatedDiscount}%</span>
-                          )}
-                        </div>
-                      </Card>
-                    </Link>
-                  )
-                })}
+                        </Card>
+                      </Link>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           </Card>
