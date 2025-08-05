@@ -73,14 +73,18 @@ export default function PostDiscountCodePage() {
     const [progressWidth, setProgressWidth] = useState(0)
     const [hoveredStep, setHoveredStep] = useState<number | null>(null)
 
-    const [title, setTitle] = useState("")
-    const [titleFocused, setTitleFocused] = useState(false)
+    const [discount, setDiscount] = useState("")
+    const [discountFocused, setDiscountFocused] = useState(false)
     const [priceOffer, setPriceOffer] = useState("")
     const [lowestPrice, setLowestPrice] = useState("")
     const [discountCode, setDiscountCode] = useState("")
     const [availability, setAvailability] = useState("online")
     const [postageCosts, setPostageCosts] = useState("")
     const [shippingFrom, setShippingFrom] = useState("")
+
+    const [discountType, setDiscountType] = useState("")
+    const [discountValue, setDiscountValue] = useState("")
+
 
     const [priceOfferFocused, setPriceOfferFocused] = useState(false)
     const [lowestPriceFocused, setLowestPriceFocused] = useState(false)
@@ -203,7 +207,7 @@ export default function PostDiscountCodePage() {
     const endDateRef = useRef<HTMLInputElement>(null)
     const endTimeRef = useRef<HTMLInputElement>(null)
 
-    const [titleError, setTitleError] = useState("");
+    const [discountError, setDiscountError] = useState("");
     const [descriptionError, setDescriptionError] = useState("");
     const [categoryError, setCategoryError] = useState("");
 
@@ -312,11 +316,11 @@ export default function PostDiscountCodePage() {
     }
 
     const handleNext = () => {
-        if (currentStep === 1 && !title.trim()) {
-            setTitleError("This field is required");
+        if (currentStep === 1 && !discount.trim()) {
+            setDiscountError("This field is required");
             return;
         }
-        setTitleError("");
+        setDiscountError("");
         if (currentStep === 3) {
             if (editorRef.current) {
                 setDescription(editorRef.current.innerHTML);
@@ -559,8 +563,8 @@ export default function PostDiscountCodePage() {
         return (
             <div className="flex flex-col items-center justify-center flex-1 !m-0 !p-0 animate-fade-in-up px-4" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
                 <div className="w-full max-w-2xl text-center space-y-8">
-                    <div className="space-y-4">
-                        <h1 className="text-2xl leading-tight font-poppins font-medium text-[#000] dark:text-[#fff]">
+                    <div className="space-y-4 pt-3">
+                        <h1 className="text-[32px] leading-tight  font-semibold text-[#000] dark:text-[#fff]">
                             Share a discount code with millions of people
                         </h1>
                         <p className="text-lg font-poppins text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)]">
@@ -569,6 +573,16 @@ export default function PostDiscountCodePage() {
                     </div>
                     <div className="space-y-6">
                         <div className="flex flex-col items-center space-y-3 w-full">
+                            <div className="relative flex-1 w-full">
+                                <Scissors className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                <Input
+                                    type="url"
+                                    placeholder="Discount code"
+                                    value={discountCode}
+                                    onChange={(e) => setDiscountCode(e.target.value)}
+                                    className="w-full h-auto text-sm leading-5 bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] dark:text-white text-[#000] placeholder:text-gray-400 focus:border-[#f97936] focus:shadow-none rounded-lg transition-all duration-200 ease-out py-[9px] pl-10 text-ellipsis"
+                                />
+                            </div>
                             <div className="relative flex-1 w-full">
                                 <Link2 className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 <Input
@@ -581,7 +595,7 @@ export default function PostDiscountCodePage() {
                             </div>
                             <Button
                                 onClick={handleContinue}
-                                disabled={!linkValue.trim() || isLoading}
+                                disabled={!linkValue.trim() && !discountCode.trim() || isLoading}
                                 className="h-9 px-4 text-sm rounded-full bg-[#f7641b] hover:bg-[#eb611f] text-white disabled:text-[#a7a9ac] dark:disabled:text-[#8b8d90] disabled:bg-[#f3f5f7] dark:disabled:bg-[#363739] w-full"
                             >
                                 {isLoading ? "Checking..." : "Continue"}
@@ -697,7 +711,7 @@ export default function PostDiscountCodePage() {
   {/* Continue Button */}
   <Button
     onClick={handleContinue}
-    disabled={!linkValue.trim() || isLoading}
+    disabled={!linkValue.trim() && !discountCode.trim() || isLoading}
     className="h-9 px-4 text-sm rounded-full bg-[#f7641b] hover:bg-[#eb611f] text-white disabled:text-[#a7a9ac] dark:disabled:text-[#8b8d90] disabled:bg-[#f3f5f7] dark:disabled:bg-[#363739]"
   >
     {isLoading ? "Checking..." : "Continue"}
@@ -792,32 +806,32 @@ export default function PostDiscountCodePage() {
                             <label className="dark:text-white text-black text-sm font-semibold pb-[1.75px]">
                                 Title of offer <span className="dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span>
                             </label>
-                            <span className="dark:text-[hsla(0,0%,100%,0.75)] text-sm">{140 - title.length}</span>
+                            <span className="dark:text-[hsla(0,0%,100%,0.75)] text-sm">{140 - discount.length}</span>
                         </div>
                         <Input
-                            value={title}
+                            value={discount}
                             onChange={e => {
-                                setTitle(e.target.value);
-                                if (titleError) setTitleError("");
+                                setDiscount(e.target.value);
+                                if (discountError) setDiscountError("");
                             }}
                             placeholder="A short, clear title of your offer"
                             className={cn(
                                 "w-full border text-black dark:border-[hsla(0,0%,100%,0.35)] dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]",
-                                titleError ? "border-red-500 focus:border-red-500" : "border-[rgba(3,12,25,0.23)]"
+                                discountError ? "border-red-500 focus:border-red-500" : "border-[rgba(3,12,25,0.23)]"
                             )}
-                            onFocus={() => setTitleFocused(true)}
-                            onBlur={() => setTitleFocused(false)}
+                            onFocus={() => setDiscountFocused(true)}
+                            onBlur={() => setDiscountFocused(false)}
                         />
-                        {titleError && (
-                            <div className="text-red-500 text-xs mt-1">{titleError}</div>
+                        {discountError && (
+                            <div className="text-red-500 text-xs mt-1">{discountError}</div>
                         )}
                         {/* Help Section  */}
                         <div
                             className={cn(
                                 "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                !titleFocused && "expand-leave-to",
+                                !discountFocused && "expand-leave-to",
                             )}
-                            style={{ height: titleFocused ? 110 : 0 }}
+                            style={{ height: discountFocused ? 110 : 0 }}
                         >
                             <div className="mt-2 bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1">
                                 <div className="flex items-center">
@@ -837,7 +851,7 @@ export default function PostDiscountCodePage() {
                     </div>
                     {/* Price Details Section */}
                     <div className="">
-                        <h2 className="text-xl font-semibold dark:text-white text-black pb-4">Price details</h2>
+                        <h2 className="text-xl font-semibold dark:text-white text-black pb-4">Discount type</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="">
                                 <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">Price Offer</label>
@@ -1637,179 +1651,130 @@ export default function PostDiscountCodePage() {
                                     <div className="">
                                         <div className="flex justify-between items-center">
                                             <label className="dark:text-white text-black text-sm font-semibold pb-[1.75px]">
-                                                Title of offer <span className="dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span>
+                                                discount code title <span className="text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span>
                                             </label>
-                                            <span className="dark:text-[hsla(0,0%,100%,0.75)] text-sm">{140 - title.length}</span>
+                                            <span className="dark:text-[hsla(0,0%,100%,0.75)] text-sm">{140 - discount.length}</span>
                                         </div>
                                         <Input
-                                            value={title}
+                                            value={discount}
                                             onChange={e => {
-                                                setTitle(e.target.value);
-                                                if (titleError) setTitleError("");
+                                                setDiscount(e.target.value);
+                                                if (discountError) setDiscountError("");
                                             }}
-                                            placeholder="A short, clear title of your offer"
+                                            placeholder="A short description of the discount code..."
                                             className={cn(
                                                 "w-full border text-black dark:border-[hsla(0,0%,100%,0.35)] dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]",
-                                                titleError ? "border-red-500 focus:border-red-500" : "border-[rgba(3,12,25,0.23)]"
+                                                discountError ? "border-red-500 focus:border-red-500" : "border-[rgba(3,12,25,0.23)]"
                                             )}
-                                            onFocus={() => setTitleFocused(true)}
-                                            onBlur={() => setTitleFocused(false)}
+                                            onFocus={() => setDiscountFocused(true)}
+                                            onBlur={() => setDiscountFocused(false)}
                                         />
-                                        {titleError && (
-                                            <div className="text-red-500 text-xs mt-1">{titleError}</div>
+                                        {discountError && (
+                                            <div className="text-red-500 text-xs mt-1">{discountError}</div>
                                         )}
-                                        {/* Help Section  */}
-                                        <div
-                                            className={cn(
-                                                "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                                !titleFocused && "expand-leave-to",
-                                            )}
-                                            style={{ height: titleFocused ? 110 : 0 }}
-                                        >
-                                            <div className="mt-2 bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1">
-                                                <div className="flex items-center">
-                                                    <div className="flex items-center mr-1">
-                                                        <Info className="w-[18px] h-[18px] dark:text-[hsla(0,0%,100%,0.75)] text-black" />
-                                                    </div>
-                                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                                        Make your title stand out
-                                                    </span>
-                                                </div>
-                                                <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                                    Please include the brand, product type, color and model in the title (e.g. adidas UltraBoost
-                                                    (black))
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                     </div>
-                                    {/* Price Details Section */}
+                                    {/* Discount Details Section */}
                                     <div className="">
-                                        <h2 className="text-xl font-semibold dark:text-white text-black pb-4">Price details</h2>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="">
-                                                <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">Price Offer</label>
-                                                <div className="relative">
-                                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
-                                                    <Input
-                                                        value={priceOffer}
-                                                        onChange={(e) => setPriceOffer(e.target.value)}
-                                                        placeholder="15,55"
-                                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 text-sm placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-12 dark:focus:border-[#f97936]"
-                                                        onFocus={() => setPriceOfferFocused(true)}
-                                                        onBlur={() => setPriceOfferFocused(false)}
-                                                    />
-                                                </div>
-                                                {/* Help Section for Price Offer - animated */}
-                                                <div
-                                                    className={cn(
-                                                        "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                                        !priceOfferFocused && "expand-leave-to",
-                                                    )}
-                                                    style={{ height: priceOfferFocused ? 110 : 0 }}
-                                                >
-                                                    <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
-                                                        <div className="flex items-center">
-                                                            <div className="flex items-center mr-1">
-                                                                <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
-                                                            </div>
-                                                            <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                                                Tell us the price
-                                                            </span>
-                                                        </div>
-                                                        <div className="text-sm font-normal leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                                            This should be the total price after discount(s)
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="">
-                                                <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">
-                                                    Lowest price elsewhere
-                                                </label>
-                                                <div className="relative flex-1">
-                                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
-                                                    <Input
-                                                        value={lowestPrice}
-                                                        onChange={(e) => setLowestPrice(e.target.value)}
-                                                        placeholder="0.00"
-                                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-12 dark:focus:border-[#f97936]"
-                                                        onFocus={() => setLowestPriceFocused(true)}
-                                                        onBlur={() => setLowestPriceFocused(false)}
-                                                    />
-                                                    <span
-                                                        className={cn(
-                                                            "absolute right-3 top-1/2 transform -translate-y-1/2 text-xs font-semibold px-2 py-0.5 rounded bg-[#f3f5f7] dark:bg-[hsla(0,0%,100%,0.11)]",
-                                                            calculateDiscount() > 0
-                                                                ? "text-green-600 dark:bg-[#052f01] dark:text-[#78c86b]"
-                                                                : "text-[#f7641b] dark:text-[hsla(0,0%,100%,0.75)]",
-                                                        )}
-                                                    >
-                                                        {calculateDiscount()}%
-                                                    </span>
-                                                </div>
-                                                {/* Help Section for Lowest Price Elsewhere - animated */}
-                                                <div
-                                                    className={cn(
-                                                        "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                                        !lowestPriceFocused && "expand-leave-to",
-                                                    )}
-                                                    style={{ height: lowestPriceFocused ? 150 : 0 }}
-                                                >
-                                                    <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
-                                                        <div className="flex items-center">
-                                                            <div className="flex items-center mr-1">
-                                                                <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
-                                                            </div>
-                                                            <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                                                Tell us lowest price elsewhere
-                                                            </span>
-                                                        </div>
-                                                        <div className="text-sm font-normal leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                                            This is the lowest price you can find for the product elsewhere through price comparison (not
-                                                            for the recommended retail price)
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {/* Discount Code Section */}
-                                    <div className="">
-                                        <label className="dark:text-white text-sm font-semibold pb-[1.75px]">Discount code</label>
-                                        <div className="relative">
-                                            <Scissors className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                            <Input
-                                                value={discountCode}
-                                                onChange={(e) => setDiscountCode(e.target.value)}
-                                                placeholder="Enter the discount code"
-                                                className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 dark:focus:border-[#f97936]"
-                                                onFocus={() => setDiscountCodeFocused(true)}
-                                                onBlur={() => setDiscountCodeFocused(false)}
+                                        <h2 className="text-xl font-semibold dark:text-white text-black pb-4">Discount type <span className="text-sm text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span></h2>
+                                        <div className="space-y-3">
+                                        <div className="flex items-center space-x-3">
+                                            <input
+                                            type="radio"
+                                            id="percentage"
+                                            name="discountType"
+                                            value="percentage"
+                                            checked={discountType === "percentage"}
+                                            onChange={(e) => {
+                                                setDiscountType(e.target.value);
+                                                setDiscountValue("");
+                                            }}
+                                            className="form-radio text-[#f7641b]"
                                             />
+                                            <label htmlFor="percentage" className="dark:text-white text-black text-sm">Discount (%)</label>
                                         </div>
-                                        {/* Help Section for Discount Code - animated */}
-                                        <div
-                                            className={cn(
-                                                "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                                !discountCodeFocused && "expand-leave-to",
-                                            )}
-                                            style={{ height: discountCodeFocused ? 100 : 0 }}
-                                        >
-                                            <div className="bg-[#f3f5f7] dark:bg-[#363739]rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
-                                                <div className="flex items-center">
-                                                    <div className="flex items-center mr-1">
-                                                        <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
-                                                    </div>
-                                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                                        Tell us the discount code
-                                                    </span>
-                                                </div>
-                                                <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                                    Add only one code and instructions to the description
-                                                </div>
+
+                                        {discountType === "percentage" && (
+                                            <div className="relative w-[200px] mt-1">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">%</span>
+                                            <Input
+                                                type="number"
+                                                step="0.01"
+                                                min="0"
+                                                placeholder="0.00"
+                                                value={discountValue}
+                                                onChange={(e) => setDiscountValue(e.target.value)}
+                                                className="pl-8 w-full text-sm bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white rounded-lg"
+                                            />
                                             </div>
+                                        )}
+
+                                        <div className="flex items-center space-x-3">
+                                            <input
+                                            type="radio"
+                                            id="euro"
+                                            name="discountType"
+                                            value="euro"
+                                            checked={discountType === "euro"}
+                                            onChange={(e) => {
+                                                setDiscountType(e.target.value);
+                                                setDiscountValue("");
+                                            }}
+                                            className="form-radio text-[#f7641b]"
+                                            />
+                                            <label htmlFor="euro" className="dark:text-white text-black text-sm">Discount (₹)</label>
                                         </div>
+
+                                            {discountType === "euro" && (
+                                                <div className="relative w-[200px] mt-1">
+                                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">€</span>
+                                                <Input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    placeholder="0.00"
+                                                    value={discountValue}
+                                                    onChange={(e) => setDiscountValue(e.target.value)}
+                                                    className="pl-8 w-full text-sm bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white rounded-lg"
+                                                />
+                                                </div>
+                                            )}
+
+                                    <div className="flex items-center space-x-3">
+                                        <input
+                                        type="radio"
+                                        id="freeShipping"
+                                        name="discountType"
+                                        value="freeShipping"
+                                        checked={discountType === "freeShipping"}
+                                        onChange={(e) => {
+                                            setDiscountType(e.target.value);
+                                            setDiscountValue("");
+                                        }}
+                                        className="form-radio text-[#f7641b]"
+                                        />
+                                        <label htmlFor="freeShipping" className="dark:text-white text-black text-sm">Free shipping</label>
                                     </div>
+
+                                    <div className="flex items-center space-x-3">
+                                        <input
+                                        type="radio"
+                                        id="none"
+                                        name="discountType"
+                                        value="none"
+                                        checked={discountType === "none"}
+                                        onChange={(e) => {
+                                            setDiscountType(e.target.value);
+                                            setDiscountValue("");
+                                        }}
+                                        className="form-radio text-[#f7641b]"
+                                        />
+                                        <label htmlFor="none" className="dark:text-white text-black text-sm">None of the above</label>
+                                    </div>
+                                    </div>
+
+                                    </div>
+                                   
                                     {/* Availability Section */}
                                     <div className="space-y-4">
                                         <h2 className="text-xl font-semibold dark:text-white text-black">Availability</h2>
@@ -2195,7 +2160,7 @@ export default function PostDiscountCodePage() {
                                     <div className="space-y-6 w-full">
                                         <div>
                                             <h3 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Title of offer</h3>
-                                            <p className="text-sm text-[#000] dark:text-[#fff]">{title || "dvdffvdvdbdbfb"}</p>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{discount || "dvdffvdvdbdbfb"}</p>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                             <div>
@@ -2334,10 +2299,10 @@ export default function PostDiscountCodePage() {
         setProgressWidth,
         hoveredStep,
         setHoveredStep,
-        title,
-        setTitle,
-        titleFocused,
-        setTitleFocused,
+        discount,
+        setDiscount,
+        discountFocused,
+        setDiscountFocused,
         priceOffer,
         setPriceOffer,
         lowestPrice,

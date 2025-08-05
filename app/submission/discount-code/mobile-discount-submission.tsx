@@ -93,83 +93,83 @@ export function MobileDiscountSubmission(props: any) {
   ];
 
   return (
-    <div className="block md:hidden w-full overflow-y-auto h-screen">
-      {/* Mobile Header with Steps */}
-      <div className="sticky top-0 z-50 bg-background border-b">
-        <div className="flex items-center justify-between p-4">
-          <Button variant="ghost" size="sm" onClick={handleBack} disabled={currentStep === 0}>
-            <ArrowRight className="h-4 w-4 rotate-180" />
-          </Button>
-          
-          <div className="flex-1 mx-4">
-            <div className="flex items-center justify-between">
-              {discountSteps.map((step, index) => (
-                <div key={index} className="flex items-center">
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
-                    index <= currentStep 
-                      ? 'bg-[#f7641b] text-white' 
-                      : 'bg-gray-200 text-gray-600'
-                  }`}>
-                    {index + 1}
+    <>
+      {/* Mobile: Horizontal Step Bar */}
+      <div className="block md:hidden w-full bg-[#f3f5f7] mt-12 h-fit dark:bg-[#28292a] border-b border-gray-200 dark:border-[#23272f]">
+        <nav className="flex flex-row items-center justify-between px-2 py-4 overflow-x-auto">
+          {steps.map((step: any, index: number) => {
+            let IconComponent = step.icon
+            const isActive = index === currentStep
+            const isCompleted = index < currentStep
+            const isFuture = index > currentStep
+            if (isCompleted) {
+              IconComponent = hoveredStep === index ? Pencil : CircleCheck
+            }
+            return (
+              <div key={step.id} className="flex items-center">
+                <button
+                  onClick={() => {
+                    if (index <= currentStep) setCurrentStep(index)
+                  }}
+                  disabled={index > currentStep}
+                  onMouseEnter={() => setHoveredStep(index)}
+                  onMouseLeave={() => setHoveredStep(null)}
+                  className={
+                    "flex flex-col items-center p-2  focus:outline-none  rounded-full align-middle text-sm font-semibold whitespace-nowrap" +
+                    (isActive
+                      ? " text-black bg-white dark:text-[#f97936]"
+                      : isCompleted
+                        ? " text-[#238012] dark:text-green-400"
+                        : " text-black dark:text-[#525457]") +
+                    (isFuture ? " cursor-not-allowed opacity-35 text-[rgba(4,9,18,0.35)]" : "")
+                  }
+                >
+                  <div className="flex flex-row gap-3 whitespace-normal">
+                    <IconComponent className="h-5 w-5" />
+                    <span className=" whitespace-nowrap">{step.title}</span>
                   </div>
-                  {index < discountSteps.length - 1 && (
-                    <div className={`w-8 h-0.5 mx-2 ${
-                      index < currentStep ? 'bg-[#f7641b]' : 'bg-gray-200'
-                    }`} />
-                  )}
-                </div>
-              ))}
-            </div>
+                </button>
+                {index < steps.length - 1 && <div className="w-6 h-px bg-[rgba(3,12,25,0.23)] dark:bg-[#46484b] mx-2" />}
+              </div>
+            )
+          })}
+        </nav>
+      </div>
+
+      {/* Mobile: Main Content Area */}
+      <div className="flex flex-col overflow-auto md:hidden pb-12">
+        <div>{renderStepContent && renderStepContent()}</div>
+        {currentStep > 0 && (
+          <div className="border-t border-[#dfe1e4] dark:border-[#46484b] p-4 flex justify-between sticky bottom-0 bg-white dark:bg-[#1d1f20]">
+            <Button
+              onClick={handleBack}
+              variant="outline"
+              className="h-9 px-4 border-[#dfe1e4] rounded-full hover:border-[#d7d9dd] hover:bg-[#f3f5f7] text-[#6b6d70] hover:text-[#76787b] dark:border-[#46484b] dark:hover:border-[#525457] dark:hover:bg-[#363739] dark:text-[#c5c7ca] dark:hover:text-[#d7d9dd] dark:bg-[#1d1f20] bg-transparent"
+            >
+              Back
+            </Button>
+            <Button
+              onClick={() => {
+                if (currentStep === steps.length - 1) {
+                  handleSubmitDeal(payloadBase)
+                } else {
+                  handleNext()
+                }
+              }}
+              disabled={isLoading}
+              className="border rounded-full h-9 px-4 border-[#f7641b] hover:border-[#eb611f] text-[#f7641b] hover:bg-[#fbf3ef] hover:text-[#eb611f] bg-[#fff] dark:border-[#f97936] dark:text-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203] dark:bg-[#1d1f20]"
+            >
+              {isLoading && (
+                <svg className="animate-spin mr-2 h-4 w-4 text-[#f7641b]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+              )}
+              {currentStep === steps.length - 1 ? "Publish" : "Next"}
+            </Button>
           </div>
-
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={handleNext}
-            disabled={currentStep === discountSteps.length - 1}
-          >
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
+        )}
       </div>
-
-      {/* Main Content Area */}
-      <div className="flex-1">
-        {renderStepContent()}
-      </div>
-
-      {/* Bottom Navigation */}
-      <div className="sticky bottom-0 bg-background border-t p-4">
-        <div className="flex gap-4">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 0}
-            className="flex-1"
-          >
-            Back
-          </Button>
-          <Button
-            onClick={() => {
-              if (currentStep === discountSteps.length - 1) {
-                handleSubmitDeal(payloadBase)
-              } else {
-                handleNext()
-              }
-            }}
-            disabled={isLoading}
-            className="flex-1 bg-[#f7641b] hover:bg-[#eb611f] text-white"
-          >
-            {isLoading && (
-              <svg className="animate-spin mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-              </svg>
-            )}
-            {currentStep === discountSteps.length - 1 ? "Post Discount Code" : "Next"}
-          </Button>
-        </div>
-      </div>
-    </div>
+    </>
   )
 } 
