@@ -199,7 +199,7 @@ export function CommentSection({ dealId }: CommentSectionProps) {
   }
 
   return (
-    <div className="rounded-lg border bg-white" id="comments">
+    <div className="comment-section rounded-lg border bg-white" id="comments">
       <div className="border-b p-4">
         <h2 className="text-xl font-bold">{dealComments.length} Comments </h2>
       </div>

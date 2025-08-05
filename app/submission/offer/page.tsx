@@ -1453,7 +1453,7 @@ export default function PostOfferPage() {
                     {/* Description Text Area */}
                     <div className="space-y-4">
                         <div className="relative h-[400px] ">
-                            {editor && <EditorContent editor={editor} />}
+                            <EditorContent editor={editor} />
                             {descriptionError && (
                                 <div className="text-red-500 text-xs mt-1">{descriptionError}</div>
                             )}
@@ -1477,6 +1477,7 @@ export default function PostOfferPage() {
                                     <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[rgba(4,8,13,0.59)] mt-1">
                                         Add the details about the product,links to relevant info/reviews and why you think it's a good deal
                                     </div>
+                                    
                                 </div>
                             </div>
                             {/* Formatting Toolbar */}
@@ -2093,10 +2094,10 @@ export default function PostOfferPage() {
                                                                         fileInput.click()
                                                                     }
                                                                 }}
-                                                                className="bg-[#f7641b] hover:bg-[#eb611f] h-9 text-white rounded-full px-[14px] text-sm font-medium relative"
+                                                                className="bg-[#f7641b] hover:bg-[#eb611f] h-9 text-white rounded-full lg:px-[14px] text-sm font-medium relative lg:mr-32 lg:mb-14"
                                                             >
                                                                 <Plus className="w-4 h-4" />
-                                                                Upload images
+                                                                Upload images 
                                                             </Button>
                                                         </div>
                                                     ) : (
@@ -2445,7 +2446,7 @@ export default function PostOfferPage() {
         editorProps: {
             attributes: {
                 class: cn(
-                    "w-full min-h-[400px] bg-white dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black focus:outline-none dark:text-white rounded-lg p-4 pb-16 resize-none text-base leading-6 transition-all duration-300 ease-in-out flex-shrink-0 list-disc list-inside",
+                    "w-full min-h-[400px] bg-white dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black focus:outline-none dark:text-white rounded-lg p-4 pb-16 resize-none text-base leading-6 transition-all duration-300 ease-in-out flex-shrink-0 list-disc list-inside placeholder:text-gray-400",
                     descriptionFocused ? "min-h-[510px]" : "min-h-[400px]",
                     descriptionError ? "border-red-500 focus:border-red-500" : ""
                 ),
