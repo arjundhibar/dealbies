@@ -319,6 +319,7 @@
 .dark .icon-button{
   border-color: #46484b;
   color: #c5c7ca;
+  background-color: #46484b;
 } 
 
 [contenteditable] ul {

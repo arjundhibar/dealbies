@@ -81,7 +81,7 @@ export function CommentSection({ dealId }: CommentSectionProps) {
     const isReplying = replyingTo === id
 
     return (
-      <div key={id} className="border-b py-4 last:border-0 bg-white">
+      <div key={id} className="border-b py-4 last:border-0 bg-white dark:bg-[#1d1f20]">
         <div className="flex gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage src={postedBy.avatar || "/kishan.jpeg"} alt={postedBy.name} />
@@ -191,7 +191,7 @@ export function CommentSection({ dealId }: CommentSectionProps) {
               </div>
             )}
 
-            {replies && replies.length > 0 && <div className="mt-4 border-l-2 pl-4">{replies.map(renderComment)}</div>}
+            {replies && replies.length > 0 && <div className="mt-4  border-l-2 pl-4">{replies.map(renderComment)}</div>}
           </div>
         </div>
       </div>
@@ -199,7 +199,7 @@ export function CommentSection({ dealId }: CommentSectionProps) {
   }
 
   return (
-    <div className="comment-section rounded-lg border bg-white" id="comments">
+    <div className="comment-section rounded-lg border bg-white dark:bg-[#1d1f20]" id="comments">
       <div className="border-b p-4">
         <h2 className="text-xl font-bold">{dealComments.length} Comments </h2>
       </div>

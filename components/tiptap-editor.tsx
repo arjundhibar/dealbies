@@ -10,12 +10,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { 
-  Bold, 
-  Italic, 
   Link as LinkIcon, 
   Image as ImageIcon, 
   Smile,
-  Send
+  Send,
+  SendHorizonal
 } from 'lucide-react'
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
@@ -114,142 +113,121 @@ export function TipTapEditor({
     <div className={`relative ${className}`}>
       <div 
         className={`
-          border rounded-lg transition-all duration-200 ease-in-out
-          ${isExpanded ? 'border-gray-300 shadow-sm' : 'border-gray-200'}
+          border rounded-lg transition-all duration-200 ease-in-out dark:bg-[#1d1f20]
+          ${isExpanded ? 'border-gray-300 dark:border-gray-500 shadow-sm' : 'border-gray-200'}
           ${disabled ? 'bg-gray-50' : 'bg-white'}
         `}
       >
-        {/* Toolbar - only show when expanded */}
-        {isExpanded && (
-          <div className="flex items-center gap-1 p-2 border-b bg-gray-50">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={editor.isActive('bold') ? 'bg-gray-200' : ''}
-            >
-              <Bold className="h-4 w-4" />
-            </Button>
-            
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={editor.isActive('italic') ? 'bg-gray-200' : ''}
-            >
-              <Italic className="h-4 w-4" />
-            </Button>
-
-            <div className="w-px h-6 bg-gray-300 mx-1" />
-
-            <Popover open={showLinkInput} onOpenChange={setShowLinkInput}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className={editor.isActive('link') ? 'bg-gray-200' : ''}
-                >
-                  <LinkIcon className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-3">
-                <div className="flex gap-2">
-                  <Input
-                    ref={linkInputRef}
-                    placeholder="Enter URL..."
-                    value={linkUrl}
-                    onChange={(e) => setLinkUrl(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addLink()}
-                    className="flex-1"
-                  />
-                  <Button size="sm" onClick={addLink}>
-                    Add
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Popover open={showImageInput} onOpenChange={setShowImageInput}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                >
-                  <ImageIcon className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-3">
-                <div className="flex gap-2">
-                  <Input
-                    ref={imageInputRef}
-                    placeholder="Enter image URL..."
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addImage()}
-                    className="flex-1"
-                  />
-                  <Button size="sm" onClick={addImage}>
-                    Add
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-
-            <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
-              <PopoverTrigger asChild>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                >
-                  <Smile className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="p-0">
-                <Picker
-                  data={data}
-                  onEmojiSelect={addEmoji}
-                  theme="light"
-                  set="native"
-                  previewPosition="none"
-                  skinTonePosition="none"
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        )}
-
         {/* Editor Content */}
         <div className="p-3">
           <EditorContent 
             editor={editor} 
             onKeyDown={handleKeyDown}
             className={`
-              min-h-[40px] max-h-32 overflow-y-auto
+              min-h-[40px] max-h-32 overflow-y-auto 
               ${isExpanded ? 'min-h-[80px]' : ''}
             `}
           />
         </div>
 
-        {/* Submit Button - only show when expanded and has content */}
-        {isExpanded && editor.getText().trim() && (
-          <div className="flex justify-end p-2 border-t bg-gray-50">
+        {/* Toolbar and Submit Button Container - only show when expanded */}
+        {isExpanded && (
+          <div className="flex items-center justify-between p-2 bg-white dark:bg-[#1d1f20]">
+            {/* Toolbar - positioned on the left */}
+            <div className="flex items-center gap-1">
+              <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <Smile className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0">
+                  <Picker
+                    data={data}
+                    onEmojiSelect={addEmoji}
+                    theme="light"
+                    set="native"
+                    previewPosition="none"
+                    skinTonePosition="none"
+                  />
+                </PopoverContent>
+              </Popover>
+
+              <Popover open={showLinkInput} onOpenChange={setShowLinkInput}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className={editor.isActive('link') ? 'bg-gray-200' : ''}
+                  >
+                    <LinkIcon className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-3">
+                  <div className="flex gap-2">
+                    <Input
+                      ref={linkInputRef}
+                      placeholder="Enter URL..."
+                      value={linkUrl}
+                      onChange={(e) => setLinkUrl(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && addLink()}
+                      className="flex-1"
+                    />
+                    <Button size="sm" onClick={addLink}>
+                      Add
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              <Popover open={showImageInput} onOpenChange={setShowImageInput}>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-3">
+                  <div className="flex gap-2">
+                    <Input
+                      ref={imageInputRef}
+                      placeholder="Enter image URL..."
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && addImage()}
+                      className="flex-1"
+                    />
+                    <Button size="sm" onClick={addImage}>
+                      Add
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Submit Button - positioned on the right */}
             <Button
               type="button"
               size="sm"
               onClick={handleSubmit}
               disabled={disabled || !editor.getText().trim()}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 rounded-full disabled:text-[#a7a9ac] disabled:bg-[#f3f5f7] dark:disabled:text-[#8b8d90] dark:disabled:bg-[#363739] bg-[#f7641b] hover:bg-[#eb611f]"
             >
-              <Send className="h-4 w-4" />
+              <SendHorizonal className="h-4 w-4" />
               Respond
             </Button>
           </div>
         )}
+
+
       </div>
     </div>
   )

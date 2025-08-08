@@ -67,7 +67,7 @@ interface UploadedImage {
 export default function PostDiscountCodePage() {
     // Shared state for both mobile and desktop
     const [currentStep, setCurrentStep] = useState(0)
-    const [linkValue, setLinkValue] = useState("")
+    const [discountlinkValue, setDiscountLinkValue] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [duplicateDeal, setDuplicateDeal] = useState<DuplicateDeal | null>(null)
     const [progressWidth, setProgressWidth] = useState(0)
@@ -82,7 +82,7 @@ export default function PostDiscountCodePage() {
     const [postageCosts, setPostageCosts] = useState("")
     const [shippingFrom, setShippingFrom] = useState("")
 
-    const [discountType, setDiscountType] = useState("")
+    const [discountType, setDiscountType] = useState("none")
     const [discountValue, setDiscountValue] = useState("")
 
 
@@ -210,6 +210,10 @@ export default function PostDiscountCodePage() {
     const [discountError, setDiscountError] = useState("");
     const [descriptionError, setDescriptionError] = useState("");
     const [categoryError, setCategoryError] = useState("");
+
+    useEffect(() => {
+        console.log("this is the discount type", discountType)
+    },[discountType])
 
     useEffect(() => {
         if (isLoading) {
@@ -355,7 +359,7 @@ export default function PostDiscountCodePage() {
 
     const handleCancelSubmission = () => {
         setDuplicateDeal(null)
-        setLinkValue("")
+        setDiscountLinkValue("")
     }
 
     const toggleCategory = (category: string) => {
@@ -365,7 +369,7 @@ export default function PostDiscountCodePage() {
     const handleContinue = async () => {
         setIsLoading(true)
         setDuplicateDeal(null)
-        const encodedUrl = encodeURIComponent(linkValue.trim())
+        const encodedUrl = encodeURIComponent(discountlinkValue.trim())
         try {
             const res = await fetch(`/api/deals/check?url=${encodedUrl}`)
             const result = await res.json()
@@ -588,14 +592,14 @@ export default function PostDiscountCodePage() {
                                 <Input
                                     type="url"
                                     placeholder="https://www.example.com/greatdeal..."
-                                    value={linkValue}
-                                    onChange={(e) => setLinkValue(e.target.value)}
+                                    value={discountlinkValue}
+                                    onChange={(e) => setDiscountLinkValue(e.target.value)}
                                     className="w-full h-auto text-sm leading-5 bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] dark:text-white text-[#000] placeholder:text-gray-400 focus:border-[#f97936] focus:shadow-none rounded-lg transition-all duration-200 ease-out py-[9px] pl-10 text-ellipsis"
                                 />
                             </div>
                             <Button
                                 onClick={handleContinue}
-                                disabled={!linkValue.trim() && !discountCode.trim() || isLoading}
+                                disabled={!discountlinkValue.trim() && !discountCode.trim() || isLoading}
                                 className="h-9 px-4 text-sm rounded-full bg-[#f7641b] hover:bg-[#eb611f] text-white disabled:text-[#a7a9ac] dark:disabled:text-[#8b8d90] disabled:bg-[#f3f5f7] dark:disabled:bg-[#363739] w-full"
                             >
                                 {isLoading ? "Checking..." : "Continue"}
@@ -702,8 +706,8 @@ export default function PostDiscountCodePage() {
     <Input
       type="url"
       placeholder="https://www.example.com/greatdeal..."
-      value={linkValue}
-      onChange={(e) => setLinkValue(e.target.value)}
+      value={discountlinkValue}
+      onChange={(e) => setDiscountLinkValue(e.target.value)}
       className="w-full h-auto text-sm leading-5 bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] dark:text-white text-[#000] placeholder:text-gray-400 focus:border-[#f97936] focus:shadow-none rounded-lg transition-all duration-200 ease-out py-[9px] pl-10 text-ellipsis"
     />
   </div>
@@ -711,7 +715,7 @@ export default function PostDiscountCodePage() {
   {/* Continue Button */}
   <Button
     onClick={handleContinue}
-    disabled={!linkValue.trim() && !discountCode.trim() || isLoading}
+    disabled={!discountlinkValue.trim() && !discountCode.trim() || isLoading}
     className="h-9 px-4 text-sm rounded-full bg-[#f7641b] hover:bg-[#eb611f] text-white disabled:text-[#a7a9ac] dark:disabled:text-[#8b8d90] disabled:bg-[#f3f5f7] dark:disabled:bg-[#363739]"
   >
     {isLoading ? "Checking..." : "Continue"}
@@ -804,7 +808,7 @@ export default function PostDiscountCodePage() {
                     <div className="">
                         <div className="flex justify-between items-center">
                             <label className="dark:text-white text-black text-sm font-semibold pb-[1.75px]">
-                                Title of offer <span className="dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span>
+                                discount code title <span className="text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span>
                             </label>
                             <span className="dark:text-[hsla(0,0%,100%,0.75)] text-sm">{140 - discount.length}</span>
                         </div>
@@ -814,7 +818,7 @@ export default function PostDiscountCodePage() {
                                 setDiscount(e.target.value);
                                 if (discountError) setDiscountError("");
                             }}
-                            placeholder="A short, clear title of your offer"
+                            placeholder="A short description of the discount code..."
                             className={cn(
                                 "w-full border text-black dark:border-[hsla(0,0%,100%,0.35)] dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]",
                                 discountError ? "border-red-500 focus:border-red-500" : "border-[rgba(3,12,25,0.23)]"
@@ -825,157 +829,178 @@ export default function PostDiscountCodePage() {
                         {discountError && (
                             <div className="text-red-500 text-xs mt-1">{discountError}</div>
                         )}
-                        {/* Help Section  */}
-                        <div
-                            className={cn(
-                                "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                !discountFocused && "expand-leave-to",
-                            )}
-                            style={{ height: discountFocused ? 110 : 0 }}
-                        >
-                            <div className="mt-2 bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1">
-                                <div className="flex items-center">
-                                    <div className="flex items-center mr-1">
-                                        <Info className="w-[18px] h-[18px] dark:text-[hsla(0,0%,100%,0.75)] text-black" />
-                                    </div>
-                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                        Make your title stand out
-                                    </span>
-                                </div>
-                                <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                    Please include the brand, product type, color and model in the title (e.g. adidas UltraBoost
-                                    (black))
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                    {/* Price Details Section */}
+                    {/* Discount Details Section */}
                     <div className="">
-                        <h2 className="text-xl font-semibold dark:text-white text-black pb-4">Discount type</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="">
-                                <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">Price Offer</label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
-                                    <Input
-                                        value={priceOffer}
-                                        onChange={(e) => setPriceOffer(e.target.value)}
-                                        placeholder="15,55"
-                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 text-sm placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-12 dark:focus:border-[#f97936]"
-                                        onFocus={() => setPriceOfferFocused(true)}
-                                        onBlur={() => setPriceOfferFocused(false)}
-                                    />
-                                </div>
-                                {/* Help Section for Price Offer - animated */}
-                                <div
-                                    className={cn(
-                                        "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                        !priceOfferFocused && "expand-leave-to",
-                                    )}
-                                    style={{ height: priceOfferFocused ? 110 : 0 }}
-                                >
-                                    <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
-                                        <div className="flex items-center">
-                                            <div className="flex items-center mr-1">
-                                                <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
-                                            </div>
-                                            <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                                Tell us the price
-                                            </span>
-                                        </div>
-                                        <div className="text-sm font-normal leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                            This should be the total price after discount(s)
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="">
-                                <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">
-                                    Lowest price elsewhere
-                                </label>
-                                <div className="relative flex-1">
-                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
-                                    <Input
-                                        value={lowestPrice}
-                                        onChange={(e) => setLowestPrice(e.target.value)}
-                                        placeholder="0.00"
-                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-12 dark:focus:border-[#f97936]"
-                                        onFocus={() => setLowestPriceFocused(true)}
-                                        onBlur={() => setLowestPriceFocused(false)}
-                                    />
-                                    <span
-                                        className={cn(
-                                            "absolute right-3 top-1/2 transform -translate-y-1/2 text-xs font-semibold px-2 py-0.5 rounded bg-[#f3f5f7] dark:bg-[hsla(0,0%,100%,0.11)]",
-                                            calculateDiscount() > 0
-                                                ? "text-green-600 dark:bg-[#052f01] dark:text-[#78c86b]"
-                                                : "text-[#f7641b] dark:text-[hsla(0,0%,100%,0.75)]",
-                                        )}
-                                    >
-                                        {calculateDiscount()}%
-                                    </span>
-                                </div>
-                                {/* Help Section for Lowest Price Elsewhere - animated */}
-                                <div
-                                    className={cn(
-                                        "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                        !lowestPriceFocused && "expand-leave-to",
-                                    )}
-                                    style={{ height: lowestPriceFocused ? 150 : 0 }}
-                                >
-                                    <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
-                                        <div className="flex items-center">
-                                            <div className="flex items-center mr-1">
-                                                <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
-                                            </div>
-                                            <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                                Tell us lowest price elsewhere
-                                            </span>
-                                        </div>
-                                        <div className="text-sm font-normal leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                            This is the lowest price you can find for the product elsewhere through price comparison (not
-                                            for the recommended retail price)
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <h2 className="text-xl font-semibold dark:text-white text-black pb-4">Discount type <span className="text-sm text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span></h2>
+                        <div className="space-y-3">
+                        <div className="flex items-center space-x-3">
+                           <label
+  htmlFor="percentage"
+  className="flex items-center space-x-3 cursor-pointer"
+>
+  <input
+    type="radio"
+    id="percentage"
+    name="discountType"
+    value="percentage"
+    checked={discountType === "percentage"}
+    onChange={(e) => {
+      setDiscountType(e.target.value);
+      setDiscountValue("");
+    }}
+    className="hidden peer"
+  />
+  <div
+    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors duration-200
+      ${discountType === "percentage" 
+        ? "border-[#f7641b]" 
+        : "border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]"
+      }`}
+  >
+    {discountType === "percentage" && (
+      <div className="w-2 h-2 rounded-full bg-[#f7641b]"></div>
+    )}
+  </div>
+  <span className="dark:text-white text-black text-sm">Discount (%)</span>
+</label>
+
                         </div>
-                    </div>
-                    {/* Discount Code Section */}
-                    <div className="">
-                        <label className="dark:text-white text-sm font-semibold pb-[1.75px]">Discount code</label>
-                        <div className="relative">
-                            <Scissors className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+
+                        {discountType === "percentage" && (
+                            <div className="relative w-[200px] mt-1">
+                            <span className="absolute left-14 top-1/2 transform -translate-y-1/2 text-gray-400">%</span>
                             <Input
-                                value={discountCode}
-                                onChange={(e) => setDiscountCode(e.target.value)}
-                                placeholder="Enter the discount code"
-                                className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 dark:focus:border-[#f97936]"
-                                onFocus={() => setDiscountCodeFocused(true)}
-                                onBlur={() => setDiscountCodeFocused(false)}
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                placeholder="0.00"
+                                value={discountValue}
+                                onChange={(e) => setDiscountValue(e.target.value)}
+                                className="pl-8 ml-11 w-full text-sm bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white rounded-lg [&::-webkit-inner-spin-button]:appearance-none
+             [&::-webkit-outer-spin-button]:appearance-none
+             [&::-webkit-inner-spin-button]:m-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none focus-visible:outline-none focus:border-[#f7641b] focus:border-2"
                             />
-                        </div>
-                        {/* Help Section for Discount Code - animated */}
-                        <div
-                            className={cn(
-                                "transition-[height] duration-300 ease-in-out overflow-hidden",
-                                !discountCodeFocused && "expand-leave-to",
-                            )}
-                            style={{ height: discountCodeFocused ? 100 : 0 }}
-                        >
-                            <div className="bg-[#f3f5f7] dark:bg-[#363739]rounded-lg px-4 py-3 flex flex-col gap-1 mt-2">
-                                <div className="flex items-center">
-                                    <div className="flex items-center mr-1">
-                                        <Info className="w-[18px] h-[18px] text-black dark:text-[hsla(0,0%,100%,0.75)]" />
-                                    </div>
-                                    <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                        Tell us the discount code
-                                    </span>
-                                </div>
-                                <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[#6b6d70]  mt-1">
-                                    Add only one code and instructions to the description
-                                </div>
                             </div>
+                        )}
+
+                        <div className="flex items-center space-x-3">
+                           <input
+  type="radio"
+  id="euro"
+  name="discountType"
+  value="euro"
+  checked={discountType === "euro"}
+  onChange={(e) => {
+    setDiscountType(e.target.value);
+    setDiscountValue("");
+  }}
+  className="hidden peer"
+/>
+<div
+  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors duration-200
+    ${discountType === "euro" 
+      ? "border-[#f7641b]" 
+      : "border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]"
+    }`}
+>
+  {discountType === "euro" && (
+    <div className="w-2 h-2 rounded-full bg-[#f7641b]"></div>
+  )}
+</div>
+<label
+  htmlFor="euro"
+  className="dark:text-white text-black text-sm cursor-pointer"
+>
+  Discount (₹)
+</label>
+
                         </div>
+
+                            {discountType === "euro" && (
+                                <div className="relative w-[200px] mt-1">
+                                <span className="absolute left-14 top-1/2 transform -translate-y-1/2 text-gray-400">€</span>
+                                <Input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0.00"
+                                    value={discountValue}
+                                    onChange={(e) => setDiscountValue(e.target.value)}
+                                    className="pl-8 ml-11 w-full text-sm bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white rounded-lg [&::-webkit-inner-spin-button]:appearance-none
+             [&::-webkit-outer-spin-button]:appearance-none
+             [&::-webkit-inner-spin-button]:m-0 focus:outline-none focus:ring-0 focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none focus-visible:outline-none focus:border-[#f7641b] focus:border-2"
+                                />
+                                </div>
+                            )}
+                    {/* Free shipping */}
+                    <div className="flex items-center space-x-3">
+                        <input
+  type="radio"
+  id="freeShipping"
+  name="discountType"
+  value="freeShipping"
+  checked={discountType === "freeShipping"}
+  onChange={(e) => {
+    setDiscountType(e.target.value);
+    setDiscountValue("");
+  }}
+  className="hidden peer"
+/>
+<div
+  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors duration-200
+    ${discountType === "freeShipping" 
+      ? "border-[#f7641b]" 
+      : "border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]"
+    }`}
+>
+  {discountType === "freeShipping" && (
+    <div className="w-2 h-2 rounded-full bg-[#f7641b]"></div>
+  )}
+</div>
+<label
+  htmlFor="freeShipping"
+  className="dark:text-white text-black text-sm cursor-pointer"
+>
+  Free shipping
+</label>
+
+                    </div>
+                    {/* None of the above */}
+                    <div className="flex items-center space-x-3">
+                    <input
+  type="radio"
+  id="none"
+  name="discountType"
+  value="none"
+  checked={discountType === "none"}
+  onChange={(e) => {
+    setDiscountType(e.target.value);
+    setDiscountValue("");
+  }}
+  className="hidden peer"
+/>
+<div
+  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors duration-200
+    ${discountType === "none" 
+      ? "border-[#f7641b]" 
+      : "border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]"
+    }`}
+>
+  {discountType === "none" && (
+    <div className="w-2 h-2 rounded-full bg-[#f7641b]"></div>
+  )}
+</div>
+<label
+  htmlFor="none"
+  className="dark:text-white text-black text-sm cursor-pointer"
+>
+  None of the above
+</label>
+
+                    </div>
+                    </div>
+
                     </div>
                     {/* Availability Section */}
                     <div className="space-y-4">
@@ -999,78 +1024,33 @@ export default function PostDiscountCodePage() {
                                 className={cn(
                                     "flex-1 py-3 border",
                                     availability === "offline"
-                                        ? "bg-[#fbf3ef] hover:bg-[#fbece3] border-[#f7641b] hover:border-[#eb611f] hover:text-[#eb611f] dark:bg-[#481802] text-[#f7641b]  dark:text-[#f97936] dark:border-[#f97936] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
+                                        ? "bg-[#fbf3ef] hover:bg-[#fbece3] border-[#f7641b] hover:border-[#eb611f] hover:text-[#eb611f] dark:bg-[#481802] text-[#f7641b]  dark:text-[#f97936] dark:border-[#f7641b] dark:hover:border-[#f7641b] dark:hover:text-[#f7641b] dark:hover:bg-[#612203]"
                                         : "text-black bg-[#fff] hover:border-[#d7d9dd] hover:text-[#f7641b] hover:bg-[#fff] dark:bg-[#1d1f20] dark:hover:bg-[#1d1f20] dark:text-white dark:hover:border-[#525457] dark:hover:text-[#f97936]",
-                                    "rounded-r-full", // Right outer corner rounded
-                                    "rounded-l-none", // Inner corner flat
+                                    "rounded-r-full",
+                                    "rounded-l-none",
                                 )}
                             >
                                 Offline
                             </Button>
                         </div>
                     </div>
-                    {/* Postage and Shipping Section or Location Selection for Offline */}
-                    {availability === "offline" ? (
-                        <div className=" rounded-lg relative">
-                            <label className="dark:text-white text-sm font-semibold pb-[1.75px]">Select location(s)</label>
-                            <Input
-                                value={shippingFrom}
-                                onChange={(e) => setShippingFrom(e.target.value)}
-                                placeholder="Type to search or add city..."
-                                className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]"
-                                onFocus={() => setShowCityDropdown(true)}
-                                onBlur={() => setTimeout(() => setShowCityDropdown(false), 150)}
-                            />
-                            {showCityDropdown && (
-                                <ul className="absolute left-0 right-0 z-10 mt-2 max-h-56 overflow-y-auto bg-[#f3f5f7] dark:bg-[#23272f] rounded-lg shadow-lg border border-gray-200 dark:border-[#23272f] text-sm font-medium text-black dark:text-white">
-                                    {cityList.map((city) => (
-                                        <li
-                                            key={city}
-                                            className="px-4 py-2 cursor-pointer hover:bg-[#e3e4e8] dark:hover:bg-[#363739]"
-                                            onMouseDown={() => {
-                                                setShippingFrom(city)
-                                                setShowCityDropdown(false)
-                                            }}
-                                        >
-                                            {city}
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="">
-                                <label className="dark:text-white font-semibold text-black text-sm pb-[1.75px]">
-                                    Postage costs
-                                </label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
-                                    <Input
-                                        value={postageCosts}
-                                        onChange={(e) => setPostageCosts(e.target.value)}
-                                        placeholder="0.00"
-                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 focus:outline-none !focus:ring-0 focus:border-[#f97936] dark:focus:ring-0 dark:focus:border-[#f97936]"
-                                    />
-                                </div>
-                            </div>
-                            <div className="">
-                                <label className="dark:text-white font-semibold text-sm pb-[1.75px]">Shipping from</label>
-                                <div className="relative">
-                                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                    <Input
-                                        value={shippingFrom}
-                                        onChange={(e) => setShippingFrom(e.target.value)}
-                                        placeholder="Search..."
-                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 dark:focus:border-[#f97936]"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {/* Discount Code Section */}
+                    <div className="">
+                        <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">
+                            Discount code <span className="text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span>
+                        </label>
+                        <Input
+                            value={discountCode}
+                            onChange={(e) => setDiscountCode(e.target.value)}
+                            placeholder="Enter discount code"
+                            className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]"
+                            onFocus={() => setDiscountCodeFocused(true)}
+                            onBlur={() => setDiscountCodeFocused(false)}
+                        />
+                    </div>
                 </div>
             </div>
-        );
+        )
     }
 
     function renderCase3Mobile() {
@@ -1356,7 +1336,7 @@ export default function PostDiscountCodePage() {
                     {/* Header */}
                     <div className="text-left">
                         <h1 className="text-2xl md:text-[32px] leading-8 md:leading-10 font-semibold text-[#000] dark:text-[#fff]">
-                            Why is this offer worth sharing?
+                            Why is your discount code worth sharing?
                         </h1>
                     </div>
                     {/* Description Text Area */}
@@ -1366,28 +1346,7 @@ export default function PostDiscountCodePage() {
                             {descriptionError && (
                                 <div className="text-red-500 text-xs mt-1">{descriptionError}</div>
                             )}
-                            {/* Help Section for Description - animated */}
-                            <div
-                                className={cn(
-                                    "transition-[height] duration-300 ease-in-out overflow-hidden absolute top-[353px] left-2 right-2 z-10",
-                                    !descriptionFocused && "expand-leave-to",
-                                )}
-                                style={{ height: descriptionFocused ? 110 : 0 }}
-                            >
-                                <div className="bg-[#f3f5f7] dark:bg-[#363739] rounded-lg px-4 py-3 flex flex-col gap-1">
-                                    <div className="flex items-center">
-                                        <div className="flex items-center mr-1">
-                                            <Info className="w-[18px] h-[18px] dark:text-[hsla(0,0%,100%,0.75)] text-black" />
-                                        </div>
-                                        <span className="font-semibold text-base text-black dark:text-[#e3e4e8]">
-                                            Tell us about your deal.
-                                        </span>
-                                    </div>
-                                    <div className="text-sm leading-5 dark:text-[hsla(0,0%,100%,0.75)] text-[rgba(4,8,13,0.59)] mt-1">
-                                        Add the details about the product,links to relevant info/reviews and why you think it's a good deal
-                                    </div>
-                                </div>
-                            </div>
+                            
                             {/* Formatting Toolbar */}
                             <div className="relative -top-14 w-fit left-2 inline-flex items-center gap-1 bg-[#fff] dark:bg-[#1d1f20] rounded-xl p-[7px] border border-[rgba(3,12,25,0.1)] dark:border-[#1d1f20] shadow-lg overflow-x-auto">
                                 <Button variant="ghost" size="sm" className="icon-button flex-shrink-0" onMouseDown={e => e.preventDefault()} onClick={() => editor?.chain().focus().toggleBold().run()}><Bold className="h-4 w-4 stroke-[3.2]" /></Button>
@@ -1679,24 +1638,41 @@ export default function PostDiscountCodePage() {
                                         <h2 className="text-xl font-semibold dark:text-white text-black pb-4">Discount type <span className="text-sm text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span></h2>
                                         <div className="space-y-3">
                                         <div className="flex items-center space-x-3">
-                                            <input
-                                            type="radio"
-                                            id="percentage"
-                                            name="discountType"
-                                            value="percentage"
-                                            checked={discountType === "percentage"}
-                                            onChange={(e) => {
-                                                setDiscountType(e.target.value);
-                                                setDiscountValue("");
-                                            }}
-                                            className="form-radio text-[#f7641b]"
-                                            />
-                                            <label htmlFor="percentage" className="dark:text-white text-black text-sm">Discount (%)</label>
+                                           <label
+  htmlFor="percentage"
+  className="flex items-center space-x-3 cursor-pointer"
+>
+  <input
+    type="radio"
+    id="percentage"
+    name="discountType"
+    value="percentage"
+    checked={discountType === "percentage"}
+    onChange={(e) => {
+      setDiscountType(e.target.value);
+      setDiscountValue("");
+    }}
+    className="hidden peer"
+  />
+  <div
+    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors duration-200
+      ${discountType === "percentage" 
+        ? "border-[#f7641b]" 
+        : "border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]"
+      }`}
+  >
+    {discountType === "percentage" && (
+      <div className="w-2 h-2 rounded-full bg-[#f7641b]"></div>
+    )}
+  </div>
+  <span className="dark:text-white text-black text-sm">Discount (%)</span>
+</label>
+
                                         </div>
 
                                         {discountType === "percentage" && (
                                             <div className="relative w-[200px] mt-1">
-                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">%</span>
+                                            <span className="absolute left-14 top-1/2 transform -translate-y-1/2 text-gray-400">%</span>
                                             <Input
                                                 type="number"
                                                 step="0.01"
@@ -1704,30 +1680,49 @@ export default function PostDiscountCodePage() {
                                                 placeholder="0.00"
                                                 value={discountValue}
                                                 onChange={(e) => setDiscountValue(e.target.value)}
-                                                className="pl-8 w-full text-sm bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white rounded-lg"
+                                                className="pl-8 ml-11 w-full text-sm bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white rounded-lg [&::-webkit-inner-spin-button]:appearance-none
+             [&::-webkit-outer-spin-button]:appearance-none
+             [&::-webkit-inner-spin-button]:m-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none focus-visible:outline-none focus:border-[#f7641b] focus:border-2"
                                             />
                                             </div>
                                         )}
 
                                         <div className="flex items-center space-x-3">
-                                            <input
-                                            type="radio"
-                                            id="euro"
-                                            name="discountType"
-                                            value="euro"
-                                            checked={discountType === "euro"}
-                                            onChange={(e) => {
-                                                setDiscountType(e.target.value);
-                                                setDiscountValue("");
-                                            }}
-                                            className="form-radio text-[#f7641b]"
-                                            />
-                                            <label htmlFor="euro" className="dark:text-white text-black text-sm">Discount (₹)</label>
+                                           <input
+  type="radio"
+  id="euro"
+  name="discountType"
+  value="euro"
+  checked={discountType === "euro"}
+  onChange={(e) => {
+    setDiscountType(e.target.value);
+    setDiscountValue("");
+  }}
+  className="hidden peer"
+/>
+<div
+  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors duration-200
+    ${discountType === "euro" 
+      ? "border-[#f7641b]" 
+      : "border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]"
+    }`}
+>
+  {discountType === "euro" && (
+    <div className="w-2 h-2 rounded-full bg-[#f7641b]"></div>
+  )}
+</div>
+<label
+  htmlFor="euro"
+  className="dark:text-white text-black text-sm cursor-pointer"
+>
+  Discount (₹)
+</label>
+
                                         </div>
 
                                             {discountType === "euro" && (
                                                 <div className="relative w-[200px] mt-1">
-                                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">€</span>
+                                                <span className="absolute left-14 top-1/2 transform -translate-y-1/2 text-gray-400">€</span>
                                                 <Input
                                                     type="number"
                                                     step="0.01"
@@ -1735,42 +1730,79 @@ export default function PostDiscountCodePage() {
                                                     placeholder="0.00"
                                                     value={discountValue}
                                                     onChange={(e) => setDiscountValue(e.target.value)}
-                                                    className="pl-8 w-full text-sm bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white rounded-lg"
+                                                    className="pl-8 ml-11 w-full text-sm bg-[#fff] dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:text-white rounded-lg [&::-webkit-inner-spin-button]:appearance-none
+             [&::-webkit-outer-spin-button]:appearance-none
+             [&::-webkit-inner-spin-button]:m-0 focus:outline-none focus:ring-0 focus:shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:shadow-none focus-visible:outline-none focus:border-[#f7641b] focus:border-2"
                                                 />
                                                 </div>
                                             )}
-
+                                    {/* Free shipping */}
                                     <div className="flex items-center space-x-3">
                                         <input
-                                        type="radio"
-                                        id="freeShipping"
-                                        name="discountType"
-                                        value="freeShipping"
-                                        checked={discountType === "freeShipping"}
-                                        onChange={(e) => {
-                                            setDiscountType(e.target.value);
-                                            setDiscountValue("");
-                                        }}
-                                        className="form-radio text-[#f7641b]"
-                                        />
-                                        <label htmlFor="freeShipping" className="dark:text-white text-black text-sm">Free shipping</label>
+  type="radio"
+  id="freeShipping"
+  name="discountType"
+  value="freeShipping"
+  checked={discountType === "freeShipping"}
+  onChange={(e) => {
+    setDiscountType(e.target.value);
+    setDiscountValue("");
+  }}
+  className="hidden peer"
+/>
+<div
+  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors duration-200
+    ${discountType === "freeShipping" 
+      ? "border-[#f7641b]" 
+      : "border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]"
+    }`}
+>
+  {discountType === "freeShipping" && (
+    <div className="w-2 h-2 rounded-full bg-[#f7641b]"></div>
+  )}
+</div>
+<label
+  htmlFor="freeShipping"
+  className="dark:text-white text-black text-sm cursor-pointer"
+>
+  Free shipping
+</label>
+
+                                    </div>
+                                    {/* None of the above */}
+                                    <div className="flex items-center space-x-3">
+                                    <input
+  type="radio"
+  id="none"
+  name="discountType"
+  value="none"
+  checked={discountType === "none"}
+  onChange={(e) => {
+    setDiscountType(e.target.value);
+    setDiscountValue("");
+  }}
+  className="hidden peer"
+/>
+<div
+  className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors duration-200
+    ${discountType === "none" 
+      ? "border-[#f7641b]" 
+      : "border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]"
+    }`}
+>
+  {discountType === "none" && (
+    <div className="w-2 h-2 rounded-full bg-[#f7641b]"></div>
+  )}
+</div>
+<label
+  htmlFor="none"
+  className="dark:text-white text-black text-sm cursor-pointer"
+>
+  None of the above
+</label>
+
                                     </div>
 
-                                    <div className="flex items-center space-x-3">
-                                        <input
-                                        type="radio"
-                                        id="none"
-                                        name="discountType"
-                                        value="none"
-                                        checked={discountType === "none"}
-                                        onChange={(e) => {
-                                            setDiscountType(e.target.value);
-                                            setDiscountValue("");
-                                        }}
-                                        className="form-radio text-[#f7641b]"
-                                        />
-                                        <label htmlFor="none" className="dark:text-white text-black text-sm">None of the above</label>
-                                    </div>
                                     </div>
 
                                     </div>
@@ -1836,35 +1868,35 @@ export default function PostDiscountCodePage() {
                                                 </ul>
                                             )}
                                         </div>
-                                    ) : (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="">
-                                                <label className="dark:text-white font-semibold text-black text-sm pb-[1.75px]">
-                                                    Postage costs
-                                                </label>
-                                                <div className="relative">
-                                                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
-                                                    <Input
-                                                        value={postageCosts}
-                                                        onChange={(e) => setPostageCosts(e.target.value)}
-                                                        placeholder="0.00"
-                                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 focus:outline-none !focus:ring-0 focus:border-[#f97936] dark:focus:ring-0 dark:focus:border-[#f97936]"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="">
-                                                <label className="dark:text-white font-semibold text-sm pb-[1.75px]">Shipping from</label>
-                                                <div className="relative">
-                                                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                                    <Input
-                                                        value={shippingFrom}
-                                                        onChange={(e) => setShippingFrom(e.target.value)}
-                                                        placeholder="Search..."
-                                                        className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 dark:focus:border-[#f97936]"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
+                                    ) : (<div> </div>
+                                        // <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        //     <div className="">
+                                        //         <label className="dark:text-white font-semibold text-black text-sm pb-[1.75px]">
+                                        //             Postage costs
+                                        //         </label>
+                                        //         <div className="relative">
+                                        //             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">₹</span>
+                                        //             <Input
+                                        //                 value={postageCosts}
+                                        //                 onChange={(e) => setPostageCosts(e.target.value)}
+                                        //                 placeholder="0.00"
+                                        //                 className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 focus:outline-none !focus:ring-0 focus:border-[#f97936] dark:focus:ring-0 dark:focus:border-[#f97936]"
+                                        //             />
+                                        //         </div>
+                                        //     </div>
+                                        //     <div className="">
+                                        //         <label className="dark:text-white font-semibold text-sm pb-[1.75px]">Shipping from</label>
+                                        //         <div className="relative">
+                                        //             <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                        //             <Input
+                                        //                 value={shippingFrom}
+                                        //                 onChange={(e) => setShippingFrom(e.target.value)}
+                                        //                 placeholder="Search..."
+                                        //                 className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-9 pr-4 dark:focus:border-[#f97936]"
+                                        //             />
+                                        //         </div>
+                                        //     </div>
+                                        // </div>
                                     )}
                                 </div>
                             </div>
@@ -1883,7 +1915,7 @@ export default function PostDiscountCodePage() {
                                     Make your deal stand out with images
                                 </h1>
                                 <p className="text-base md:text-lg text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)]">
-                                    Upload up to 8 images to post your deal. You can drag and drop to reorder and choose the cover.
+                                    Upload up to 8 images to post your discount code. You can drag and drop to rearrange them and choose the cover.
                                 </p>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto border border-dashed border-[rgba(9,24,47,0.13)] dark:border-[hsla(0,0%,100%,0.18)] p-4 rounded-lg">
@@ -1932,7 +1964,7 @@ export default function PostDiscountCodePage() {
                                     return (
                                         <div key={`empty-${index}`} className="aspect-square">
                                             {showUploadButton ? (
-                                                <label className="aspect-square bg-[rgba(15,55,95,0.05)] dark:bg-[hsla(0,0%,100%,0.11)] rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-[#5a5d61] transition-colors relative">
+                                                <label className="aspect-square bg-[rgba(15,55,95,0.05)] dark:bg-[hsla(0,0%,100%,0.11)] rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors relative">
                                                     <input
                                                         type="file"
                                                         multiple
@@ -1953,7 +1985,7 @@ export default function PostDiscountCodePage() {
                                                                         fileInput.click()
                                                                     }
                                                                 }}
-                                                                className="bg-[#f7641b] hover:bg-[#eb611f] h-9 text-white rounded-full px-[14px] text-sm font-medium relative"
+                                                                className="bg-[#f7641b] hover:bg-[#eb611f] h-9 text-white rounded-full px-[14px] text-sm font-medium relative -mt-12 -ml-36"
                                                             >
                                                                 <Plus className="w-4 h-4" />
                                                                 Upload images
@@ -2134,14 +2166,19 @@ export default function PostDiscountCodePage() {
                         <div className="max-w-[682px] w-full space-y-2 mb-[84px]">
                             {/* Header */}
                             <div className="text-left mt-8 md:mt-28 space-y-8 mb-5">
-                                <h1 className="text-3xl md:text-5xl font-semibold text-[#000] dark:text-[#fff]">Check your deal</h1>
+                                <h1 className="text-3xl md:text-5xl font-semibold text-[#000] dark:text-[#fff]">Check your discount code</h1>
                             </div>
 
                             {/* Link Section */}
                             <div className="space-y-4">
                                 <div className="flex flex-col items-start p-6 border rounded-lg dark:border-[hsla(0,0%,100%,0.18)] space-y-6">
-                                    <h2 className="text-2xl font-bold text-[#000] dark:text-[#fff]">Link</h2>
-                                    <div className="text-base text-[#000] dark:text-[#fff] break-all">{linkValue || "example.com"}</div>
+                                    <h2 className="text-2xl font-bold text-[#000] dark:text-[#fff]">Link & code</h2>
+                                    <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Link</h4>
+                                    <div className="text-base text-[#000] dark:text-[#fff] break-all">{discountlinkValue || "example.com"}</div>
+                                    <div>
+                                            <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Discount code</h4>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{discountCode || "-"}</p>
+                                        </div>
                                     <Button
                                         onClick={() => setCurrentStep(0)}
                                         variant="ghost"
@@ -2159,40 +2196,31 @@ export default function PostDiscountCodePage() {
 
                                     <div className="space-y-6 w-full">
                                         <div>
-                                            <h3 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Title of offer</h3>
-                                            <p className="text-sm text-[#000] dark:text-[#fff]">{discount || "dvdffvdvdbdbfb"}</p>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <div>
-                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Price Offer</h4>
-                                                <p className="text-sm text-[#000] dark:text-[#fff]">{priceOffer ? `₹${priceOffer}` : "-"}</p>
-                                            </div>
-                                            <div>
-                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">
-                                                    Lowest price elsewhere
-                                                </h4>
-                                                <p className="text-sm text-[#000] dark:text-[#fff]">{lowestPrice ? `₹${lowestPrice}` : "-"}</p>
-                                            </div>
-                                            <div>
-                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Postage costs</h4>
-                                                <p className="text-sm text-[#000] dark:text-[#fff]">
-                                                    {postageCosts ? `₹${postageCosts}` : "-"}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <div>
-                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Shipping from</h4>
-                                                <p className="text-sm text-[#000] dark:text-[#fff]">{shippingFrom || "-"}</p>
-                                            </div>
-                                            <div>
-                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Availability</h4>
-                                                <p className="text-sm text-[#000] dark:text-[#fff]">{availability || "-"}</p>
-                                            </div>
+                                            <h3 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Title of discount code</h3>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{discount || "No title provided"}</p>
                                         </div>
                                         <div>
-                                            <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Discount code</h4>
-                                            <p className="text-sm text-[#000] dark:text-[#fff]">{discountCode || "-"}</p>
+                                            <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Discount type</h4>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">
+                                                {discountType === "percentage" && "Discount (%)"}
+                                                {discountType === "euro" && "Discount (₹)"}
+                                                {discountType === "freeShipping" && "Free shipping"}
+                                                {discountType === "none" && "None of the above"}
+                                                {!discountType && "-"}
+                                            </p>
+                                        </div>
+                                        {(discountType === "percentage" || discountType === "euro") && (
+                                            <div>
+                                                <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Discount value</h4>
+                                                <p className="text-sm text-[#000] dark:text-[#fff]">
+                                                    {discountValue ? `${discountValue}${discountType === "percentage" ? "%" : "₹"}` : "-"}
+                                                </p>
+                                            </div>
+                                        )}
+                                        
+                                        <div>
+                                            <h4 className="text-base font-semibold text-[#000] dark:text-[#fff] mb-1">Availability</h4>
+                                            <p className="text-sm text-[#000] dark:text-[#fff]">{availability || "-"}</p>
                                         </div>
                                         <Button
                                             onClick={() => setCurrentStep(1)}
@@ -2228,7 +2256,7 @@ export default function PostDiscountCodePage() {
                                     <h2 className="text-xl font-semibold text-[#000] dark:text-[#fff]">Description</h2>
                                     <div className="space-y-2 w-full">
                                         <h3 className="text-base font-medium text-[#000] dark:text-[#fff]">
-                                            Why is this offer worth sharing?
+                                            Why is your discount code worth sharing?
                                         </h3>
                                         {description ? (
                                             <div
@@ -2289,8 +2317,8 @@ export default function PostDiscountCodePage() {
     const sharedProps = {
         currentStep,
         setCurrentStep,
-        linkValue,
-        setLinkValue,
+        discountlinkValue,
+        setDiscountLinkValue,
         isLoading,
         setIsLoading,
         duplicateDeal,
@@ -2427,7 +2455,6 @@ export default function PostDiscountCodePage() {
             attributes: {
                 class: cn(
                     "w-full min-h-[400px] bg-white dark:bg-[#1d1f20] border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black focus:outline-none dark:text-white rounded-lg p-4 pb-16 resize-none text-base leading-6 transition-all duration-300 ease-in-out flex-shrink-0 list-disc list-inside",
-                    descriptionFocused ? "min-h-[510px]" : "min-h-[400px]",
                     descriptionError ? "border-red-500 focus:border-red-500" : ""
                 ),
             },
