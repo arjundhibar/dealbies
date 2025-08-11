@@ -11,9 +11,6 @@ import {
     FileText,
     Eye,
     ListChecksIcon as ListCheck,
-    CircleCheck,
-    Pencil,
-    MapPin,
     Info,
     Scissors,
     ArrowRight,
@@ -1032,21 +1029,38 @@ export default function PostDiscountCodePage() {
                             >
                                 Offline
                             </Button>
+                            
                         </div>
-                    </div>
-                    {/* Discount Code Section */}
-                    <div className="">
-                        <label className="dark:text-white text-black font-semibold text-sm pb-[1.75px]">
-                            Discount code <span className="text-[rgba(4,8,13,0.59)] dark:text-[hsla(0,0%,100%,0.75)] font-normal">(required)</span>
-                        </label>
-                        <Input
-                            value={discountCode}
-                            onChange={(e) => setDiscountCode(e.target.value)}
-                            placeholder="Enter discount code"
-                            className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]"
-                            onFocus={() => setDiscountCodeFocused(true)}
-                            onBlur={() => setDiscountCodeFocused(false)}
-                        />
+                        {availability === "offline" ? (
+                                        <div className=" rounded-lg relative">
+                                            <label className="dark:text-white text-sm font-semibold pb-[1.75px]">Select location(s)</label>
+                                            <Input
+                                                value={shippingFrom}
+                                                onChange={(e) => setShippingFrom(e.target.value)}
+                                                placeholder="Type to search or add city..."
+                                                className="w-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)] text-black dark:bg-[#1d1f20] dark:text-white dark:focus:ring-0 focus:ring-0 placeholder:text-gray-400 rounded-lg pt-2 pb-2 pl-4 pr-4 dark:focus:border-[#f97936]"
+                                                onFocus={() => setShowCityDropdown(true)}
+                                                onBlur={() => setTimeout(() => setShowCityDropdown(false), 150)}
+                                            />
+                                            {showCityDropdown && (
+                                                <ul className="absolute left-0 right-0 z-10 mt-2 max-h-56 overflow-y-auto bg-[#f3f5f7] dark:bg-[#23272f] rounded-lg shadow-lg border border-gray-200 dark:border-[#23272f] text-sm font-medium text-black dark:text-white">
+                                                    {cityList.map((city) => (
+                                                        <li
+                                                            key={city}
+                                                            className="px-4 py-2 cursor-pointer hover:bg-[#e3e4e8] dark:hover:bg-[#363739]"
+                                                            onMouseDown={() => {
+                                                                setShippingFrom(city)
+                                                                setShowCityDropdown(false)
+                                                            }}
+                                                        >
+                                                            {city}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    ) : (<div> </div>
+                                    )}
                     </div>
                 </div>
             </div>
@@ -1595,7 +1609,7 @@ export default function PostDiscountCodePage() {
             case 1:
                 return (
                     <>
-                        <div className="block md:hidden h-screen overflow-y-auto p-2">{renderCase1Mobile()}</div>
+                        <div className="block md:hidden h-auto overflow-y-auto p-2">{renderCase1Mobile()}</div>
                         <div className="hidden md:block w-full">
                             {/* Restore the original desktop JSX for case 1 here */}
                             <div
@@ -2042,7 +2056,7 @@ export default function PostDiscountCodePage() {
                     >
                         <div className="max-w-[682px] w-full space-y-8">
                             {/* Header */}
-                            <div className="text-start -mt-8 md:-mt-20">
+                            <div className="text-start mt-2 md:-mt-20">
                                 <h1 className="text-2xl md:text-[32px] font-semibold text-[#000] dark:text-[#fff]">Final details</h1>
                             </div>
 
@@ -2321,8 +2335,6 @@ export default function PostDiscountCodePage() {
         setDiscountLinkValue,
         isLoading,
         setIsLoading,
-        duplicateDeal,
-        setDuplicateDeal,
         progressWidth,
         setProgressWidth,
         hoveredStep,
@@ -2331,22 +2343,14 @@ export default function PostDiscountCodePage() {
         setDiscount,
         discountFocused,
         setDiscountFocused,
-        priceOffer,
-        setPriceOffer,
-        lowestPrice,
-        setLowestPrice,
         discountCode,
         setDiscountCode,
+        discountType,
+        setDiscountType,
+        discountValue,
+        setDiscountValue,
         availability,
         setAvailability,
-        postageCosts,
-        setPostageCosts,
-        shippingFrom,
-        setShippingFrom,
-        priceOfferFocused,
-        setPriceOfferFocused,
-        lowestPriceFocused,
-        setLowestPriceFocused,
         discountCodeFocused,
         setDiscountCodeFocused,
         uploadedImages,

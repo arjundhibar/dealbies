@@ -6,7 +6,7 @@ import { Pencil, CircleCheck, ArrowRight, CheckCircle, Check, Link2, Sparkles, I
 import { useRouter } from "next/navigation"
 import { getSupabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth-context"
-import { useOfferSubmission } from "@/hooks/use-offer-submission";
+import { useCouponSubmission } from "@/hooks/use-coupon-submission";
 
 export function MobileDiscountSubmission(props: any) {
   const {
@@ -35,21 +35,20 @@ export function MobileDiscountSubmission(props: any) {
     uploadedImages,
   } = props
 
-  const { handleSubmitDeal, isLoading } = useOfferSubmission(uploadedImages, title);
+  const { handleSubmitCoupon, isLoading } = useCouponSubmission();
 
   const payloadBase = {
-    title,
-    description,
-    price: parseFloat(priceOffer) || 0,
-    originalPrice: parseFloat(lowestPrice) || null,
-    discountCode: discountCode || null,
-    availability,
-    postageCosts: postageCosts ? parseFloat(postageCosts) : null,
-    shippingFrom: shippingFrom || null,
+    title: props.discount,
+    description: props.description,
+    discountCode: props.discountCode,
+    discountType: props.discountType || "none",
+    discountValue: props.discountValue || null,
+    availability: props.availability,
+    couponUrl: props.discountlinkValue || "",
     startAt: startDate && startTime ? new Date(`${startDate}T${startTime}`).toISOString() : null,
     expiresAt: endDate && endTime ? new Date(`${endDate}T${endTime}`).toISOString() : null,
-    category: selectedCategories[0] || null,
-    dealUrl: linkValue,
+    category: selectedCategories[0] || "Other",
+    uploadedImages: props.uploadedImages,
   };
 
   // Define discount code specific steps
@@ -140,7 +139,7 @@ export function MobileDiscountSubmission(props: any) {
       <div className="flex flex-col overflow-auto md:hidden pb-12">
         <div>{renderStepContent && renderStepContent()}</div>
         {currentStep > 0 && (
-          <div className="border-t border-[#dfe1e4] dark:border-[#46484b] p-4 flex justify-between sticky bottom-0 bg-white dark:bg-[#1d1f20]">
+          <div className="border-t  border-[#e4dfdf] dark:border-[#46484b] p-4 flex justify-between sticky bottom-0 bg-white dark:bg-[#1d1f20]">
             <Button
               onClick={handleBack}
               variant="outline"
@@ -151,7 +150,7 @@ export function MobileDiscountSubmission(props: any) {
             <Button
               onClick={() => {
                 if (currentStep === steps.length - 1) {
-                  handleSubmitDeal(payloadBase)
+                  handleSubmitCoupon(payloadBase)
                 } else {
                   handleNext()
                 }

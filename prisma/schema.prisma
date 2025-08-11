@@ -68,22 +68,40 @@ model DealImage {
 }
 
 model Coupon {
-  id          String    @id @default(uuid())
-  code        String
-  title       String
-  description String
-  merchant    String
-  logoUrl     String?   @map("logo_url")
-  expiresAt   DateTime  @map("expires_at")
-  terms       String?
-  userId      String    @map("user_id")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @default(now()) @map("updated_at")
-  comments    Comment[]
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  votes       Vote[]
+  id            String      @id @default(uuid())
+  title         String
+  slug          String      @unique
+  description   String
+  discountCode  String      @map("discount_code")
+  discountType  String      @map("discount_type") // percentage, euro, freeShipping, none
+  discountValue Decimal?    @map("discount_value") @db.Decimal(10, 2)
+  availability  Availability
+  couponUrl     String      @map("coupon_url")
+  expired       Boolean     @default(false)
+  expiresAt     DateTime?   @map("expires_at")
+  startAt       DateTime?   @map("start_at")
+  category      String
+  userId        String      @map("user_id")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @default(now()) @map("updated_at")
+  comments      Comment[]
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  votes         Vote[]
+  images        CouponImage[] @relation("CouponToImages")
 
   @@map("coupons")
+}
+
+model CouponImage {
+  id        String   @id @default(uuid())
+  url       String
+  cloudflareUrl String? // Actual Cloudflare URL for redirect
+  isCover   Boolean  @default(false)
+  couponId  String   @map("coupon_id")
+  coupon    Coupon   @relation("CouponToImages", fields: [couponId], references: [id], onDelete: Cascade)
+  slug      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  @@map("coupon_images")
 }
 
 model Comment {

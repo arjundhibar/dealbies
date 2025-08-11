@@ -1,14 +1,53 @@
-"use client"
-
-import React, { useState } from "react"
+import React from "react"
 import { Button } from "@/components/ui/button"
-import { Pencil, CircleCheck, ArrowRight, CheckCircle, Check, Link2, Sparkles, ImageIcon, FileText, ListChecksIcon as ListCheck, Eye, Tag, Percent } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { getSupabase } from "@/lib/supabase"
-import { useAuth } from "@/lib/auth-context"
-import { useOfferSubmission } from "@/hooks/use-offer-submission";
+import { Pencil, CircleCheck, ArrowRight, Check, Link2, Sparkles, ImageIcon, FileText, ListChecksIcon as ListCheck, Eye } from "lucide-react"
+import { useCouponSubmission } from "@/hooks/use-coupon-submission";
 
-export function DesktopDiscountSubmission(props: any) {
+// Define the prop types based on sharedProps
+interface DesktopDiscountSubmissionProps {
+  steps: any[];
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  hoveredStep: number | null;
+  setHoveredStep: (step: number | null) => void;
+  renderStepContent: () => React.ReactNode;
+  handleBack: () => void;
+  handleNext: () => void;
+  discount: string;
+  setDiscount: (val: string) => void;
+  discountFocused: boolean;
+  setDiscountFocused: (val: boolean) => void;
+  discountCode: string;
+  setDiscountCode: (val: string) => void;
+  discountType: string;
+  setDiscountType: (val: string) => void;
+  discountValue: string;
+  setDiscountValue: (val: string) => void;
+  availability: string;
+  setAvailability: (val: string) => void;
+  discountCodeFocused: boolean;
+  setDiscountCodeFocused: (val: boolean) => void;
+  uploadedImages: any[];
+  setUploadedImages: (imgs: any[]) => void;
+  description: string;
+  setDescription: (val: string) => void;
+  startDate: string;
+  setStartDate: (val: string) => void;
+  startTime: string;
+  setStartTime: (val: string) => void;
+  endDate: string;
+  setEndDate: (val: string) => void;
+  endTime: string;
+  setEndTime: (val: string) => void;
+  selectedCategories: string[];
+  setSelectedCategories: (cats: string[]) => void;
+  discountlinkValue: string;
+  setDiscountLinkValue: (val: string) => void;
+  isLoading: boolean;
+  // ...other sharedProps if needed
+}
+
+export function DesktopDiscountSubmission(props: DesktopDiscountSubmissionProps) {
   const {
     steps,
     currentStep,
@@ -18,38 +57,53 @@ export function DesktopDiscountSubmission(props: any) {
     renderStepContent,
     handleBack,
     handleNext,
-    title,
-    description,
-    priceOffer,
-    lowestPrice,
+    discount,
+    setDiscount,
+    discountFocused,
+    setDiscountFocused,
     discountCode,
+    setDiscountCode,
+    discountType,
+    setDiscountType,
+    discountValue,
+    setDiscountValue,
     availability,
-    postageCosts,
-    shippingFrom,
-    startDate,
-    startTime,
-    endDate,
-    endTime,
-    selectedCategories,
-    linkValue,
+    setAvailability,
+    discountCodeFocused,
+    setDiscountCodeFocused,
     uploadedImages,
+    setUploadedImages,
+    description,
+    setDescription,
+    startDate,
+    setStartDate,
+    startTime,
+    setStartTime,
+    endDate,
+    setEndDate,
+    endTime,
+    setEndTime,
+    selectedCategories,
+    setSelectedCategories,
+    discountlinkValue,
+    setDiscountLinkValue,
+    isLoading,
   } = props
 
-  const { handleSubmitDeal, isLoading } = useOfferSubmission(uploadedImages, title);
+  const { handleSubmitCoupon } = useCouponSubmission(uploadedImages, discount);
 
   const payloadBase = {
-    title,
+    title: discount,
     description,
-    price: parseFloat(priceOffer) || 0,
-    originalPrice: parseFloat(lowestPrice) || null,
-    discountCode: discountCode || null,
+    discountCode,
+    discountType: discountType || "none",
+    discountValue: discountValue || null,
     availability,
-    postageCosts: postageCosts ? parseFloat(postageCosts) : null,
-    shippingFrom: shippingFrom || null,
+    couponUrl: discountlinkValue || "",
     startAt: startDate && startTime ? new Date(`${startDate}T${startTime}`).toISOString() : null,
     expiresAt: endDate && endTime ? new Date(`${endDate}T${endTime}`).toISOString() : null,
-    category: selectedCategories[0] || null,
-    dealUrl: linkValue,
+    category: selectedCategories[0] || "Other",
+    uploadedImages,
   };
 
   // Define discount code specific steps
@@ -156,8 +210,10 @@ export function DesktopDiscountSubmission(props: any) {
             </Button>
             <Button
               onClick={() => {
+                console.log("kishan clicked")
                 if (currentStep === discountSteps.length - 1) {
-                  handleSubmitDeal(payloadBase)
+                  console.log("Submitting coupon with payload:", payloadBase)
+                  handleSubmitCoupon(payloadBase)
                 } else {
                   handleNext()
                 }

@@ -1,170 +1,133 @@
-import { NextResponse } from "next/server"
-import prisma from "@/lib/prisma"
-import { getSupabase } from "@/lib/supabase"
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { getSupabase } from "@/lib/supabase";
+import slugify from "slugify";
 
-export async function GET(request: Request) {
+async function isPrismaInitialized() {
   try {
-    const { searchParams } = new URL(request.url)
-    const merchant = searchParams.get("merchant")
-    const sort = searchParams.get("sort") || "newest"
-
-    let orderBy: any = { createdAt: "desc" }
-
-    if (sort === "hottest") {
-      // For hottest, we'll sort later after calculating scores
-      orderBy = { createdAt: "desc" }
-    } else if (sort === "expiring") {
-      orderBy = { expiresAt: "asc" }
-    }
-
-    const coupons = await prisma.coupon.findMany({
-      where: merchant ? { merchant } : undefined,
-      orderBy,
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            avatarUrl: true,
-          },
-        },
-        _count: {
-          select: {
-            comments: true,
-          },
-        },
-        votes: true,
-      },
-    })
-
-    // Get current user for vote status
-    const supabase = getSupabase()
-    let currentUserId: string | null = null
-
-    if (supabase) {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (session?.user) {
-        const user = await prisma.user.findUnique({
-          where: { email: session.user.email! },
-        })
-        currentUserId = user?.id || null
-      }
-    }
-
-    // Calculate score for each coupon
-    const couponsWithScore = coupons.map((coupon) => {
-      const upVotes = coupon.votes.filter((vote) => vote.voteType === "up").length
-      const downVotes = coupon.votes.filter((vote) => vote.voteType === "down").length
-      const score = upVotes - downVotes
-
-      // Get user's vote if logged in
-      let userVote = undefined
-      if (currentUserId) {
-        const userVoteObj = coupon.votes.find((vote) => vote.userId === currentUserId)
-        if (userVoteObj) {
-          userVote = userVoteObj.voteType
-        }
-      }
-
-      return {
-        id: coupon.id,
-        code: coupon.code,
-        title: coupon.title,
-        description: coupon.description,
-        merchant: coupon.merchant,
-        logoUrl: coupon.logoUrl,
-        expiresAt: coupon.expiresAt,
-        terms: coupon.terms,
-        createdAt: coupon.createdAt,
-        score,
-        commentCount: coupon._count.comments,
-        postedBy: {
-          id: coupon.user.id,
-          name: coupon.user.username,
-          avatar: coupon.user.avatarUrl,
-        },
-        userVote,
-      }
-    })
-
-    // If sorting by hottest, sort by score
-    if (sort === "hottest") {
-      couponsWithScore.sort((a, b) => b.score - a.score || (b.createdAt > a.createdAt ? 1 : -1))
-    }
-
-    return NextResponse.json(couponsWithScore)
-  } catch (error) {
-    console.error("Error fetching coupons:", error)
-    return NextResponse.json({ error: "An error occurred while fetching coupons" }, { status: 500 })
+    await prisma.$connect();
+    console.log("Prisma is connected");
+    return true;
+  } catch (err) {
+    console.error("❌ Prisma failed to connect:", err);
+    return false;
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const { code, title, description, merchant, logoUrl, expiresAt, terms } = await request.json()
+    console.log("▶️ Start /api/coupons handler");
 
-    // Get user from session
-    const supabase = getSupabase()
-    if (!supabase) {
-      return NextResponse.json({ error: "Authentication service unavailable" }, { status: 500 })
+    if (!(await isPrismaInitialized())) {
+      return NextResponse.json({ error: "Database connection not available." }, { status: 503 });
+    }
+
+    const contentType = request.headers.get("content-type");
+    if (!contentType?.includes("application/json")) {
+      return NextResponse.json({ error: "Content-Type must be application/json" }, { status: 400 });
+    }
+
+    const body = await request.json();
+    const {
+      title,
+      description,
+      discountCode,
+      discountType,
+      discountValue,
+      availability,
+      couponUrl,
+      expiresAt,
+      startAt,
+      category,
+      imageUrls,
+      coverImageIndex = 0,
+    } = body;
+
+    // Validate required fields
+    if (
+      !title ||
+      !description ||
+      !discountCode ||
+      !discountType ||
+      !availability ||
+      !couponUrl ||
+      !category ||
+      !imageUrls ||
+      imageUrls.length === 0
+    ) {
+      return NextResponse.json(
+        {
+          error: "Missing required fields",
+          title,
+          description,
+          discountCode,
+          discountType,
+          availability,
+          couponUrl,
+          category,
+          imageUrls,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Supabase Auth check
+    const supabase = getSupabase();
+    const token = request.headers.get("Authorization")?.replace("Bearer ", "");
+
+    if (!token) {
+      return NextResponse.json({ error: "Missing or invalid token" }, { status: 401 });
     }
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession()
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(token);
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "You must be logged in to post a coupon" }, { status: 401 })
+    if (userError || !user) {
+      return NextResponse.json({ error: "Unauthorized user not found" }, { status: 401 });
     }
 
-    // Find user in our database
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email! },
-    })
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    const dbUser = await prisma.user.findUnique({ where: { email: user.email! } });
+    if (!dbUser) {
+      return NextResponse.json({ error: "User not found in database" }, { status: 403 });
     }
+
+    // Create slug from title
+    const slug = slugify(title, { lower: true, strict: true });
+
+    // Parse discountValue if present
+    const parsedDiscountValue = discountValue ? parseFloat(discountValue) : null;
 
     const coupon = await prisma.coupon.create({
       data: {
-        code,
         title,
+        slug,
         description,
-        merchant,
-        logoUrl,
-        expiresAt: new Date(expiresAt),
-        terms,
+        discountCode,
+        discountType: discountType.toLowerCase(),
+        discountValue: parsedDiscountValue,
+        availability: availability.toUpperCase(),
+        couponUrl,
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
+        startAt: startAt ? new Date(startAt) : null,
+        category,
         userId: user.id,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            username: true,
-            avatarUrl: true,
-          },
+        images: {
+          create: imageUrls.map((img: any, index: number) => ({
+            url: img.url,
+            cloudflareUrl: img.cloudflareUrl,
+            slug: img.slug,
+            isCover: img.isCover ?? index === coverImageIndex,
+          })),
         },
       },
-    })
+      include: { images: true },
+    });
 
-    return NextResponse.json(
-      {
-        ...coupon,
-        score: 0,
-        commentCount: 0,
-        postedBy: {
-          id: coupon.user.id,
-          name: coupon.user.username,
-          avatar: coupon.user.avatarUrl,
-        },
-      },
-      { status: 201 },
-    )
-  } catch (error) {
-    console.error("Error creating coupon:", error)
-    return NextResponse.json({ error: "An error occurred while creating the coupon" }, { status: 500 })
+    return NextResponse.json({ success: true, couponId: coupon.id }, { status: 201 });
+  } catch (err) {
+    console.error("🔥 Coupon POST Error:", err);
+    return NextResponse.json({ error: "Unexpected server error" }, { status: 500 });
   }
 }

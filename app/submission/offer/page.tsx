@@ -11,8 +11,6 @@ import {
     FileText,
     Eye,
     ListChecksIcon as ListCheck,
-    CircleCheck,
-    Pencil,
     MapPin,
     Info,
     Scissors,
