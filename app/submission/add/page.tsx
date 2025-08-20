@@ -67,7 +67,7 @@ export default function PostDealPage() {
                 ],
             },
             icon: MessageCircle,
-            href: "/post/discussion",
+            href: "/submission/discussion",
             available: true,
         },
         {

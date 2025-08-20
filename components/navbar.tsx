@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { useAuth } from "@/lib/auth-context"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,9 +15,21 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   Search,
   Menu,
@@ -40,67 +52,56 @@ import {
   AlarmClockCheck,
   Tags,
   TagIcon,
-} from "lucide-react"
-import { PostDealForm } from "@/components/post-deal-form"
-import { UnifiedAuthForm } from "@/components/unified-auth-form"
-import { useRouter } from "next/navigation"
-import { cn } from "@/lib/utils"
-import { usePathname } from "next/navigation"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AppSidebar } from "@/components/app-sidebar"
+} from "lucide-react";
+import { PostDealForm } from "@/components/post-deal-form";
+import { UnifiedAuthForm } from "@/components/unified-auth-form";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useScrollDirection } from "@/hooks/use-scroll-direction";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AppSidebar } from "@/components/app-sidebar";
 
 export function Navbar() {
-  const { user, signOut } = useAuth()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isPostDealOpen, setIsPostDealOpen] = useState(false)
-  const [isLoginOpen, setIsLoginOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [activeTab, setActiveTab] = useState("for-you")
-  const router = useRouter()
-  const pathname = usePathname()
-  const isMobile = useIsMobile()
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [view, setView] = useState<"main" | "categories">("main")
-  const isSubmissionPage = pathname.startsWith('/submission/');
+  const { user, signOut } = useAuth();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isPostDealOpen, setIsPostDealOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [activeTab, setActiveTab] = useState("for-you");
+  const router = useRouter();
+  const pathname = usePathname();
+  const isMobile = useIsMobile();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [view, setView] = useState<"main" | "categories">("main");
+  const isSubmissionPage = pathname.startsWith("/submission/");
+  const isCategoryPage = pathname.startsWith("/category/");
+  const { scrollDirection, isScrolled: hasScrolled } = useScrollDirection();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
-    }
+      setIsScrolled(window.scrollY > 10);
+    };
 
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
-  }
+  };
 
   const handleDealPosted = () => {
-    setIsPostDealOpen(false)
-  }
+    setIsPostDealOpen(false);
+  };
 
   const handleLoginSuccess = () => {
-    setIsLoginOpen(false)
-  }
-
-  const mainCategories = [
-    { name: "All Deals", href: "/", icon: Flame },
-    { name: "Vouchers", href: "/coupons", icon: ShoppingBag },
-    { name: "Freebies", href: "/freebies", icon: Heart },
-  ]
-
-  const popularCategories = [
-    { name: "Tech", href: "/category/tech" },
-    { name: "Fashion", href: "/category/fashion" },
-    { name: "Home", href: "/category/home" },
-    { name: "Gaming", href: "/category/gaming" },
-    { name: "Travel", href: "/category/travel" },
-  ]
+    setIsLoginOpen(false);
+  };
 
   // Auth button/link that handles both login and signup for mobile and desktop cases
   const AuthButton = () => {
@@ -119,16 +120,22 @@ export function Navbar() {
           </SheetTrigger>
           <SheetContent side="bottom" className="h-[80vh]">
             <SheetHeader className="mb-4">
-              <SheetTitle><div className="flex items-center gap-2">
-                <Flame className="h-6 w-6 text-dealhunter-red" />
-                <span className="text-xl font-bold">DealHunter</span>
-              </div> </SheetTitle>
+              <SheetTitle>
+                <div className="flex items-center gap-2">
+                  <Flame className="h-6 w-6 text-dealhunter-red" />
+                  <span className="text-xl font-bold">DealHunter</span>
+                </div>{" "}
+              </SheetTitle>
               {/* <SheetTitle>Login or register</SheetTitle> */}
             </SheetHeader>
-            <UnifiedAuthForm onSuccess={handleLoginSuccess} isOpen={isLoginOpen} onOpenChange={setIsLoginOpen} />
+            <UnifiedAuthForm
+              onSuccess={handleLoginSuccess}
+              isOpen={isLoginOpen}
+              onOpenChange={setIsLoginOpen}
+            />
           </SheetContent>
         </Sheet>
-      )
+      );
     }
 
     return (
@@ -168,13 +175,12 @@ export function Navbar() {
           </div>
         </DialogContent>
       </Dialog>
-
-    )
-  }
+    );
+  };
 
   // Mobile bottom navigation
   const MobileBottomNav = () => {
-    if (!isMobile) return null
+    if (!isMobile) return null;
 
     return (
       <div className="fixed bottom-0 left-0 right-0 bg-background text-foreground border-t z-50 flex justify-around items-center h-14">
@@ -200,9 +206,9 @@ export function Navbar() {
           className="flex flex-col items-center justify-center gap-1 h-auto py-2 rounded-none flex-1"
           onClick={() => {
             if (user) {
-              router.push('/submission/add');
+              router.push("/submission/add");
             } else {
-              setIsLoginOpen(true)
+              setIsLoginOpen(true);
             }
           }}
         >
@@ -247,14 +253,18 @@ export function Navbar() {
           <AuthButton />
         )}
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <>
       {/* Sidebar Sheet */}
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0" hideCloseButton>
+        <SheetContent
+          side="left"
+          className="w-[300px] sm:w-[350px] p-0"
+          hideCloseButton
+        >
           <AppSidebar
             onClose={() => setIsSidebarOpen(false)}
             initialView={view}
@@ -263,9 +273,20 @@ export function Navbar() {
         </SheetContent>
       </Sheet>
       <header
-        className={cn("sticky top-0 z-40 w-full bg-background text-foreground border-b dark:bg-[#1d1f20]", isScrolled && "shadow-sm")}
+        className={cn(
+          "sticky top-0 z-40 w-full bg-background text-foreground  dark:bg-[#1d1f20] transition-transform duration-300",
+          isScrolled && "shadow-sm",
+          scrollDirection === "down" && hasScrolled
+            ? "transform -translate-y-full"
+            : "transform translate-y-0"
+        )}
       >
-        <div className={cn("mx-auto max-w-[82.5rem] px-4 w-full box-border", isMobile && "px-1")}>
+        <div
+          className={cn(
+            "mx-auto max-w-[82.5rem] px-4 w-full box-border",
+            isMobile && "px-1"
+          )}
+        >
           {/* Top Navigation Bar */}
           <div className={cn("flex items-center justify-between h-14")}>
             {isMobile ? (
@@ -275,7 +296,10 @@ export function Navbar() {
                     <Flame className="h-6 w-6 text-dealhunter-red" />
                     <span className="text-xl font-bold">DealHunter</span>
                   </Link>
-                  <form onSubmit={handleSearch} className="relative flex-1 max-w-[65%]">
+                  <form
+                    onSubmit={handleSearch}
+                    className="relative flex-1 max-w-[65%]"
+                  >
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                     <Input
                       type="search"
@@ -290,7 +314,10 @@ export function Navbar() {
             ) : (
               <>
                 <div className="flex items-center gap-6">
-                  <Link href="/" className="flex items-center gap-1 shrink-0 h-[3.4357rem] w-[147px]">
+                  <Link
+                    href="/"
+                    className="flex items-center gap-1 shrink-0 h-[3.4357rem] w-[147px]"
+                  >
                     <Flame className="h-6 w-6 text-dealhunter-red font-bold" />
                     <span className="text-xl font-bold">DealHunter</span>
                   </Link>
@@ -306,7 +333,10 @@ export function Navbar() {
                   </Button>
                 </div>
 
-                <form onSubmit={handleSearch} className="relative max-w-xl w-full mx-4">
+                <form
+                  onSubmit={handleSearch}
+                  className="relative max-w-xl w-full mx-4"
+                >
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -320,9 +350,8 @@ export function Navbar() {
                 </form>
 
                 <div className="flex items-center gap-4">
-                  {isSubmissionPage ? (
+                  {isSubmissionPage || isCategoryPage ? (
                     <>
-
                       <Button
                         variant="navbar"
                         size="sm"
@@ -351,12 +380,15 @@ export function Navbar() {
                     </Button>
                   )}
 
-
                   {user ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="font-medium">
-                          {isSubmissionPage ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="font-medium"
+                        >
+                          {isSubmissionPage || isCategoryPage ? (
                             <>
                               <Button
                                 variant="navbar"
@@ -366,19 +398,33 @@ export function Navbar() {
                                 <Avatar className="h-5 w-5 mr-0.5">
                                   <AvatarImage
                                     src={user.user_metadata?.avatar || ""}
-                                    alt={user.user_metadata?.username || user.email}
+                                    alt={
+                                      user.user_metadata?.username || user.email
+                                    }
                                     className="h-5 w-5 object-cover"
                                   />
-                                  <AvatarFallback>{(user.user_metadata?.username || user.email?.split("@")[0])?.charAt(0).toUpperCase()}</AvatarFallback>
+                                  <AvatarFallback>
+                                    {(
+                                      user.user_metadata?.username ||
+                                      user.email?.split("@")[0]
+                                    )
+                                      ?.charAt(0)
+                                      .toUpperCase()}
+                                  </AvatarFallback>
                                 </Avatar>
-                                <span className="text-[#000] font-semibold text-base dark:text-white"> {user.user_metadata?.username || user.email?.split("@")[0]}</span>
+                                <span className="text-[#000] font-semibold text-base dark:text-white">
+                                  {" "}
+                                  {user.user_metadata?.username ||
+                                    user.email?.split("@")[0]}
+                                </span>
                               </Button>
                             </>
                           ) : (
                             <>
                               <User className="h-4 w-4 mr-1" />
                               <span className="hidden md:inline">
-                                {user.user_metadata?.username || user.email?.split("@")[0]}
+                                {user.user_metadata?.username ||
+                                  user.email?.split("@")[0]}
                               </span>
                             </>
                           )}
@@ -416,7 +462,7 @@ export function Navbar() {
                     size="sm"
                     onClick={() => {
                       if (user) {
-                        router.push('/submission/add');
+                        router.push("/submission/add");
                       } else {
                         setIsLoginOpen(true);
                       }
@@ -424,18 +470,23 @@ export function Navbar() {
                   >
                     <PlusCircle className="mr-1 h-4 w-4 md:hidden" />
                     <Plus className="h-5 w-5" />
-                    <span className="hidden md:inline mr-1 text-base">Post</span>
+                    <span className="hidden md:inline mr-1 text-base">
+                      Post
+                    </span>
                     <span className="md:hidden">Post</span>
                   </Button>
 
-
                   {user && (
-                    <Dialog open={isPostDealOpen} onOpenChange={setIsPostDealOpen}>
+                    <Dialog
+                      open={isPostDealOpen}
+                      onOpenChange={setIsPostDealOpen}
+                    >
                       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
                         <DialogHeader>
                           <DialogTitle>Post a New Deal</DialogTitle>
                           <DialogDescription>
-                            Share a great deal with the community. Fill out the form below with all the details.
+                            Share a great deal with the community. Fill out the
+                            form below with all the details.
                           </DialogDescription>
                         </DialogHeader>
                         <div className="flex-1 overflow-auto pb-6">
@@ -450,7 +501,7 @@ export function Navbar() {
           </div>
 
           {/* Secondary Navigation - Categories */}
-          {!isSubmissionPage && (
+          {!isSubmissionPage && !isCategoryPage && (
             <>
               {isMobile ? (
                 <div className="flex overflow-x-auto scrollbar-hide px-1 ">
@@ -460,8 +511,8 @@ export function Navbar() {
                       size="sm"
                       className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
                       onClick={() => {
-                        setIsSidebarOpen(true)
-                        setView("categories")
+                        setIsSidebarOpen(true);
+                        setView("categories");
                       }}
                     >
                       <LayoutGrid className="h-4 w-4 mr-1" />
@@ -469,26 +520,45 @@ export function Navbar() {
                       <ChevronDown className="h-3 w-3 ml-1" />
                     </Button>
 
-                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                    >
                       <Tag className="h-4 w-4 mr-1" />
                       Discount codes
                       <ChevronDown className="h-3 w-3 ml-1" />
                     </Button>
 
-                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                      asChild
+                    >
                       <Link href="/deals">
                         <TagIcon className="h-4 w-4 mr-1" />
                         Deals
                       </Link>
                     </Button>
 
-                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                      asChild
+                    >
                       <Link href="/freebies">
                         <Gift className="h-4 w-4 mr-1" />
                         Freebies
                       </Link>
                     </Button>
-                    <Button variant="ghost" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                      asChild
+                    >
                       <Link href="/discussion">
                         <MessagesSquare className="h-4 w-4 mr-1" />
                         Discussion
@@ -504,8 +574,8 @@ export function Navbar() {
                       size="sm"
                       className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
                       onClick={() => {
-                        setIsSidebarOpen(true)
-                        setView("categories")
+                        setIsSidebarOpen(true);
+                        setView("categories");
                       }}
                     >
                       <LayoutGrid className="h-4 w-4 mr-1" />
@@ -515,7 +585,11 @@ export function Navbar() {
 
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="navbar" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]">
+                        <Button
+                          variant="navbar"
+                          size="sm"
+                          className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                        >
                           <Tag className="h-4 w-4 mr-1" />
                           Discount codes
                           <ChevronDown className="h-3 w-3 ml-1" />
@@ -534,21 +608,36 @@ export function Navbar() {
                       </DropdownMenuContent>
                     </DropdownMenu>
 
-                    <Button variant="navbar" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                    <Button
+                      variant="navbar"
+                      size="sm"
+                      className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                      asChild
+                    >
                       <Link href="/deals">
                         <TagIcon className="h-4 w-4 mr-1" />
                         Deals
                       </Link>
                     </Button>
 
-                    <Button variant="navbar" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]" asChild>
+                    <Button
+                      variant="navbar"
+                      size="sm"
+                      className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                      asChild
+                    >
                       <Link href="/freebies">
                         <Gift className="h-4 w-4 mr-1" />
                         Freebies
                       </Link>
                     </Button>
 
-                    <Button variant="navbar" size="sm" className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica] rounded-lg" asChild>
+                    <Button
+                      variant="navbar"
+                      size="sm"
+                      className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica] rounded-lg"
+                      asChild
+                    >
                       <Link href="/discussion">
                         <MessagesSquare className="h-4 w-4 mr-1" />
                         Discussion
@@ -560,13 +649,18 @@ export function Navbar() {
 
               {/* Tabs Navigation */}
               <div className="flex border-border justify-between items-center">
-                <Tabs defaultValue="for-you" className="w-full" value={activeTab} onValueChange={setActiveTab}>
+                <Tabs
+                  defaultValue="for-you"
+                  className="w-full"
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                >
                   <TabsList className="bg-transparent h-10 p-0">
                     <TabsTrigger
                       value="for-you"
                       className={cn(
                         "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                        activeTab === "for-you" ? "font-medium" : "",
+                        activeTab === "for-you" ? "font-medium" : ""
                       )}
                     >
                       For you
@@ -575,7 +669,7 @@ export function Navbar() {
                       value="hottest"
                       className={cn(
                         "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                        activeTab === "hottest" ? "font-medium" : "",
+                        activeTab === "hottest" ? "font-medium" : ""
                       )}
                     >
                       Hottest
@@ -584,7 +678,7 @@ export function Navbar() {
                       value="is-called"
                       className={cn(
                         "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                        activeTab === "is-called" ? "font-medium" : "",
+                        activeTab === "is-called" ? "font-medium" : ""
                       )}
                     >
                       Is called
@@ -593,7 +687,7 @@ export function Navbar() {
                       value="new"
                       className={cn(
                         "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                        activeTab === "new" ? "font-medium" : "",
+                        activeTab === "new" ? "font-medium" : ""
                       )}
                     >
                       New
@@ -603,14 +697,17 @@ export function Navbar() {
 
                 {isMobile ? (
                   <div className="flex items-center justify-center w-8 h-8 p-2 rounded-full border border-gray-200 bg-white ml-2 dark:bg-transparent">
-
                     <Sliders className="h-4 w-4" />
                     {/* <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
                       1
                     </span> */}
                   </div>
                 ) : (
-                  <Button variant="outline" size="sm" className="flex items-center rounded-full gap-1 mb-2 ml-auto">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center rounded-full gap-1 mb-2 ml-auto"
+                  >
                     <Sliders className="h-5 w-5" />
                     Filter
                     <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
@@ -625,15 +722,21 @@ export function Navbar() {
       </header>
 
       {/* Add padding at the bottom to account for the fixed mobile nav */}
-      {isMobile && !isSubmissionPage && <div className="h-14"></div>}
+      {isMobile && !isSubmissionPage && !isCategoryPage && (
+        <div className="h-14"></div>
+      )}
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
 
       {/* Mobile Post Deal Form */}
       {isMobile && user && (
-        <PostDealForm onSuccess={handleDealPosted} isOpen={isPostDealOpen} onOpenChange={setIsPostDealOpen} />
+        <PostDealForm
+          onSuccess={handleDealPosted}
+          isOpen={isPostDealOpen}
+          onOpenChange={setIsPostDealOpen}
+        />
       )}
     </>
-  )
+  );
 }

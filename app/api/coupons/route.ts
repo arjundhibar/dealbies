@@ -14,6 +14,15 @@ async function isPrismaInitialized() {
   }
 }
 
+function extractMerchant(url: string): string {
+  try {
+    const hostname = new URL(url).hostname
+    return hostname.replace(/^www\./, '')
+  } catch {
+    return 'unknown-merchant'
+  }
+}
+
 export async function POST(request: Request) {
   try {
     console.log("▶️ Start /api/coupons handler");
@@ -43,6 +52,7 @@ export async function POST(request: Request) {
       coverImageIndex = 0,
     } = body;
 
+    const merchant = extractMerchant(couponUrl)
     // Validate required fields
     if (
       !title ||
@@ -107,6 +117,7 @@ export async function POST(request: Request) {
         discountCode,
         discountType: discountType.toLowerCase(),
         discountValue: parsedDiscountValue,
+        merchant,
         availability: availability.toUpperCase(),
         couponUrl,
         expiresAt: expiresAt ? new Date(expiresAt) : null,

@@ -17,10 +17,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { TipTapEditor } from "@/components/tiptap-editor"
 
 interface CommentSectionProps {
-  dealId: string
+  dealId?: string
+  couponId?: string
 }
 
-export function CommentSection({ dealId }: CommentSectionProps) {
+export function CommentSection({ dealId, couponId }: CommentSectionProps) {
   const { currentUser, addComment, voteComment } = useData()
   const [dealComments, setDealComments] = useState<Comment[]>([])
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
@@ -29,12 +30,18 @@ export function CommentSection({ dealId }: CommentSectionProps) {
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
 
+  const id = dealId || couponId
+  const isCoupon = !!couponId
+
   useEffect(() => {
     const fetchComments = async () => {
+      if (!id) return
+      
       setLoading(true)
       setError(null)
       try {
-        const response = await fetch(`/api/deals/${dealId}/comments`)
+        const endpoint = isCoupon ? `/api/coupons/${id}/comments` : `/api/deals/${id}/comments`
+        const response = await fetch(endpoint)
         if (response.ok) {
           const data = await response.json()
           setDealComments(data)
@@ -51,18 +58,21 @@ export function CommentSection({ dealId }: CommentSectionProps) {
     }
 
     fetchComments()
-  }, [dealId])
+  }, [id, isCoupon])
 
 
 
 
 
   const handleVote = async (commentId: string, voteType: "up" | "down") => {
+    if (!id) return
+    
     try {
-      await voteComment(dealId, commentId, voteType)
+      await voteComment(id, commentId, voteType)
 
       // Refresh comments to get updated votes
-      const response = await fetch(`/api/deals/${dealId}/comments`)
+      const endpoint = isCoupon ? `/api/coupons/${id}/comments` : `/api/deals/${id}/comments`
+      const response = await fetch(endpoint)
       if (response.ok) {
         const data = await response.json()
         setDealComments(data)
@@ -146,10 +156,11 @@ export function CommentSection({ dealId }: CommentSectionProps) {
                       onSubmit={async (content) => {
                         setIsSubmitting(true)
                         try {
-                          await addComment(dealId, content, id)
+                          await addComment(id, content, id, isCoupon)
                           
                           // Refresh comments to get the updated structure with replies
-                          const response = await fetch(`/api/deals/${dealId}/comments`)
+                          const endpoint = isCoupon ? `/api/coupons/${id}/comments` : `/api/deals/${id}/comments`
+                          const response = await fetch(endpoint)
                           if (response.ok) {
                             const data = await response.json()
                             setDealComments(data)
@@ -233,12 +244,22 @@ export function CommentSection({ dealId }: CommentSectionProps) {
                     return
                   }
                   
+                  if (!id) {
+                    toast({
+                      title: "Error",
+                      description: "Invalid content ID.",
+                      variant: "destructive",
+                    })
+                    return
+                  }
+                  
                   setIsSubmitting(true)
                   try {
-                    await addComment(dealId, content)
+                    await addComment(id, content, undefined, isCoupon)
                     
                     // Refetch comments to get the updated list
-                    const response = await fetch(`/api/deals/${dealId}/comments`)
+                    const endpoint = isCoupon ? `/api/coupons/${id}/comments` : `/api/deals/${id}/comments`
+                    const response = await fetch(endpoint)
                     if (response.ok) {
                       const data = await response.json()
                       setDealComments(data)

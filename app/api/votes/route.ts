@@ -26,17 +26,21 @@ export async function POST(request: Request) {
     }
 
     const userId = data.user.id
-    const { dealId, voteType } = await request.json()
+    const { dealId, couponId, voteType } = await request.json()
 
-    if (!dealId || !voteType) {
-      return NextResponse.json({ error: "Missing dealId or voteType" }, { status: 400 })
+    if (!voteType) {
+      return NextResponse.json({ error: "Missing voteType" }, { status: 400 })
+    }
+
+    if (!dealId && !couponId) {
+      return NextResponse.json({ error: "Missing dealId or couponId" }, { status: 400 })
     }
 
     const existingVote = await prisma.vote.findFirst({
       where: {
         userId,
-        dealId,
-        couponId: null,
+        dealId: dealId || null,
+        couponId: couponId || null,
         commentId: null,
       },
     })
@@ -58,9 +62,9 @@ export async function POST(request: Request) {
       await prisma.vote.create({
         data: {
           userId,
-          dealId,
+          dealId: dealId || null,
+          couponId: couponId || null,
           voteType,
-          couponId: null,
           commentId: null,
         },
       })

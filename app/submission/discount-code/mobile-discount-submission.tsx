@@ -1,14 +1,55 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
 import { Button } from "@/components/ui/button"
-import { Pencil, CircleCheck, ArrowRight, CheckCircle, Check, Link2, Sparkles, ImageIcon, FileText, ListChecksIcon as ListCheck, Eye, Tag, Percent } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { getSupabase } from "@/lib/supabase"
-import { useAuth } from "@/lib/auth-context"
+import { Pencil, CircleCheck, ArrowRight, Check, Link2, Sparkles, ImageIcon, FileText, ListChecksIcon as ListCheck, Eye } from "lucide-react"
 import { useCouponSubmission } from "@/hooks/use-coupon-submission";
 
-export function MobileDiscountSubmission(props: any) {
+// Define the prop types based on sharedProps (same as desktop)
+interface MobileDiscountSubmissionProps {
+  steps: any[];
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  hoveredStep: number | null;
+  setHoveredStep: (step: number | null) => void;
+  renderStepContent: () => React.ReactNode;
+  handleBack: () => void;
+  handleNext: () => void;
+  discount: string;
+  setDiscount: (val: string) => void;
+  discountFocused: boolean;
+  setDiscountFocused: (val: boolean) => void;
+  discountCode: string;
+  setDiscountCode: (val: string) => void;
+  discountType: string;
+  setDiscountType: (val: string) => void;
+  discountValue: string;
+  setDiscountValue: (val: string) => void;
+  availability: string;
+  setAvailability: (val: string) => void;
+  discountCodeFocused: boolean;
+  setDiscountCodeFocused: (val: boolean) => void;
+  uploadedImages: any[];
+  setUploadedImages: (imgs: any[]) => void;
+  description: string;
+  setDescription: (val: string) => void;
+  startDate: string;
+  setStartDate: (val: string) => void;
+  startTime: string;
+  setStartTime: (val: string) => void;
+  endDate: string;
+  setEndDate: (val: string) => void;
+  endTime: string;
+  setEndTime: (val: string) => void;
+  selectedCategories: string[];
+  setSelectedCategories: (cats: string[]) => void;
+  discountlinkValue: string;
+  setDiscountLinkValue: (val: string) => void;
+  isLoading: boolean;
+  // ...other sharedProps if needed
+}
+
+export function MobileDiscountSubmission(props: MobileDiscountSubmissionProps) {
   const {
     steps,
     currentStep,
@@ -18,37 +59,53 @@ export function MobileDiscountSubmission(props: any) {
     renderStepContent,
     handleBack,
     handleNext,
-    title,
-    description,
-    priceOffer,
-    lowestPrice,
+    discount,
+    setDiscount,
+    discountFocused,
+    setDiscountFocused,
     discountCode,
+    setDiscountCode,
+    discountType,
+    setDiscountType,
+    discountValue,
+    setDiscountValue,
     availability,
-    postageCosts,
-    shippingFrom,
-    startDate,
-    startTime,
-    endDate,
-    endTime,
-    selectedCategories,
-    linkValue,
+    setAvailability,
+    discountCodeFocused,
+    setDiscountCodeFocused,
     uploadedImages,
+    setUploadedImages,
+    description,
+    setDescription,
+    startDate,
+    setStartDate,
+    startTime,
+    setStartTime,
+    endDate,
+    setEndDate,
+    endTime,
+    setEndTime,
+    selectedCategories,
+    setSelectedCategories,
+    discountlinkValue,
+    setDiscountLinkValue,
+    isLoading,
   } = props
 
-  const { handleSubmitCoupon, isLoading } = useCouponSubmission();
+  const { handleSubmitCoupon } = useCouponSubmission(uploadedImages, discount);
 
   const payloadBase = {
-    title: props.discount,
-    description: props.description,
-    discountCode: props.discountCode,
-    discountType: props.discountType || "none",
-    discountValue: props.discountValue || null,
-    availability: props.availability,
-    couponUrl: props.discountlinkValue || "",
+    title: discount,
+    description,
+    discountCode,
+    discountType: discountType || "none",
+    discountValue: discountValue || null,
+    availability,
+    couponUrl: discountlinkValue || "",
     startAt: startDate && startTime ? new Date(`${startDate}T${startTime}`).toISOString() : null,
     expiresAt: endDate && endTime ? new Date(`${endDate}T${endTime}`).toISOString() : null,
     category: selectedCategories[0] || "Other",
-    uploadedImages: props.uploadedImages,
+    uploadedImages,
   };
 
   // Define discount code specific steps
@@ -96,7 +153,7 @@ export function MobileDiscountSubmission(props: any) {
       {/* Mobile: Horizontal Step Bar */}
       <div className="block md:hidden w-full bg-[#f3f5f7] mt-12 h-fit dark:bg-[#28292a] border-b border-gray-200 dark:border-[#23272f]">
         <nav className="flex flex-row items-center justify-between px-2 py-4 overflow-x-auto">
-          {steps.map((step: any, index: number) => {
+          {discountSteps.map((step: any, index: number) => {
             let IconComponent = step.icon
             const isActive = index === currentStep
             const isCompleted = index < currentStep
@@ -128,7 +185,7 @@ export function MobileDiscountSubmission(props: any) {
                     <span className=" whitespace-nowrap">{step.title}</span>
                   </div>
                 </button>
-                {index < steps.length - 1 && <div className="w-6 h-px bg-[rgba(3,12,25,0.23)] dark:bg-[#46484b] mx-2" />}
+                {index < discountSteps.length - 1 && <div className="w-6 h-px bg-[rgba(3,12,25,0.23)] dark:bg-[#46484b] mx-2" />}
               </div>
             )
           })}
@@ -149,7 +206,8 @@ export function MobileDiscountSubmission(props: any) {
             </Button>
             <Button
               onClick={() => {
-                if (currentStep === steps.length - 1) {
+                console.log("Mobile: Submitting coupon with payload:", payloadBase)
+                if (currentStep === discountSteps.length - 1) {
                   handleSubmitCoupon(payloadBase)
                 } else {
                   handleNext()
@@ -164,7 +222,17 @@ export function MobileDiscountSubmission(props: any) {
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                 </svg>
               )}
-              {currentStep === steps.length - 1 ? "Publish" : "Next"}
+              {currentStep === discountSteps.length - 1 ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  <span>Posting discount code</span>
+                </>
+              ) : (
+                <>
+                  <span>Next</span>
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
             </Button>
           </div>
         )}

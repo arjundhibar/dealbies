@@ -49,13 +49,18 @@ export interface Comment {
 
 export interface Coupon {
   id: string
-  code: string
   title: string
   description: string
   merchant: string
-  logoUrl?: string
-  expiresAt: string
-  terms?: string
+  discountCode: string
+  discountType: string
+  discountValue?: number
+  availability: string
+  couponUrl: string
+  expired: boolean
+  expiresAt?: string
+  startAt?: string
+  category: string
   createdAt: string
   score: number
   commentCount: number
@@ -65,4 +70,5 @@ export interface Coupon {
     avatar?: string
   }
   userVote?: "up" | "down"
+  imageUrls?: { url: string }[];
 }

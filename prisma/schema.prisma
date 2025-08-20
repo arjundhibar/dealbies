@@ -72,6 +72,7 @@ model Coupon {
   title         String
   slug          String      @unique
   description   String
+  merchant      String?
   discountCode  String      @map("discount_code")
   discountType  String      @map("discount_type") // percentage, euro, freeShipping, none
   discountValue Decimal?    @map("discount_value") @db.Decimal(10, 2)
