@@ -1,24 +1,38 @@
-"use client"
+"use client";
 
-import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { MessageSquare, ExternalLink, ChevronUp, ChevronDown, Share2, MessagesSquare, ArrowBigDown, ArrowBigUp } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
-import { isPast } from "date-fns"
-import { cn, formatRelativeTime, formatCurrency, calculateDiscount } from "@/lib/utils"
-import type { Deal } from "@/lib/types"
-import { useData } from "@/lib/data-context"
-import { useToast } from "@/hooks/use-toast"
-import { DealCardSaveButton } from "@/components/deal-card-save-button"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { useIsMobile } from "@/hooks/use-mobile"
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  MessageSquare,
+  ExternalLink,
+  ChevronUp,
+  ChevronDown,
+  Share2,
+  MessagesSquare,
+  ArrowBigDown,
+  ArrowBigUp,
+} from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { isPast } from "date-fns";
+import {
+  cn,
+  formatRelativeTime,
+  formatCurrency,
+  calculateDiscount,
+} from "@/lib/utils";
+import type { Deal } from "@/lib/types";
+import { useData } from "@/lib/data-context";
+import { useToast } from "@/hooks/use-toast";
+import { DealCardSaveButton } from "@/components/deal-card-save-button";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DealCardProps {
-  deal: Deal
+  deal: Deal;
 }
 
 export function DealCard({ deal }: DealCardProps) {
@@ -37,44 +51,51 @@ export function DealCard({ deal }: DealCardProps) {
     dealUrl,
     expired,
     expiresAt,
-  } = deal
+  } = deal;
 
-  const { voteDeal, updateDealVote, currentUser, deals: globalDeals } = useData()
-  
+  const {
+    voteDeal,
+    updateDealVote,
+    currentUser,
+    deals: globalDeals,
+  } = useData();
+
   // Get the current vote state from the global deals array
-  const currentDeal = globalDeals.find(d => d.id === id)
-  const score = currentDeal?.score ?? deal.score
-  const userVote = currentDeal?.userVote ?? deal.userVote
-  const { toast } = useToast()
-  const router = useRouter()
-  const [isVoting, setIsVoting] = useState(false)
-  const isMobile = useIsMobile()
+  const currentDeal = globalDeals.find((d) => d.id === id);
+  const score = currentDeal?.score ?? deal.score;
+  const userVote = currentDeal?.userVote ?? deal.userVote;
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isVoting, setIsVoting] = useState(false);
+  const isMobile = useIsMobile();
 
-  const isExpired = expired || (expiresAt && isPast(new Date(expiresAt)))
-  const discount = originalPrice ? calculateDiscount(Number(originalPrice), Number(price)) : null
-  const postedAtDate = new Date(createdAt)
+  const isExpired = expired || (expiresAt && isPast(new Date(expiresAt)));
+  const discount = originalPrice
+    ? calculateDiscount(Number(originalPrice), Number(price))
+    : null;
+  const postedAtDate = new Date(createdAt);
 
   const handleVote = async (voteType: "up" | "down") => {
-    if (isVoting) return
+    if (isVoting) return;
 
     try {
-      setIsVoting(true)
-      
+      setIsVoting(true);
+
       // Make API call - the voteDeal function will handle all state updates
-      await voteDeal(id, voteType)
+      await voteDeal(id, voteType);
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "You must be logged in to vote.",
         variant: "destructive",
-      })
+      });
       if (!currentUser) {
-        router.push("/login")
+        router.push("/login");
       }
     } finally {
-      setIsVoting(false)
+      setIsVoting(false);
     }
-  }
+  };
 
   // Mobile layout
   if (isMobile) {
@@ -87,7 +108,12 @@ export function DealCard({ deal }: DealCardProps) {
               {/* Product Image */}
               <div className="relative w-[7rem] h-[7rem]">
                 <Image
-                  src={typeof imageUrls?.[0] === 'string' ? imageUrls[0] : imageUrls?.[0]?.url || "/placeholder.svg?height=400&width=400&query=product"}
+                  src={
+                    typeof imageUrls?.[0] === "string"
+                      ? imageUrls[0]
+                      : imageUrls?.[0]?.url ||
+                        "/placeholder.svg?height=400&width=400&query=product"
+                  }
                   alt={title}
                   fill
                   className="object-cover z-5 rounded-lg"
@@ -95,35 +121,70 @@ export function DealCard({ deal }: DealCardProps) {
               </div>
 
               {/* Top overlay - Voting */}
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10 flex items-center bg-[#fff] rounded-full p-1 gap-2 dark:bg-[#1d1f20]" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="absolute top-2 left-1/2 -translate-x-1/2 z-10 flex items-center bg-[#fff] rounded-full p-1 gap-2 dark:bg-[#1d1f20]"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={cn("h-7 w-7 p-0 rounded-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]", userVote === "down" && "text-blue-500")}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote("down") }}
+                  className={cn(
+                    "h-7 w-7 p-0 rounded-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]",
+                    userVote === "down" && "text-blue-500"
+                  )}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleVote("down");
+                  }}
                   disabled={isVoting}
                 >
-                  <ArrowBigDown className="h-6 w-6 scale-[1.5] scale-x-[1] text-[#005498] dark:text-[#5aa4f1]" strokeWidth={1.5} />
+                  <ArrowBigDown
+                    className="h-6 w-6 scale-[1.5] scale-x-[1] text-[#005498] dark:text-[#5aa4f1]"
+                    strokeWidth={1.5}
+                  />
                 </Button>
-                <span className="text-lg font-bold text-vote-lightOrange">{score}°</span>
+                <span className="text-lg font-bold text-vote-lightOrange">
+                  {score}°
+                </span>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={cn("h-7 w-7 p-0 rounded-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]", userVote === "up" && "text-dealhunter-red")}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote("up") }}
+                  className={cn(
+                    "h-7 w-7 p-0 rounded-full border border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]",
+                    userVote === "up" && "text-dealhunter-red"
+                  )}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleVote("up");
+                  }}
                   disabled={isVoting}
                 >
-                  <ArrowBigUp className="h-6 w-6 scale-[1.5] scale-x-[1] text-[#ce1734] dark:text-[#f97778]" strokeWidth={1.5} />
+                  <ArrowBigUp
+                    className="h-6 w-6 scale-[1.5] scale-x-[1] text-[#ce1734] dark:text-[#f97778]"
+                    strokeWidth={1.5}
+                  />
                 </Button>
               </div>
 
               {/* Bottom overlay - Actions */}
-              <div className="absolute bottom-1 text-gray-500 left-[40%] -translate-x-1/2 z-10 flex rounded-full" onClick={(e) => e.stopPropagation()}>
-                <Link href={`/deal/${id}#comments`}>
-                  <Button variant="ghost" size="icon" className="p-0 font-semibold">
-                    <MessagesSquare className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)] dark:hover:text-dealhunter-red" />
-                  </Button>
-                </Link>
+              <div
+                className="absolute bottom-1 text-gray-500 left-[40%] -translate-x-1/2 z-10 flex rounded-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="p-0 font-semibold"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    router.push(`/deal/${id}#comments`);
+                  }}
+                >
+                  <MessagesSquare className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)] dark:hover:text-dealhunter-red" />
+                </Button>
                 <Button variant="ghost" size="icon" className="p-0">
                   <Share2 className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)] dark:hover:text-dealhunter-red" />
                 </Button>
@@ -138,35 +199,51 @@ export function DealCard({ deal }: DealCardProps) {
                   {/* <Badge variant="dark" className="">
                     Posted {formatRelativeTime(postedAtDate)}
                   </Badge> */}
-                  <div className="text-sm text-muted-foreground pl-[0.5rem] pr-[0.5rem] pb-[0.25rem] pt-[0.25rem] rounded-md dark:bg-[hsla(0,0%,100%,0.11)] dark:text-[hsla(0,0%,100%,0.75)] bg-[#0f375f0d] ">Posted {formatRelativeTime(postedAtDate)}</div>
+                  <div className="text-sm text-muted-foreground pl-[0.5rem] pr-[0.5rem] pb-[0.25rem] pt-[0.25rem] rounded-md dark:bg-[hsla(0,0%,100%,0.11)] dark:text-[hsla(0,0%,100%,0.75)] bg-[#0f375f0d] ">
+                    Posted {formatRelativeTime(postedAtDate)}
+                  </div>
                 </div>
 
-                <h3 className="text-base font-bold mb-1 leading-[1.5rem] group-hover:text-[#f7641b] line-clamp-1">{title}</h3>
+                <h3 className="text-base font-bold mb-1 leading-[1.5rem] group-hover:text-[#f7641b] line-clamp-1">
+                  {title}
+                </h3>
 
                 <div className="flex items-center gap-2 mb-1 leading-none">
-                  <span className="text-xl font-bold text-[#f7641b] dark:text-[#f97936]">{formatCurrency(Number(price))}</span>
+                  <span className="text-xl font-bold text-[#f7641b] dark:text-[#f97936]">
+                    {formatCurrency(Number(price))}
+                  </span>
                   {originalPrice && (
                     <>
                       <span className="text-base text-muted-foreground line-through">
                         {formatCurrency(Number(originalPrice))}
                       </span>
-                      <span className="text-green-600 text-[14px] font-bold">-{discount}%</span>
+                      <span className="text-green-600 text-[14px] font-bold">
+                        -{discount}%
+                      </span>
                     </>
                   )}
                 </div>
 
                 <div className="text-[12px] text-muted-foreground mb-1 leading-none">
-                  Available at <span className="font-medium text-black dark:text-white">{merchant}</span>
+                  Available at{" "}
+                  <span className="font-medium text-black dark:text-white">
+                    {merchant}
+                  </span>
                 </div>
 
                 <div className="flex items-center text-[12px] gap-1 text-muted-foreground leading-none">
                   <Avatar className="h-5 w-5">
                     <AvatarImage
-                      src={postedBy.avatar || "/placeholder.svg?height=40&width=40&text=U"}
+                      src={
+                        postedBy.avatar ||
+                        "/placeholder.svg?height=40&width=40&text=U"
+                      }
                       alt={postedBy.name}
                       className="h-5 w-5 object-cover"
                     />
-                    <AvatarFallback>{postedBy.name.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>
+                      {postedBy.name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
                   <span>Posted by</span>
                   <span className="font-medium">{postedBy.name}</span>
@@ -180,8 +257,15 @@ export function DealCard({ deal }: DealCardProps) {
                 className="bg-[#f7641b] hover:bg-[#eb611f] active:bg-[#da5a1c] shadow-[#f7641b] hover:shadow-[#eb611f] rounded-[50vh] min-w-[12.375rem] h-9 px-4 mt-2"
                 onClick={(e) => e.stopPropagation()}
               >
-                <a href={dealUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
-                  <span className="text-[0.875rem] font-bold text-white">Get Deal</span>
+                <a
+                  href={dealUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center"
+                >
+                  <span className="text-[0.875rem] font-bold text-white">
+                    Get Deal
+                  </span>
                   <ExternalLink className="ml-1 h-3 w-3 text-white" />
                 </a>
               </Button>
@@ -189,20 +273,24 @@ export function DealCard({ deal }: DealCardProps) {
           </div>
         </Card>
       </Link>
-    )
+    );
   }
 
-  // Desktop layout 
+  // Desktop layout
   return (
     <Link href={`/deal/${id}`} className="block group">
       <Card className="overflow-hidden shadow-sm hover:shadow-md dark:bg-dark-secondary cursor-pointer min-h-[14.25rem] border-none">
-
         <div className="flex">
           {/* Left side - Product image */}
           <div className="w-[14.125rem] p-[0.75rem]  relative bg-[#0f375f0d] dark:bg-dark-tertiary">
             <div className="relative h-full">
               <Image
-                src={typeof imageUrls?.[0] === 'string' ? imageUrls[0] : imageUrls?.[0]?.url || "/placeholder.svg?height=400&width=600&query=product"}
+                src={
+                  typeof imageUrls?.[0] === "string"
+                    ? imageUrls[0]
+                    : imageUrls?.[0]?.url ||
+                      "/placeholder.svg?height=400&width=600&query=product"
+                }
                 alt={title}
                 fill
                 className="object-cover rounded-lg"
@@ -222,57 +310,93 @@ export function DealCard({ deal }: DealCardProps) {
             {/* Top section with voting and posted time */}
             <div className="flex justify-between items-center mb-2 ">
               {/* Voting buttons */}
-              <div className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="flex items-center bg-[#0f375f0d] rounded-full p-1 dark:bg-dark-tertiary"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <Button
                   variant="outline"
                   size="icon"
-                  className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "down" && "text-blue-500")}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote("down") }}
+                  className={cn(
+                    "rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7",
+                    userVote === "down" && "text-blue-500"
+                  )}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleVote("down");
+                  }}
                   disabled={isVoting}
                 >
-                  <ArrowBigDown className="h-6 w-6 scale-[1.5] scale-x-[1.1]  text-[#005498] dark:text-[#5aa4f1]" strokeWidth={1.5} />
+                  <ArrowBigDown
+                    className="h-6 w-6 scale-[1.5] scale-x-[1.1]  text-[#005498] dark:text-[#5aa4f1]"
+                    strokeWidth={1.5}
+                  />
                   <span className="sr-only">Downvote</span>
                 </Button>
 
-                <span className="text-lg font-bold text-dealhunter-red mx-2">{score}°</span>
+                <span className="text-lg font-bold text-dealhunter-red mx-2">
+                  {score}°
+                </span>
 
                 <Button
                   variant="outline"
                   size="icon"
-                  className={cn("rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7", userVote === "up" && "text-dealhunter-red")}
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleVote("up") }}
+                  className={cn(
+                    "rounded-full border-[hsla(0,0%,100%,0.35)] h-7 w-7",
+                    userVote === "up" && "text-dealhunter-red"
+                  )}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleVote("up");
+                  }}
                   disabled={isVoting}
                 >
-                  <ArrowBigUp className="h-6 w-6 scale-[1.5] scale-x-[1.1] text-[#ce1734] dark:text-[#f97778]" strokeWidth={1.5} />
+                  <ArrowBigUp
+                    className="h-6 w-6 scale-[1.5] scale-x-[1.1] text-[#ce1734] dark:text-[#f97778]"
+                    strokeWidth={1.5}
+                  />
                   <span className="sr-only">Upvote</span>
                 </Button>
               </div>
 
               {/* Posted time */}
-              <div className="text-sm text-muted-foreground pl-[0.5rem] pr-[0.5rem] pb-[0.25rem] pt-[0.25rem] rounded-sm dark:bg-[hsla(0,0%,100%,0.11)] dark:text-[hsla(0,0%,100%,0.75)] bg-[#0f375f0d] ">Posted {formatRelativeTime(postedAtDate)}</div>
+              <div className="text-sm text-muted-foreground pl-[0.5rem] pr-[0.5rem] pb-[0.25rem] pt-[0.25rem] rounded-sm dark:bg-[hsla(0,0%,100%,0.11)] dark:text-[hsla(0,0%,100%,0.75)] bg-[#0f375f0d] ">
+                Posted {formatRelativeTime(postedAtDate)}
+              </div>
             </div>
 
             {/* Title */}
-            <h3 className="text-lg font-bold group-hover:text-[#f7641b] line-clamp-1">{title}</h3>
+            <h3 className="text-lg font-bold group-hover:text-[#f7641b] line-clamp-1">
+              {title}
+            </h3>
 
             {/* Price section */}
             {/* Price, Merchant, Posted By - All in one line */}
             <div className="flex items-center gap-2 my-2 flex-wrap">
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-[#f7641b] dark:text-[#f97936]">{formatCurrency(Number(price))}</span>
+                <span className="text-2xl font-bold text-[#f7641b] dark:text-[#f97936]">
+                  {formatCurrency(Number(price))}
+                </span>
                 {originalPrice && (
                   <>
                     <span className="text-base text-muted-foreground line-through">
                       {formatCurrency(Number(originalPrice))}
                     </span>
-                    <span className="text-green-600 font-bold">-{discount}%</span>
+                    <span className="text-green-600 font-bold">
+                      -{discount}%
+                    </span>
                   </>
                 )}
               </div>
               <span className="text-gray-500">|</span>
               <div className="flex items-center gap-1 text-sm text-muted-foreground dark:text-[hsla(0,0%,100%,0.75)]">
                 <span>Available at</span>
-                <Badge variant="outline" className="bg-white dark:text-white dark:bg-dark-secondary">
+                <Badge
+                  variant="outline"
+                  className="bg-white dark:text-white dark:bg-dark-secondary"
+                >
                   {merchant}
                 </Badge>
               </div>
@@ -280,34 +404,54 @@ export function DealCard({ deal }: DealCardProps) {
               <div className="flex items-center gap-1 text-sm text-muted-foreground dark:text-[hsla(0,0%,100%,0.75)]">
                 <Avatar className="h-5 w-5">
                   <AvatarImage
-                    src={postedBy.avatar || "./kishan.jpeg?height=40&width=40&text=U"}
+                    src={
+                      postedBy.avatar ||
+                      "./kishan.jpeg?height=40&width=40&text=U"
+                    }
                     alt={postedBy.name}
                     className="h-5 w-5 object-cover"
                   />
-                  <AvatarFallback>{postedBy.name.charAt(0).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>
+                    {postedBy.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
                 <span>Posted by</span>
                 <span className="font-medium">{postedBy.name}</span>
               </div>
             </div>
 
-
             {/* Description */}
-            <p className="line-clamp-2 text-sm text-muted-foreground mb-auto">{description}</p>
+            <p className="line-clamp-2 text-sm text-muted-foreground mb-auto">
+              {description}
+            </p>
 
             {/* Bottom section with actions */}
             <div className="flex items-center justify-between mt-4 pt-1">
-              <div className="flex items-center gap-3 " onClick={(e) => e.stopPropagation()}>
+              <div
+                className="flex items-center gap-3 "
+                onClick={(e) => e.stopPropagation()}
+              >
                 {/* Comments */}
-                <Button variant="ghost" size="sm" className="gap-1 p-0 hover:text-dealhunter-red shadow-none focus:outline-none focus:ring-0" asChild>
-                  <Link href={`/deal/${id}#comments`}>
-                    <MessagesSquare className="h-4 w-4" />
-                    <span className="ml-1">{commentCount}</span>
-                  </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1 p-0 hover:text-dealhunter-red shadow-none focus:outline-none focus:ring-0"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    router.push(`/deal/${id}#comments`);
+                  }}
+                >
+                  <MessagesSquare className="h-4 w-4" />
+                  <span className="ml-1">{commentCount}</span>
                 </Button>
 
                 {/* Share */}
-                <Button variant="ghost" size="sm" className="gap-1 p-0 hover:text-dealhunter-red">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1 p-0 hover:text-dealhunter-red"
+                >
                   <Share2 className="h-4 w-4" />
                 </Button>
 
@@ -323,8 +467,15 @@ export function DealCard({ deal }: DealCardProps) {
                 className="bg-[#f7641b] hover:bg-[#eb611f] active:bg-[#da5a1c] shadow-[#f7641b] hover:shadow-[#eb611f] rounded-[50vh] min-w-[12.375rem] h-9 px-4"
                 onClick={(e) => e.stopPropagation()}
               >
-                <a href={dealUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center">
-                  <span className="text-[0.875rem] font-bold text-white">Get Deal</span>
+                <a
+                  href={dealUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center"
+                >
+                  <span className="text-[0.875rem] font-bold text-white">
+                    Get Deal
+                  </span>
                   <ExternalLink className="ml-1 h-3 w-3 text-white" />
                 </a>
               </Button>
@@ -333,5 +484,5 @@ export function DealCard({ deal }: DealCardProps) {
         </div>
       </Card>
     </Link>
-  )
+  );
 }

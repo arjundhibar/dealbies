@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { TipTapEditor } from "@/components/tiptap-editor";
+import { SubmissionEditor } from "@/components/submission-editor";
 import { cn } from "@/lib/utils";
 import { Info } from "lucide-react";
 
@@ -79,9 +79,10 @@ export default function PostDiscussionPage() {
               <h3 className="text-base font-medium text-[#000] dark:text-[#fff]">
                 What would you like to discuss?
               </h3>
-              <TipTapEditor
+              <SubmissionEditor
+                content={description}
+                onUpdate={(content) => setDescription(content)}
                 placeholder="Share your thoughts, ask questions, or start a conversation about deals, shopping tips, or anything related to saving money..."
-                onSubmit={(content) => setDescription(content)}
                 className="w-full"
               />
             </div>
