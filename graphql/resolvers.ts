@@ -1,6 +1,7 @@
 // graphql/resolvers.ts
 import { prisma } from '@/lib/prisma'
 import { getSupabase } from '@/lib/supabase'
+import { getImageUrl } from '@/lib/utils'
 
 export const resolvers = {
     Query: {
@@ -9,15 +10,30 @@ export const resolvers = {
 
             if (sort === 'comments') {
                 orderBy = [{ comments: { _count: 'desc' } }, { createdAt: 'desc' }]
+            } else if (sort === 'hottest') {
+                orderBy = [{ votes: { _count: 'desc' } }, { createdAt: 'desc' }]
+            } else if (sort === 'newest') {
+                orderBy = { createdAt: 'desc' }
             }
 
+
+            // Calculate 72 hours ago for "new" filter
+            const seventyTwoHoursAgo = new Date(Date.now() - 72 * 60 * 60 * 1000);
+            
             const deals = await prisma.deal.findMany({
-                where: category ? { 
-                    category: { 
-                        equals: category, 
-                        mode: 'insensitive' 
-                    } 
-                } : undefined,
+                where: {
+                    ...(category ? { 
+                        category: { 
+                            equals: category, 
+                            mode: 'insensitive' 
+                        } 
+                    } : {}),
+                    ...(sort === 'new' ? {
+                        createdAt: {
+                            gte: seventyTwoHoursAgo
+                        }
+                    } : {})
+                },
                 orderBy,
                 include: {
                     user: { select: { id: true, username: true, avatarUrl: true } },
@@ -47,15 +63,15 @@ export const resolvers = {
                 let coverImage = null;
                 if (deal.images && deal.images.length > 0) {
                     const cover = deal.images.find((img: any) => img.isCover);
-                    coverImage = cover ? cover.url : deal.images[0].url;
+                    coverImage = cover || deal.images[0];
                 }
 
                 return {
                     id: deal.id,
                     title: deal.title,
                     description: deal.description,
-                    imageUrls: deal.images.map((img: any) => img.url),
-                    coverImage, // <-- add this field
+                    imageUrls: deal.images.map((img: any) => getImageUrl(img.slug)),
+                    coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
                     price: deal.price,
                     originalPrice: deal.originalPrice,
                     merchant: deal.merchant,
@@ -96,14 +112,14 @@ export const resolvers = {
             let coverImage = null;
             if (deal.images && deal.images.length > 0) {
                 const cover = deal.images.find((img: any) => img.isCover);
-                coverImage = cover ? cover.url : deal.images[0].url;
+                                    coverImage = cover || deal.images[0];
             }
             return {
                 id: deal.id,
                 title: deal.title,
                 description: deal.description,
-                imageUrls: deal.images.map((img: any) => img.url),
-                coverImage,
+                imageUrls: deal.images.map((img: any) => getImageUrl(img.slug)),
+                coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
                 price: deal.price,
                 originalPrice: deal.originalPrice,
                 merchant: deal.merchant,
@@ -134,7 +150,7 @@ export const resolvers = {
             }
             
             if (category) {
-                whereClause.category = { equals: category, mode: 'insensitive' }
+                whereClause.category = category
             }
 
             const coupons = await prisma.coupon.findMany({
@@ -168,15 +184,15 @@ export const resolvers = {
                 let coverImage = null;
                 if (coupon.images && coupon.images.length > 0) {
                     const cover = coupon.images.find((img: any) => img.isCover);
-                    coverImage = cover ? cover.url : coupon.images[0].url;
+                    coverImage = cover || coupon.images[0];
                 }
 
                 return {
                     id: coupon.id,
                     title: coupon.title,
                     description: coupon.description,
-                    imageUrls: coupon.images.map((img: any) => img.url),
-                    coverImage,
+                    imageUrls: coupon.images.map((img: any) => getImageUrl(img.slug)),
+                    coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
                     discountCode: coupon.discountCode,
                     discountType: coupon.discountType,
                     merchant: coupon.merchant,
@@ -219,14 +235,14 @@ export const resolvers = {
             let coverImage = null;
             if (coupon.images && coupon.images.length > 0) {
                 const cover = coupon.images.find((img: any) => img.isCover);
-                coverImage = cover ? cover.url : coupon.images[0].url;
+                coverImage = cover || coupon.images[0];
             }
             return {
                 id: coupon.id,
                 title: coupon.title,
                 description: coupon.description,
-                imageUrls: coupon.images.map((img: any) => img.url),
-                coverImage,
+                imageUrls: coupon.images.map((img: any) => getImageUrl(img.slug)),
+                coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
                 discountCode: coupon.discountCode,
                 discountType: coupon.discountType,
                 merchant: coupon.merchant,

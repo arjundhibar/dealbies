@@ -5,6 +5,7 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { useData } from "@/lib/data-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -65,6 +66,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 
 export function Navbar() {
   const { user, signOut } = useAuth();
+  const { setCurrentSort, fetchDeals } = useData();
   const [searchQuery, setSearchQuery] = useState("");
   const [isPostDealOpen, setIsPostDealOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -101,6 +103,34 @@ export function Navbar() {
 
   const handleLoginSuccess = () => {
     setIsLoginOpen(false);
+  };
+
+  const handleTabChange = async (value: string) => {
+    setActiveTab(value);
+
+    let sortOrder = "newest";
+    switch (value) {
+      case "hottest":
+        sortOrder = "hottest";
+        break;
+      case "is-called":
+        sortOrder = "comments";
+        break;
+      case "new":
+        sortOrder = "new";
+        break;
+      default:
+        sortOrder = "newest";
+    }
+
+    setCurrentSort(sortOrder);
+
+    // Fetch deals with the new sort order
+    try {
+      await fetchDeals(undefined, sortOrder);
+    } catch (error) {
+      console.error("Error fetching deals with new sort:", error);
+    }
   };
 
   // Auth button/link that handles both login and signup for mobile and desktop cases
@@ -530,7 +560,7 @@ export function Navbar() {
                       className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
                       asChild
                     >
-                      <Link href="/deals">
+                      <Link href="/">
                         <TagIcon className="h-4 w-4 mr-1" />
                         Deals
                       </Link>
@@ -608,7 +638,7 @@ export function Navbar() {
                       className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
                       asChild
                     >
-                      <Link href="/deals">
+                      <Link href="/">
                         <TagIcon className="h-4 w-4 mr-1" />
                         Deals
                       </Link>
@@ -647,7 +677,7 @@ export function Navbar() {
                   defaultValue="for-you"
                   className="w-full"
                   value={activeTab}
-                  onValueChange={setActiveTab}
+                  onValueChange={handleTabChange}
                 >
                   <TabsList className="bg-transparent h-10 p-0">
                     <TabsTrigger

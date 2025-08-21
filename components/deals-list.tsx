@@ -51,7 +51,7 @@ export function DealsList({
   filters,
   onFiltersReset,
 }: DealsListProps) {
-  const { fetchDeals, fetchCoupons, isLoading } = useData();
+  const { fetchDeals, fetchCoupons, isLoading, currentSort } = useData();
   const { user } = useAuth();
   const [sort, setSort] = useState(initialSort);
   const [mixedContent, setMixedContent] = useState<MixedContent[]>([]);
@@ -67,10 +67,26 @@ export function DealsList({
     }
   }, [filters?.sortBy]);
 
+  // Update sort when global sort changes (from navbar tabs)
+  useEffect(() => {
+    if (currentSort && currentSort !== sort) {
+      console.log("DealsList - Global sort changed to:", currentSort);
+      setSort(currentSort);
+    }
+  }, [currentSort, sort]);
+
   // Debug filters changes
   useEffect(() => {
     console.log("DealsList - Filters changed:", filters);
   }, [filters]);
+
+  // Refetch deals when sort changes
+  useEffect(() => {
+    if (sort && sort !== initialSort) {
+      console.log("DealsList - Refetching deals with sort:", sort);
+      fetchDeals(category, sort);
+    }
+  }, [sort, initialSort, category, fetchDeals]);
 
   // Function to shuffle array
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -172,7 +188,7 @@ export function DealsList({
     };
 
     loadContent();
-  }, [category, sort, fetchDeals, fetchCoupons]);
+  }, [category, sort, fetchDeals, fetchCoupons, filters]);
 
   // Re-apply filters when filters change (without re-fetching)
   useEffect(() => {
@@ -183,7 +199,7 @@ export function DealsList({
       const shuffledContent = shuffleArray(filteredContent);
       setMixedContent(shuffledContent);
     }
-  }, [filters, mixedContent.length]);
+  }, [filters, mixedContent.length, applyFilters, shuffleArray]);
 
   const handleDealPosted = async () => {
     setIsPostDealOpen(false);

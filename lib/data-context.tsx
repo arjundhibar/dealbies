@@ -18,6 +18,8 @@ interface DataContextType {
   savedDeals: string[];
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;
+  currentSort: string;
+  setCurrentSort: (sort: string) => void;
   addDeal: (
     deal: Omit<
       Deal,
@@ -71,6 +73,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [savedDeals, setSavedDeals] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentSort, setCurrentSort] = useState<string>("newest");
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -997,6 +1000,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           savedDeals,
           currentUser,
           setCurrentUser,
+          currentSort,
+          setCurrentSort,
           addDeal,
           addComment,
           voteDeal,
@@ -1019,6 +1024,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           comments,
           savedDeals,
           currentUser,
+          currentSort,
+          setCurrentSort,
           addDeal,
           addComment,
           voteDeal,

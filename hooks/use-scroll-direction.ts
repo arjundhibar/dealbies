@@ -14,7 +14,7 @@ export function useScrollDirection() {
       const scrollY = window.scrollY
       const direction = scrollY > lastScrollY ? 'down' : 'up'
       
-      if (direction !== scrollDirection && Math.abs(scrollY - lastScrollY) > 10) {
+      if (Math.abs(scrollY - lastScrollY) > 10) {
         setScrollDirection(direction)
       }
       
@@ -25,7 +25,7 @@ export function useScrollDirection() {
 
     window.addEventListener('scroll', updateScrollDirection)
     return () => window.removeEventListener('scroll', updateScrollDirection)
-  }, [scrollDirection])
+  }, [])
 
   return { scrollDirection, scrollY, isScrolled }
 }
