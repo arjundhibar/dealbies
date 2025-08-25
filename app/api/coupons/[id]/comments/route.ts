@@ -76,7 +76,6 @@ export async function GET(
 
     return NextResponse.json(transformedComments)
   } catch (error) {
-    console.error("Error fetching coupon comments:", error)
     return NextResponse.json(
       { error: "Failed to fetch comments" },
       { status: 500 }

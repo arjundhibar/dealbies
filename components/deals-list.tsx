@@ -32,6 +32,10 @@ interface DealsListProps {
   category?: string;
   initialSort?: string;
   showHeader?: boolean;
+  initialData?: {
+    deals: Deal[];
+    coupons: Coupon[];
+  };
   filters?: {
     sortBy: string;
     hideExpired: boolean;
@@ -48,6 +52,7 @@ export function DealsList({
   category,
   initialSort = "newest",
   showHeader = true,
+  initialData,
   filters,
   onFiltersReset,
 }: DealsListProps) {
@@ -79,14 +84,6 @@ export function DealsList({
   useEffect(() => {
     console.log("DealsList - Filters changed:", filters);
   }, [filters]);
-
-  // Refetch deals when sort changes
-  useEffect(() => {
-    if (sort && sort !== initialSort) {
-      console.log("DealsList - Refetching deals with sort:", sort);
-      fetchDeals(category, sort);
-    }
-  }, [sort, initialSort, category, fetchDeals]);
 
   // Function to shuffle array
   const shuffleArray = <T,>(array: T[]): T[] => {
@@ -144,62 +141,76 @@ export function DealsList({
     });
   };
 
-  useEffect(() => {
-    const loadContent = async () => {
-      try {
-        console.log("DealsList - Loading content for category:", category);
-        console.log("DealsList - Sort:", sort);
-        console.log("DealsList - Filters:", filters);
-
-        const [deals, coupons] = await Promise.all([
-          fetchDeals(category, sort),
-          fetchCoupons(undefined, category, sort),
-        ]);
-
-        console.log("DealsList - Deals fetched:", deals);
-        console.log("DealsList - Coupons fetched:", coupons);
-
-        // Create mixed content array
-        const mixed: MixedContent[] = [
-          ...deals.map((deal) => ({
-            type: "deal" as const,
-            id: deal.id,
-            data: deal,
-          })),
-          ...coupons.map((coupon) => ({
-            type: "coupon" as const,
-            id: coupon.id,
-            data: coupon,
-          })),
-        ];
-
-        console.log("DealsList - Mixed content created:", mixed);
-
-        // Apply filters and set the content
-        const filteredContent = applyFilters(mixed);
-        console.log("DealsList - Filtered content:", filteredContent);
-
-        // Shuffle the filtered content
-        const shuffledContent = shuffleArray(filteredContent);
-        setMixedContent(shuffledContent);
-      } catch (error) {
-        console.error("Error loading content:", error);
-      }
-    };
-
-    loadContent();
-  }, [category, sort, fetchDeals, fetchCoupons, filters]);
-
-  // Re-apply filters when filters change (without re-fetching)
+  // Apply filters when filters change
   useEffect(() => {
     if (mixedContent.length > 0 && filters) {
-      console.log("DealsList - Re-applying filters:", filters);
+      console.log("DealsList - Applying filters:", filters);
       const filteredContent = applyFilters(mixedContent);
-      console.log("DealsList - Re-filtered content:", filteredContent);
       const shuffledContent = shuffleArray(filteredContent);
       setMixedContent(shuffledContent);
     }
-  }, [filters, mixedContent.length, applyFilters, shuffleArray]);
+  }, [filters]); // Only depend on filters
+
+  // Initialize mixedContent from initialData if provided
+  useEffect(() => {
+    if (initialData) {
+      const mixed: MixedContent[] = [
+        ...initialData.deals.map((deal) => ({
+          type: "deal" as const,
+          id: deal.id,
+          data: deal,
+        })),
+        ...initialData.coupons.map((coupon) => ({
+          type: "coupon" as const,
+          id: coupon.id,
+          data: coupon,
+        })),
+      ];
+      setMixedContent(mixed);
+    }
+  }, [initialData]);
+
+  // Load content when no initialData is provided (for homepage)
+  useEffect(() => {
+    if (!initialData && sort) {
+      const loadContent = async () => {
+        try {
+          console.log(
+            "DealsList - Loading content for category:",
+            category || "all",
+            "sort:",
+            sort
+          );
+
+          const [deals, coupons] = await Promise.all([
+            fetchDeals(category, sort),
+            fetchCoupons(undefined, category, sort),
+          ]);
+
+          // Create mixed content array
+          const mixed: MixedContent[] = [
+            ...deals.map((deal) => ({
+              type: "deal" as const,
+              id: deal.id,
+              data: deal,
+            })),
+            ...coupons.map((coupon) => ({
+              type: "coupon" as const,
+              id: coupon.id,
+              data: coupon,
+            })),
+          ];
+
+          console.log("DealsList - Content loaded, total items:", mixed.length);
+          setMixedContent(mixed);
+        } catch (error) {
+          console.error("Error loading content:", error);
+        }
+      };
+
+      loadContent();
+    }
+  }, [initialData, category, sort, fetchDeals, fetchCoupons]);
 
   const handleDealPosted = async () => {
     setIsPostDealOpen(false);

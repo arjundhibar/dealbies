@@ -16,7 +16,6 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ exists: !!user })
   } catch (error) {
-    console.error("Error checking username:", error)
     return NextResponse.json({ error: "An error occurred while checking the username" }, { status: 500 })
   }
 }

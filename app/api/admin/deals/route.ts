@@ -48,7 +48,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(deal, { status: 201 })
   } catch (error) {
-    console.error("Error creating deal:", error)
     return NextResponse.json({ error: "An error occurred while creating the deal" }, { status: 500 })
   }
 }

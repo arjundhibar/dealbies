@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 
 export async function GET(request: Request) {
   try {
     console.log("GET /api/users/saved-deals called")
     // Get user from session
-    const supabase = createServerComponentClient({ cookies })
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
     const {
       data: { session },
     } = await supabase.auth.getSession()
@@ -107,7 +108,8 @@ export async function POST(request: Request) {
     console.log("Request body dealId:", dealId)
 
     // Get user from session
-    const supabase = createServerComponentClient({ cookies })
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
     const {
       data: { session },
     } = await supabase.auth.getSession()

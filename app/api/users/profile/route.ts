@@ -7,10 +7,11 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const email = searchParams.get("email")
+    const username = searchParams.get("username")
     const supabase = createServerComponentClient({ cookies })
 
-    // Get user from session if email not provided
-    if (!email) {
+    // Get user from session if no email or username provided
+    if (!email && !username) {
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -50,24 +51,45 @@ export async function GET(request: Request) {
       })
     }
 
-    // Get user by email
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        avatarUrl: true,
-        createdAt: true,
-        _count: {
-          select: {
-            deals: true,
-            votes: true,
-            comments: true,
+    // Get user by email or username
+    let user;
+    if (email) {
+      user = await prisma.user.findUnique({
+        where: { email },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          avatarUrl: true,
+          createdAt: true,
+          _count: {
+            select: {
+              deals: true,
+              votes: true,
+              comments: true,
+            }
           }
-        }
-      },
-    })
+        },
+      })
+    } else if (username) {
+      user = await prisma.user.findUnique({
+        where: { username },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          avatarUrl: true,
+          createdAt: true,
+          _count: {
+            select: {
+              deals: true,
+              votes: true,
+              comments: true,
+            }
+          }
+        },
+      })
+    }
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })

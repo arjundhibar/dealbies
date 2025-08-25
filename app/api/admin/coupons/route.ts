@@ -46,7 +46,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json(coupon, { status: 201 })
   } catch (error) {
-    console.error("Error creating coupon:", error)
     return NextResponse.json({ error: "An error occurred while creating the coupon" }, { status: 500 })
   }
 }

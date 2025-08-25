@@ -32,7 +32,6 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser(token)
 
     if (error || !user) {
-      console.error("Auth error:", error)
       return NextResponse.json({ error: "Authentication failed" }, { status: 401 })
     }
 
@@ -43,7 +42,6 @@ export async function POST(request: Request) {
         where: { email: user.email! },
       })
     } catch (error) {
-      console.error("Error finding user:", error)
       return NextResponse.json({ error: "Database error when finding user" }, { status: 500 })
     }
 
@@ -73,7 +71,6 @@ export async function POST(request: Request) {
         },
       })
     } catch (error) {
-      console.error("Error creating comment:", error)
       return NextResponse.json({ error: "Database error when creating comment" }, { status: 500 })
     }
 
@@ -91,7 +88,6 @@ export async function POST(request: Request) {
       { status: 201 },
     )
   } catch (error) {
-    console.error("Error creating comment:", error)
     return NextResponse.json({ error: "An error occurred while creating the comment" }, { status: 500 })
   }
 }

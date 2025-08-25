@@ -253,21 +253,19 @@ export function DealCard({ deal }: DealCardProps) {
               <Button
                 variant="default"
                 size="sm"
-                asChild
                 className="bg-[#f7641b] hover:bg-[#eb611f] active:bg-[#da5a1c] shadow-[#f7641b] hover:shadow-[#eb611f] rounded-[50vh] min-w-[12.375rem] h-9 px-4 mt-2"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.open(dealUrl, "_blank", "noopener,noreferrer");
+                }}
               >
-                <a
-                  href={dealUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center"
-                >
+                <span className="flex items-center justify-center">
                   <span className="text-[0.875rem] font-bold text-white">
                     Get Deal
                   </span>
                   <ExternalLink className="ml-1 h-3 w-3 text-white" />
-                </a>
+                </span>
               </Button>
             </div>
           </div>
@@ -463,21 +461,19 @@ export function DealCard({ deal }: DealCardProps) {
               <Button
                 variant="default"
                 size="sm"
-                asChild
                 className="bg-[#f7641b] hover:bg-[#eb611f] active:bg-[#da5a1c] shadow-[#f7641b] hover:shadow-[#eb611f] rounded-[50vh] min-w-[12.375rem] h-9 px-4"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.open(dealUrl, "_blank", "noopener,noreferrer");
+                }}
               >
-                <a
-                  href={dealUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center"
-                >
+                <span className="flex items-center justify-center">
                   <span className="text-[0.875rem] font-bold text-white">
                     Get Deal
                   </span>
                   <ExternalLink className="ml-1 h-3 w-3 text-white" />
-                </a>
+                </span>
               </Button>
             </div>
           </div>

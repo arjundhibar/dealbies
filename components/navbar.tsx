@@ -53,6 +53,14 @@ import {
   AlarmClockCheck,
   Tags,
   TagIcon,
+  X,
+  Bookmark,
+  Trophy,
+  Activity,
+  Megaphone,
+  Star,
+  ChartNoAxesColumn,
+  Settings,
 } from "lucide-react";
 import { PostDealForm } from "@/components/post-deal-form";
 import { UnifiedAuthForm } from "@/components/unified-auth-form";
@@ -79,7 +87,10 @@ export function Navbar() {
   const [view, setView] = useState<"main" | "categories">("main");
   const isSubmissionPage = pathname.startsWith("/submission/");
   const isCategoryPage = pathname.startsWith("/category/");
+  const isProfilePage =
+    pathname.startsWith("/profile") || pathname.split("/").length > 2;
   const { scrollDirection, isScrolled: hasScrolled } = useScrollDirection();
+  const [userProfile, setUserProfile] = useState<any>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -89,6 +100,27 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Fetch user profile when user is logged in
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (user?.email) {
+        try {
+          const response = await fetch(
+            `/api/users/profile?email=${encodeURIComponent(user.email)}`
+          );
+          if (response.ok) {
+            const profile = await response.json();
+            setUserProfile(profile);
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -399,6 +431,25 @@ export function Navbar() {
                         Notifications
                       </Button>
                     </>
+                  ) : isProfilePage ? (
+                    <>
+                      <Button
+                        variant="navbar"
+                        size="sm"
+                        className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md"
+                      >
+                        <AlarmClockCheck className="h-4 w-4" />
+                        Alerts
+                      </Button>
+                      <Button
+                        variant="navbar"
+                        size="sm"
+                        className="hidden md:flex items-center rounded-full h-[40px] px-[12px] py-0 font-semibold text-md"
+                      >
+                        <Bell className="h-4 w-4 mr-1" />
+                        Notifications
+                      </Button>
+                    </>
                   ) : (
                     <Button
                       variant="navbar"
@@ -418,62 +469,183 @@ export function Navbar() {
                           size="sm"
                           className="font-medium"
                         >
-                          {isSubmissionPage || isCategoryPage ? (
-                            <>
-                              <Avatar className="h-5 w-5 mr-0.5">
-                                <AvatarImage
-                                  src={user.user_metadata?.avatar || ""}
-                                  alt={
-                                    user.user_metadata?.username || user.email
-                                  }
-                                  className="h-5 w-5 object-cover"
-                                />
-                                <AvatarFallback>
-                                  {(
-                                    user.user_metadata?.username ||
-                                    user.email?.split("@")[0]
-                                  )
-                                    ?.charAt(0)
-                                    .toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="text-[#000] font-semibold text-base dark:text-white">
-                                {" "}
-                                {user.user_metadata?.username ||
-                                  user.email?.split("@")[0]}
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <User className="h-4 w-4 mr-1" />
-                              <span className="hidden md:inline">
-                                {user.user_metadata?.username ||
-                                  user.email?.split("@")[0]}
-                              </span>
-                            </>
-                          )}
+                          <Avatar className="h-5 w-5 mr-0.5">
+                            <AvatarImage
+                              src={
+                                userProfile?.avatarUrl ||
+                                user.user_metadata?.avatar ||
+                                ""
+                              }
+                              alt={
+                                userProfile?.username ||
+                                user.user_metadata?.username ||
+                                user.email
+                              }
+                              className="h-5 w-5 object-cover"
+                            />
+                            <AvatarFallback>
+                              {(
+                                userProfile?.username ||
+                                user.user_metadata?.username ||
+                                user.email?.split("@")[0]
+                              )
+                                ?.charAt(0)
+                                .toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-[#000] font-semibold text-base dark:text-white -pl-4">
+                            {userProfile?.username ||
+                              user.user_metadata?.username ||
+                              user.email?.split("@")[0]}
+                          </span>
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href="/profile">
-                            <User className="mr-2 h-4 w-4" />
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-[350px] shadow-md"
+                      >
+                        <div className="flex items-center justify-between pl-4 pr-2 pt-2">
+                          <h3 className="text-base font-semibold text-black dark:text-white">
                             Profile
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/my-deals">My Deals</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/saved">Saved Deals</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => signOut()}>
-                          <LogOut className="mr-2 h-4 w-4" />
-                          Log Out
-                        </DropdownMenuItem>
+                          </h3>
+                          <button className="text-[#6b6d70] rounded-full p-1 hover:bg-[rgba(15,55,95,0.05)] hover:text-[#76787b] dark:text-gray-400 dark:hover:text-gray-200">
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
+
+                        <div className="">
+                          {[
+                            {
+                              icon: <Trophy className="h-5 w-5 text-black" />,
+                              name: "Points Club",
+                              href: `/${
+                                userProfile?.username ||
+                                user.user_metadata?.username ||
+                                user.email?.split("@")[0]
+                              }/points-and-rewards`,
+                              showLine: false,
+                            },
+                            {
+                              icon: <Bookmark className="h-5 w-5" />,
+                              name: "Favourites",
+                              href: `/${
+                                userProfile?.username ||
+                                user.user_metadata?.username ||
+                                user.email?.split("@")[0]
+                              }/saved-deals`,
+                              showLine: true,
+                            },
+                            {
+                              icon: <Activity className="h-5 w-5" />,
+                              name: "Activity",
+                              href: `/${
+                                userProfile?.username ||
+                                user.user_metadata?.username ||
+                                user.email?.split("@")[0]
+                              }/activity`,
+                              showLine: true,
+                            },
+                            {
+                              icon: <Tag className="h-5 w-5" />,
+                              name: "My Offers",
+                              href: `/${
+                                userProfile?.username ||
+                                user.user_metadata?.username ||
+                                user.email?.split("@")[0]
+                              }/offers`,
+                              showLine: false,
+                            },
+                            {
+                              icon: <Megaphone className="h-5 w-5" />,
+                              name: "Psoted referral codes",
+                              href: `/${
+                                userProfile?.username ||
+                                user.user_metadata?.username ||
+                                user.email?.split("@")[0]
+                              }/referral-codes`,
+                              showLine: false,
+                            },
+                            {
+                              icon: <MessageSquare className="h-5 w-5" />,
+                              name: "My discussions",
+                              href: `/${
+                                userProfile?.username ||
+                                user.user_metadata?.username ||
+                                user.email?.split("@")[0]
+                              }/discussions`,
+                              showLine: false,
+                            },
+                            {
+                              icon: <Star className="h-5 w-5" />,
+                              name: "Badges",
+                              href: `/${
+                                userProfile?.username ||
+                                user.user_metadata?.username ||
+                                user.email?.split("@")[0]
+                              }/badges`,
+                              showLine: false,
+                            },
+                            {
+                              icon: <ChartNoAxesColumn className="h-5 w-5" />,
+                              name: "Statistics",
+                              href: `/${
+                                userProfile?.username ||
+                                user.user_metadata?.username ||
+                                user.email?.split("@")[0]
+                              }/stats`,
+                              showLine: false,
+                            },
+                            {
+                              icon: <Settings className="h-5 w-5" />,
+                              name: "Institutions",
+                              href: `/${
+                                userProfile?.username ||
+                                user.user_metadata?.username ||
+                                user.email?.split("@")[0]
+                              }/settings`,
+                              showLine: false,
+                            },
+
+                            {
+                              icon: <LogOut className="h-5 w-5" />,
+                              name: "Log Out",
+                              href: "#",
+                              showLine: false,
+                              onClick: () => signOut(),
+                              isAction: true,
+                            },
+                          ].map((item, index) => (
+                            <div key={index}>
+                              {item.isAction ? (
+                                <DropdownMenuItem
+                                  onClick={item.onClick}
+                                  className="flex items-center gap-3 p-[14px]"
+                                >
+                                  {item.icon}
+                                  <span className="text-black text-sm font-semibold">
+                                    {item.name}
+                                  </span>
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem
+                                  asChild
+                                  className="flex items-center gap-3 p-[14px] hover:bg-gray-100 dark:hover:bg-gray-800 border-b"
+                                >
+                                  <Link
+                                    href={item.href}
+                                    className="flex items-center gap-3 w-full"
+                                  >
+                                    {item.icon}
+                                    <span className="text-black text-sm font-medium">
+                                      {item.name}
+                                    </span>
+                                  </Link>
+                                </DropdownMenuItem>
+                              )}
+                              {item.showLine && <div className="" />}
+                            </div>
+                          ))}
+                        </div>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   ) : (
@@ -525,7 +697,7 @@ export function Navbar() {
           </div>
 
           {/* Secondary Navigation - Categories */}
-          {!isSubmissionPage && !isCategoryPage && (
+          {!isSubmissionPage && !isCategoryPage && !isProfilePage && (
             <>
               {isMobile ? (
                 <div className="flex overflow-x-auto scrollbar-hide px-1 ">
@@ -671,75 +843,77 @@ export function Navbar() {
                 </div>
               )}
 
-              {/* Tabs Navigation */}
-              <div className="flex border-border justify-between items-center">
-                <Tabs
-                  defaultValue="for-you"
-                  className="w-full"
-                  value={activeTab}
-                  onValueChange={handleTabChange}
-                >
-                  <TabsList className="bg-transparent h-10 p-0">
-                    <TabsTrigger
-                      value="for-you"
-                      className={cn(
-                        "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                        activeTab === "for-you" ? "font-medium" : ""
-                      )}
-                    >
-                      For you
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="hottest"
-                      className={cn(
-                        "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                        activeTab === "hottest" ? "font-medium" : ""
-                      )}
-                    >
-                      Hottest
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="is-called"
-                      className={cn(
-                        "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                        activeTab === "is-called" ? "font-medium" : ""
-                      )}
-                    >
-                      Is called
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="new"
-                      className={cn(
-                        "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
-                        activeTab === "new" ? "font-medium" : ""
-                      )}
-                    >
-                      New
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-
-                {isMobile ? (
-                  <div className="flex items-center justify-center w-8 h-8 p-2 rounded-full border border-gray-200 bg-white ml-2 dark:bg-transparent">
-                    <Sliders className="h-4 w-4" />
-                    {/* <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
-                      1
-                    </span> */}
-                  </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center rounded-full gap-1 mb-2 ml-auto"
+              {/* Tabs Navigation - Hidden on Profile Pages */}
+              {!isProfilePage && (
+                <div className="flex border-border justify-between items-center">
+                  <Tabs
+                    defaultValue="for-you"
+                    className="w-full"
+                    value={activeTab}
+                    onValueChange={handleTabChange}
                   >
-                    <Sliders className="h-5 w-5" />
-                    Filter
-                    <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
-                      1
-                    </span>
-                  </Button>
-                )}
-              </div>
+                    <TabsList className="bg-transparent h-10 p-0">
+                      <TabsTrigger
+                        value="for-you"
+                        className={cn(
+                          "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
+                          activeTab === "for-you" ? "font-medium" : ""
+                        )}
+                      >
+                        For you
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="hottest"
+                        className={cn(
+                          "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
+                          activeTab === "hottest" ? "font-medium" : ""
+                        )}
+                      >
+                        Hottest
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="is-called"
+                        className={cn(
+                          "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
+                          activeTab === "is-called" ? "font-medium" : ""
+                        )}
+                      >
+                        Is called
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="new"
+                        className={cn(
+                          "rounded-none h-10 px-4 data-[state=active]:border-b-2 data-[state=active]:border-dealhunter-red data-[state=active]:shadow-none data-[state=active]:text-dealhunter-red hover:text-dealhunter-red ",
+                          activeTab === "new" ? "font-medium" : ""
+                        )}
+                      >
+                        New
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+
+                  {isMobile ? (
+                    <div className="flex items-center justify-center w-8 h-8 p-2 rounded-full border border-gray-200 bg-white ml-2 dark:bg-transparent">
+                      <Sliders className="h-4 w-4" />
+                      {/* <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
+                        1
+                      </span> */}
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center rounded-full gap-1 mb-2 ml-auto"
+                    >
+                      <Sliders className="h-5 w-5" />
+                      Filter
+                      <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-dealhunter-red text-[10px] font-medium text-white">
+                        1
+                      </span>
+                    </Button>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>

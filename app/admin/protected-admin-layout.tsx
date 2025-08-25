@@ -19,7 +19,6 @@ export default async function ProtectedAdminLayout({
 
     // If no session, redirect to login
     if (!session) {
-      console.log("No session found, redirecting to login")
       redirect("/")
       return null
     }
@@ -30,11 +29,9 @@ export default async function ProtectedAdminLayout({
       select: { role: true },
     })
 
-    console.log("User role check:", user?.role)
 
     // If not an admin, redirect to home
     if (!user || user.role !== "ADMIN") {
-      console.log("User is not an admin, redirecting to home")
       redirect("/")
       return null
     }
@@ -42,7 +39,6 @@ export default async function ProtectedAdminLayout({
     // User is authenticated and is an admin, render the children
     return <>{children}</>
   } catch (error) {
-    console.error("Error in ProtectedAdminLayout:", error)
     // In case of error, redirect to home
     redirect("/")
     return null

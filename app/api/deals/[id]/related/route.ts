@@ -32,6 +32,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
             avatarUrl: true,
           },
         },
+        images: {
+          select: {
+            slug: true,
+            cloudflareUrl: true,
+          },
+        },
         _count: {
           select: {
             comments: true,
@@ -44,7 +50,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       id: relatedDeal.id,
       title: relatedDeal.title,
       description: relatedDeal.description,
-      imageUrl: relatedDeal.imageUrl,
+      imageUrls: relatedDeal.images.map(img => img.cloudflareUrl || `/api/images/${img.slug}`),
       price: relatedDeal.price,
       originalPrice: relatedDeal.originalPrice,
       merchant: relatedDeal.merchant,
@@ -64,7 +70,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json(formattedDeals)
   } catch (error) {
-    console.error("Error fetching related deals:", error)
     return NextResponse.json({ error: "An error occurred while fetching related deals" }, { status: 500 })
   }
 }

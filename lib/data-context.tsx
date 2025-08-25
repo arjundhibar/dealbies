@@ -80,24 +80,18 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   // Fetch user profile when auth user changes
   useEffect(() => {
     const fetchUserProfile = async () => {
-      console.log("fetchUserProfile called, user:", user);
       if (!user) {
-        console.log("No user found, setting currentUser to null");
         setCurrentUser(null);
         return;
       }
 
       try {
-        console.log("Fetching user profile from API...");
         const response = await fetch(`/api/users/profile`);
-        console.log("User profile response status:", response.status);
 
         if (response.ok) {
           const userData = await response.json();
-          console.log("User profile data:", userData);
           setCurrentUser(userData);
         } else {
-          console.log("User profile not found, creating new user...");
           // If user doesn't exist in our database yet, create them
           const createResponse = await fetch("/api/users", {
             method: "POST",
@@ -110,14 +104,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             }),
           });
 
-          console.log("Create user response status:", createResponse.status);
-
           if (createResponse.ok) {
             const newUser = await createResponse.json();
-            console.log("New user created:", newUser);
             setCurrentUser(newUser);
           } else {
-            console.log("Failed to create user, setting temporary user object");
             // If we can't create the user, set a temporary user object
             setCurrentUser({
               id: user.id,
@@ -132,7 +122,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           }
         }
       } catch (error) {
-        console.error("Error fetching user profile:", error);
         // Set a temporary user object if there's an error
         setCurrentUser({
           id: user.id,
@@ -151,36 +140,25 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   // Fetch user's saved deals when user changes
   useEffect(() => {
     const fetchSavedDeals = async () => {
-      console.log("fetchSavedDeals called, user:", user);
       if (!user) {
-        console.log("No user found, setting savedDeals to empty array");
         setSavedDeals([]);
         return;
       }
 
       try {
-        console.log("Fetching saved deals from API...");
         const response = await fetch(`/api/users/saved-deals`);
-        console.log("Saved deals response status:", response.status);
 
         if (response.ok) {
           const data = await response.json();
-          console.log("Saved deals API response:", data);
+
           // The API returns full deal objects, so we need to extract the deal IDs
           const dealIds = data.map((deal: any) => deal.id);
-          console.log("Extracted deal IDs:", dealIds);
+
           setSavedDeals(dealIds);
         } else {
-          console.error(
-            "Failed to fetch saved deals, status:",
-            response.status
-          );
           const errorText = await response.text();
-          console.error("Error response:", errorText);
         }
-      } catch (error) {
-        console.error("Error fetching saved deals:", error);
-      }
+      } catch (error) {}
     };
 
     fetchSavedDeals();
@@ -197,7 +175,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           setDeals(dealsData);
         }
       } catch (error) {
-        console.error("Error fetching initial data:", error);
         toast({
           title: "Error",
           description: "Failed to load deals. Please try refreshing the page.",
@@ -215,13 +192,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     async (category?: string, sort?: string): Promise<Deal[]> => {
       setIsLoading(true);
       try {
-        console.log(
-          "DataContext - fetchDeals called with category:",
-          category,
-          "sort:",
-          sort
-        );
-
         const response = await fetch("/api/graphql", {
           method: "POST",
           headers: {
@@ -259,7 +229,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         });
 
         const { data } = await response.json();
-        console.log("DataContext - GraphQL response for deals:", data);
 
         const result = (data?.deals || []).map((deal: any) => ({
           ...deal,
@@ -270,22 +239,24 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             avatar: "",
           },
         }));
-        console.log("DataContext - Processed deals result:", result);
         setDeals(result);
         return result;
       } catch (error) {
-        console.error("Error fetching deals:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load deals. Please try refreshing the page.",
-          variant: "destructive",
-        });
+        // Use toast but don't make it a dependency to prevent infinite loops
+        if (toast) {
+          toast({
+            title: "Error",
+            description:
+              "Failed to load deals. Please try refreshing the page.",
+            variant: "destructive",
+          });
+        }
         return [];
       } finally {
         setIsLoading(false);
       }
     },
-    [toast]
+    [] // Empty dependency array to prevent recreation
   );
 
   const fetchCoupons = useCallback(
@@ -296,15 +267,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     ): Promise<Coupon[]> => {
       setIsLoading(true);
       try {
-        console.log(
-          "DataContext - fetchCoupons called with merchant:",
-          merchant,
-          "category:",
-          category,
-          "sort:",
-          sort
-        );
-
         const response = await fetch("/api/graphql", {
           method: "POST",
           headers: {
@@ -344,7 +306,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         });
 
         const { data } = await response.json();
-        console.log("DataContext - GraphQL response for coupons:", data);
 
         const result = (data?.coupons || []).map((coupon: any) => ({
           ...coupon,
@@ -355,22 +316,23 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             avatar: "",
           },
         }));
-        console.log("DataContext - Processed coupons result:", result);
         return result;
       } catch (error) {
-        console.error("Error fetching coupons:", error);
-        toast({
-          title: "Error",
-          description:
-            "Failed to load coupons. Please try refreshing the page.",
-          variant: "destructive",
-        });
+        // Use toast but don't make it a dependency to prevent infinite loops
+        if (toast) {
+          toast({
+            title: "Error",
+            description:
+              "Failed to load coupons. Please try refreshing the page.",
+            variant: "destructive",
+          });
+        }
         return [];
       } finally {
         setIsLoading(false);
       }
     },
-    [toast]
+    [] // Empty dependency array to prevent recreation
   );
 
   const addDeal = async (
@@ -405,13 +367,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Deal creation failed:", {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData,
-          dealData,
-          currentUser,
-        });
         throw new Error(
           errorData.error ||
             `Failed to create deal: ${response.status} ${response.statusText}`
@@ -422,11 +377,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setDeals((prevDeals) => [newDeal, ...prevDeals]);
       return newDeal;
     } catch (error: any) {
-      console.error("Error creating deal:", {
-        error,
-        dealData,
-        currentUser,
-      });
       throw new Error(error.message || "Failed to create deal");
     }
   };
@@ -437,7 +387,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     parentId?: string,
     isCoupon: boolean = false
   ): Promise<Comment> => {
-    console.log("currentUser in addComment:", currentUser);
     if (!currentUser) throw new Error("You must be logged in to comment");
 
     // Get the current session from Supabase (same approach as voteDeal)
@@ -485,9 +434,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           [contentId]: updatedComments,
         }));
       }
-    } catch (error) {
-      console.error("Error refreshing comments:", error);
-    }
+    } catch (error) {}
 
     // Update comment count on the deal/coupon if it's in our global state
     if (!isCoupon) {
@@ -564,12 +511,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         );
       }
 
-      console.log(
-        "Attempting to vote for deal:",
-        dealId,
-        "Vote Type:",
-        voteType
-      );
       const response = await fetch("/api/votes", {
         method: "POST",
         headers: {
@@ -655,12 +596,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         throw new Error("Missing authentication token");
       }
 
-      console.log(
-        "Attempting to vote for coupon:",
-        couponId,
-        "Vote Type:",
-        voteType
-      );
       const response = await fetch("/api/votes", {
         method: "POST",
         headers: {
@@ -679,7 +614,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       }
 
       const result = await response.json();
-      console.log("Vote result:", result);
     },
     [currentUser]
   );
@@ -693,11 +627,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     ) => {
       // Since we don't have a global coupons state, this function will be used by the coupon page
       // to update its local state. The coupon page will handle the state update itself.
-      console.log("updateCouponVote called:", {
-        couponId,
-        newScore,
-        newUserVote,
-      });
     },
     []
   );
@@ -735,9 +664,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           [dealId]: updatedComments,
         }));
       }
-    } catch (error) {
-      console.error("Error refreshing comments after vote:", error);
-    }
+    } catch (error) {}
   };
 
   const getDeal = useCallback(
@@ -792,7 +719,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           },
         };
       } catch (error) {
-        console.error("Error fetching deal:", error);
         toast({
           title: "Error",
           description: "Failed to load deal. Please try refreshing the page.",
@@ -860,7 +786,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           },
         };
       } catch (error) {
-        console.error("Error fetching coupon:", error);
         toast({
           title: "Error",
           description: "Failed to load coupon. Please try refreshing the page.",
@@ -885,7 +810,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         }
         return [];
       } catch (error) {
-        console.error("Error fetching related deals:", error);
         return [];
       }
     },

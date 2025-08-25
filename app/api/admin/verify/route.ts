@@ -30,7 +30,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ role: dbUser.role })
   } catch (err) {
-    console.error("Error fetching user role:", err)
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }

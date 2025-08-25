@@ -38,7 +38,11 @@ export default function Home() {
       <div className="space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           <div className="lg:col-span-3">
-            <DealsList />
+            <DealsList
+              category={undefined}
+              initialSort="newest"
+              showHeader={true}
+            />
           </div>
 
           <div className="hidden lg:block mt-16">

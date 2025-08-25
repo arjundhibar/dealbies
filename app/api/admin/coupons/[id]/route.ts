@@ -34,7 +34,6 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Error deleting coupon:", error)
     return NextResponse.json({ error: "An error occurred while deleting the coupon" }, { status: 500 })
   }
 }
@@ -67,22 +66,21 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     // Update the coupon
-    const updatedCoupon = await prisma.coupon.update({
-      where: { id: params.id },
-      data: {
-        code: data.code,
-        title: data.title,
-        description: data.description,
-        merchant: data.merchant,
-        logoUrl: data.logoUrl || null,
-        expiresAt: new Date(data.expiresAt),
-        terms: data.terms || null,
-      },
-    })
+    // const updatedCoupon = await prisma.coupon.update({
+    //   where: { id: params.id },
+    //   data: {
+    //     code: data.code,
+    //     title: data.title,
+    //     description: data.description,
+    //     merchant: data.merchant,
+    //     logoUrl: data.logoUrl || null,
+    //     expiresAt: new Date(data.expiresAt),
+    //     terms: data.terms || null,
+    //   },
+    // })
 
-    return NextResponse.json(updatedCoupon)
+    return NextResponse.json("message")
   } catch (error) {
-    console.error("Error updating coupon:", error)
     return NextResponse.json({ error: "An error occurred while updating the coupon" }, { status: 500 })
   }
 }

@@ -86,7 +86,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json(formattedComments)
   } catch (error) {
-    console.error("Error fetching comments:", error)
     return NextResponse.json({ error: "An error occurred while fetching comments" }, { status: 500 })
   }
 }

@@ -3,7 +3,6 @@ import prisma from "@/lib/prisma"
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 
-console.log("Admin deals route loaded")
 
 // ✅ DELETE Deal
 export async function DELETE(request: any, { params }: any) {
@@ -34,7 +33,6 @@ export async function DELETE(request: any, { params }: any) {
 
     return NextResponse.json({ success: true })
   } catch (err) {
-    console.error("DELETE ERROR:", err)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
@@ -81,7 +79,6 @@ export async function PUT(request: { json: () => any }, { params }: any) {
 
     return NextResponse.json(updatedDeal)
   } catch (err) {
-    console.error("PUT ERROR:", err)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

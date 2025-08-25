@@ -78,7 +78,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
       user: undefined,
     })
   } catch (error) {
-    console.error("Error fetching deal:", error)
     return NextResponse.json({ error: "An error occurred while fetching the deal" }, { status: 500 })
   }
 }

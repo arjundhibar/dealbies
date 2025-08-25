@@ -55,7 +55,6 @@
           const {
             data: { subscription },
           } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-            console.log("Auth state changed:", _event, newSession?.user?.email)
             setSession(newSession)
             setUser(newSession?.user ?? null)
   

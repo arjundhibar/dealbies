@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { SlidersHorizontal, Filter, SortAsc } from "lucide-react";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { useState, useEffect, useMemo } from "react";
+import { useData } from "@/lib/data-context";
 
 // Updated valid categories to match your sidebar
 const validCategories = [
@@ -75,7 +76,11 @@ export default function CategoryPage({
 }) {
   const [category, setCategory] = useState<string>("");
   const [formattedCategory, setFormattedCategory] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [deals, setDeals] = useState<any[]>([]);
+  const [coupons, setCoupons] = useState<any[]>([]);
   const { scrollDirection, isScrolled } = useScrollDirection();
+  const { fetchDeals, fetchCoupons } = useData();
 
   // Filter states
   const [sortBy, setSortBy] = useState("newest");
@@ -110,30 +115,60 @@ export default function CategoryPage({
 
   useEffect(() => {
     const loadParams = async () => {
-      const { slug } = await params;
-      const categoryValue = slug;
+      try {
+        const { slug } = await params;
+        const categoryValue = slug;
 
-      console.log("Category page - Slug received:", slug);
-      console.log("Category page - Category value:", categoryValue);
-      console.log("Category page - Valid categories:", validCategories);
+        console.log("Category page - Slug received:", slug);
+        console.log("Category page - Category value:", categoryValue);
+        console.log("Category page - Valid categories:", validCategories);
 
-      if (!validCategories.includes(categoryValue.toLowerCase())) {
-        console.log("Category page - Category not found in valid categories");
+        if (!validCategories.includes(categoryValue.toLowerCase())) {
+          console.log("Category page - Category not found in valid categories");
+          notFound();
+        }
+
+        setCategory(categoryValue);
+        // Use the display name mapping instead of just capitalizing
+        const displayName =
+          categoryDisplayNames[categoryValue] || categoryValue;
+        const databaseCategory =
+          categoryDatabaseNames[categoryValue] || categoryValue;
+        console.log("Category page - Display name:", displayName);
+        console.log("Category page - Database category:", databaseCategory);
+        setFormattedCategory(displayName);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error loading category params:", error);
         notFound();
       }
-
-      setCategory(categoryValue);
-      // Use the display name mapping instead of just capitalizing
-      const displayName = categoryDisplayNames[categoryValue] || categoryValue;
-      const databaseCategory =
-        categoryDatabaseNames[categoryValue] || categoryValue;
-      console.log("Category page - Display name:", displayName);
-      console.log("Category page - Database category:", databaseCategory);
-      setFormattedCategory(displayName);
     };
 
     loadParams();
   }, [params]);
+
+  // Load deals and coupons when category changes
+  useEffect(() => {
+    if (category && sortBy) {
+      const loadData = async () => {
+        try {
+          const [dealsData, couponsData] = await Promise.all([
+            fetchDeals(categoryDatabaseNames[category] || category, sortBy),
+            fetchCoupons(
+              undefined,
+              categoryDatabaseNames[category] || category,
+              sortBy
+            ),
+          ]);
+          setDeals(dealsData);
+          setCoupons(couponsData);
+        } catch (error) {
+          console.error("Error loading category data:", error);
+        }
+      };
+      loadData();
+    }
+  }, [category, sortBy, fetchDeals, fetchCoupons]);
 
   // Reset all filters
   const resetFilters = () => {
@@ -146,8 +181,12 @@ export default function CategoryPage({
     setMaxTemp(9999);
   };
 
-  if (!category) {
-    return null; // Loading state
+  if (isLoading || !category) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
 
   return (
@@ -463,6 +502,7 @@ export default function CategoryPage({
             <DealsList
               category={categoryDatabaseNames[category] || category}
               showHeader={false}
+              initialData={{ deals, coupons }}
               filters={memoizedFilters}
               onFiltersReset={resetFilters}
             />

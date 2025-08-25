@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
@@ -8,7 +8,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     const dealId = params.id
 
     // Get user from session
-    const supabase = createServerComponentClient({ cookies })
+    const cookieStore = cookies()
+    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
     const {
       data: { session },
     } = await supabase.auth.getSession()

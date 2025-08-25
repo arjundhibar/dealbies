@@ -8,10 +8,8 @@ import { getImageIdFromUrl } from "@/lib/getImageIdFromUrl";
 async function isPrismaInitialized() {
   try {
     await prisma.$connect()
-    console.log("Prisma is connected")
     return true
   } catch (err) {
-    console.error("❌ Prisma failed to connect:", err)
     return false
   }
 }
@@ -27,7 +25,6 @@ function extractMerchant(url: string): string {
 
 export async function POST(request: Request) {
   try {
-    console.log("▶️ Start /api/deals handler")
     if (!(await isPrismaInitialized())) {
       return NextResponse.json({ error: 'Database connection not available.' }, { status: 503 })
     }
@@ -57,7 +54,6 @@ export async function POST(request: Request) {
 
     // extract merchant from dealUrl
     const merchant = extractMerchant(dealUrl)
-    console.log("📦 Payload received:", body)
 
     if (!title || !description || !category || !dealUrl || !price || !imageUrls || imageUrls.length === 0) {
       return NextResponse.json({ error: 'Missing required fields', title, description, category, dealUrl, price, imageUrls }, { status: 400 })
@@ -117,7 +113,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, dealId: deal.id }, { status: 201 })
   } catch (err) {
-    console.error("🔥 Deal POST Error:", err)
     return NextResponse.json({ error: 'Unexpected server error' }, { status: 500 })
   }
 }
