@@ -84,6 +84,7 @@ export function Navbar() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
   const [view, setView] = useState<"main" | "categories">("main");
   const isSubmissionPage = pathname.startsWith("/submission/");
   const isCategoryPage = pathname.startsWith("/category/");
@@ -279,38 +280,32 @@ export function Navbar() {
         </Button>
 
         {user ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="flex flex-col items-center justify-center gap-1 h-auto py-2 rounded-none flex-1"
-              >
-                <User className="h-5 w-5" />
-                <span className="text-xs">Account</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/profile">
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/my-deals">My Deals</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/saved">Saved Deals</Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => signOut()}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Log Out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant="ghost"
+            className="flex flex-col items-center justify-center gap-1 h-auto py-2 rounded-none flex-1"
+            onClick={() => setIsProfileSheetOpen(true)}
+          >
+            <Avatar className="h-5 w-5">
+              <AvatarImage
+                src={userProfile?.avatarUrl || user.user_metadata?.avatar || ""}
+                alt={
+                  userProfile?.username ||
+                  user.user_metadata?.username ||
+                  user.email
+                }
+              />
+              <AvatarFallback className="text-xs">
+                {(
+                  userProfile?.username ||
+                  user.user_metadata?.username ||
+                  user.email?.split("@")[0]
+                )
+                  ?.charAt(0)
+                  .toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-xs">Profile</span>
+          </Button>
         ) : (
           <AuthButton />
         )}
@@ -926,6 +921,147 @@ export function Navbar() {
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
+
+      {/* Mobile Profile Sheet */}
+      {isMobile && user && isProfileSheetOpen && (
+        <div className="fixed inset-0 z-40">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/20 dark:bg-black/40"
+            onClick={() => setIsProfileSheetOpen(false)}
+          />
+
+          {/* Profile Content */}
+          <div className="absolute top-14 bottom-14 left-0 right-0 bg-background shadow-2xl">
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4">
+                <h3 className="text-lg font-semibold">Profile</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsProfileSheetOpen(false)}
+                  className="p-2"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Profile Options */}
+              <div className="flex-1 overflow-y-auto p-4">
+                {[
+                  {
+                    icon: <Trophy className="h-5 w-5 text-black" />,
+                    name: "Points Club",
+                    href: `/${
+                      userProfile?.username ||
+                      user.user_metadata?.username ||
+                      user.email?.split("@")[0]
+                    }/points-and-rewards`,
+                  },
+                  {
+                    icon: <Bookmark className="h-5 w-5" />,
+                    name: "Favourites",
+                    href: `/${
+                      userProfile?.username ||
+                      user.user_metadata?.username ||
+                      user.email?.split("@")[0]
+                    }/saved-deals`,
+                  },
+                  {
+                    icon: <Activity className="h-5 w-5" />,
+                    name: "Activity",
+                    href: `/${
+                      userProfile?.username ||
+                      user.user_metadata?.username ||
+                      user.email?.split("@")[0]
+                    }/activity`,
+                  },
+                  {
+                    icon: <Tag className="h-5 w-5" />,
+                    name: "My Offers",
+                    href: `/${
+                      userProfile?.username ||
+                      user.user_metadata?.username ||
+                      user.email?.split("@")[0]
+                    }/offers`,
+                  },
+                  {
+                    icon: <Megaphone className="h-5 w-5" />,
+                    name: "Posted referral codes",
+                    href: `/${
+                      userProfile?.username ||
+                      user.user_metadata?.username ||
+                      user.email?.split("@")[0]
+                    }/referral-codes`,
+                  },
+                  {
+                    icon: <MessageSquare className="h-5 w-5" />,
+                    name: "My discussions",
+                    href: `/${
+                      userProfile?.username ||
+                      user.user_metadata?.username ||
+                      user.email?.split("@")[0]
+                    }/discussions`,
+                  },
+                  {
+                    icon: <Star className="h-5 w-5" />,
+                    name: "Badges",
+                    href: `/${
+                      userProfile?.username ||
+                      user.user_metadata?.username ||
+                      user.email?.split("@")[0]
+                    }/badges`,
+                  },
+                  {
+                    icon: <ChartNoAxesColumn className="h-5 w-5" />,
+                    name: "Statistics",
+                    href: `/${
+                      userProfile?.username ||
+                      user.user_metadata?.username ||
+                      user.email?.split("@")[0]
+                    }/stats`,
+                  },
+                  {
+                    icon: <Settings className="h-5 w-5" />,
+                    name: "Institutions",
+                    href: `/${
+                      userProfile?.username ||
+                      user.user_metadata?.username ||
+                      user.email?.split("@")[0]
+                    }/settings`,
+                  },
+                ].map((item, index) => (
+                  <Link
+                    key={index}
+                    href={item.href}
+                    className="flex items-center gap-3 p-4 border-b last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    onClick={() => setIsProfileSheetOpen(false)}
+                  >
+                    {item.icon}
+                    <span className="text-black dark:text-white text-sm font-medium">
+                      {item.name}
+                    </span>
+                  </Link>
+                ))}
+
+                {/* Log Out Button */}
+                <Button
+                  variant="ghost"
+                  className="text-black p-4 dark:text-white text-sm font-medium gap-3"
+                  onClick={() => {
+                    signOut();
+                    setIsProfileSheetOpen(false);
+                  }}
+                >
+                  <LogOut className="h-5 w-5" />
+                  Log Out
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Post Deal Form */}
       {isMobile && user && (
