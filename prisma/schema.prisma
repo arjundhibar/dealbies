@@ -21,6 +21,7 @@ model User {
   coupons    Coupon[]
   deals      Deal[]
   savedDeals SavedDeal[]
+  discussions Discussion[]
   votes      Vote[]
 
   @@map("users")
@@ -106,39 +107,43 @@ model CouponImage {
 }
 
 model Comment {
-  id        String    @id @default(uuid())
-  content   String
-  userId    String    @map("user_id")
-  dealId    String?   @map("deal_id")
-  couponId  String?   @map("coupon_id")
-  parentId  String?   @map("parent_id")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @default(now()) @map("updated_at")
-  coupon    Coupon?   @relation(fields: [couponId], references: [id], onDelete: Cascade)
-  deal      Deal?     @relation(fields: [dealId], references: [id], onDelete: Cascade)
-  parent    Comment?  @relation("CommentToComment", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   Comment[] @relation("CommentToComment")
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  votes     Vote[]
+  id           String    @id @default(uuid())
+  content      String
+  userId       String    @map("user_id")
+  dealId       String?   @map("deal_id")
+  couponId     String?   @map("coupon_id")
+  discussionId String?   @map("discussion_id")
+  parentId     String?   @map("parent_id")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @default(now()) @map("updated_at")
+  coupon       Coupon?   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  deal         Deal?     @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  discussion   Discussion? @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  parent       Comment?  @relation("CommentToComment", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      Comment[] @relation("CommentToComment")
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  votes        Vote[]
 
   @@map("comments")
 }
 
 model Vote {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  dealId    String?  @map("deal_id")
-  couponId  String?  @map("coupon_id")
-  commentId String?  @map("comment_id")
-  voteType  String   @map("vote_type")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @map("updated_at")
-  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  coupon    Coupon?  @relation(fields: [couponId], references: [id], onDelete: Cascade)
-  deal      Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  dealId       String?  @map("deal_id")
+  couponId     String?  @map("coupon_id")
+  commentId    String?  @map("comment_id")
+  discussionId String?  @map("discussion_id")
+  voteType     String   @map("vote_type")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @map("updated_at")
+  comment      Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  coupon       Coupon?  @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  deal         Deal?    @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  discussion   Discussion? @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, dealId, couponId, commentId])
+  @@unique([userId, dealId, couponId, commentId, discussionId])
   @@map("votes")
 }
 
@@ -152,6 +157,23 @@ model SavedDeal {
 
   @@unique([userId, dealId])
   @@map("saved_deals")
+}
+
+model Discussion {
+  id                String   @id @default(uuid())
+  title             String
+  slug              String   @unique
+  description       String
+  category          String
+  dealCategory      String?  @map("deal_category") // Optional deal category
+  userId            String   @map("user_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @map("updated_at")
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments          Comment[]
+  votes             Vote[]
+
+  @@map("discussions")
 }
 
 enum Role {

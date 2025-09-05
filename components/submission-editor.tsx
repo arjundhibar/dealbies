@@ -36,6 +36,7 @@ interface SubmissionEditorProps {
   focused?: boolean;
   onFocusChange?: (focused: boolean) => void;
   error?: boolean;
+  disableFocusExpand?: boolean;
 }
 
 export function SubmissionEditor({
@@ -47,6 +48,7 @@ export function SubmissionEditor({
   focused = false,
   onFocusChange,
   error = false,
+  disableFocusExpand = false,
 }: SubmissionEditorProps) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showLinkInput, setShowLinkInput] = useState(false);
@@ -78,12 +80,11 @@ export function SubmissionEditor({
       attributes: {
         class: cn(
           "w-full bg-white dark:bg-[#1d1f20] border text-black focus:outline-none dark:text-white rounded-lg p-4 pb-16 resize-none text-base leading-6 transition-all duration-300 ease-in-out flex-shrink-0 list-disc list-inside placeholder:text-gray-400",
-          `min-h-[${minHeight}]`,
-          focused ? "min-h-[510px]" : `min-h-[${minHeight}]`,
           error
             ? "border-red-500 focus:border-red-500"
             : "border-[rgba(3,12,25,0.23)] dark:border-[hsla(0,0%,100%,0.35)]"
         ),
+        style: `min-height: ${minHeight};`,
       },
       handleDOMEvents: {
         focus: () => {

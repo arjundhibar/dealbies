@@ -7,13 +7,14 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import type { Deal, Comment, User, Coupon } from "./types";
+import type { Deal, Comment, User, Coupon, Discussion } from "./types";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { getSupabase } from "@/lib/supabase";
 
 interface DataContextType {
   deals: Deal[];
+  discussions: Discussion[];
   comments: Record<string, Comment[]>;
   savedDeals: string[];
   currentUser: User | null;
@@ -51,6 +52,7 @@ interface DataContextType {
   ) => Promise<void>;
   getDeal: (id: string) => Promise<Deal | undefined>;
   getCoupon: (id: string) => Promise<Coupon | undefined>;
+  getDiscussion: (id: string) => Promise<Discussion | undefined>;
   getRelatedDeals: (dealId: string, limit?: number) => Promise<Deal[]>;
   saveDeal: (dealId: string) => Promise<void>;
   unsaveDeal: (dealId: string) => Promise<void>;
@@ -61,6 +63,11 @@ interface DataContextType {
     category?: string,
     sort?: string
   ) => Promise<Coupon[]>;
+  fetchDiscussions: (
+    category?: string,
+    dealCategory?: string,
+    sort?: string
+  ) => Promise<Discussion[]>;
   isLoading: boolean;
 }
 
@@ -70,6 +77,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   // Initialize with empty arrays instead of mock data
   const [deals, setDeals] = useState<Deal[]>([]);
+  const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [savedDeals, setSavedDeals] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -324,6 +332,73 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             title: "Error",
             description:
               "Failed to load coupons. Please try refreshing the page.",
+            variant: "destructive",
+          });
+        }
+        return [];
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [] // Empty dependency array to prevent recreation
+  );
+
+  const fetchDiscussions = useCallback(
+    async (
+      category?: string,
+      dealCategory?: string,
+      sort?: string
+    ): Promise<Discussion[]> => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/graphql", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: `
+            query GetDiscussions($category: String, $dealCategory: String, $sort: String) {
+              discussions(category: $category, dealCategory: $dealCategory, sort: $sort) {
+                id
+                title
+                description
+                category
+                dealCategory
+                createdAt
+                score
+                commentCount
+                postedBy {
+                  id
+                  username
+                }
+                userVote
+              }
+            } 
+          `,
+            variables: { category, dealCategory, sort },
+          }),
+        });
+
+        const { data } = await response.json();
+
+        const result = (data?.discussions || []).map((discussion: any) => ({
+          ...discussion,
+          postedBy: {
+            id: discussion.postedBy.id,
+            name: discussion.postedBy.username,
+            avatar: "",
+          },
+        }));
+        setDiscussions(result);
+        return result;
+      } catch (error) {
+        // Use toast but don't make it a dependency to prevent infinite loops
+        if (toast) {
+          toast({
+            title: "Error",
+            description:
+              "Failed to load discussions. Please try refreshing the page.",
             variant: "destructive",
           });
         }
@@ -799,6 +874,64 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     [toast]
   );
 
+  const getDiscussion = useCallback(
+    async (id: string): Promise<Discussion | undefined> => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/graphql", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: `
+            query GetDiscussion($id: ID!) {
+              discussion(id: $id) {
+                id
+                title
+                description
+                category
+                dealCategory
+                createdAt
+                score
+                commentCount
+                postedBy {
+                  id
+                  username
+                }
+                userVote
+              }
+            }
+          `,
+            variables: { id },
+          }),
+        });
+        const { data } = await response.json();
+        const discussion = data?.discussion;
+        if (!discussion) return undefined;
+        return {
+          ...discussion,
+          postedBy: {
+            id: discussion.postedBy.id,
+            name: discussion.postedBy.username,
+            avatar: "",
+          },
+        };
+      } catch (error) {
+        toast({
+          title: "Error",
+          description:
+            "Failed to load discussion. Please try refreshing the page.",
+          variant: "destructive",
+        });
+        return undefined;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [toast]
+  );
+
   const getRelatedDeals = useCallback(
     async (dealId: string, limit = 3): Promise<Deal[]> => {
       try {
@@ -920,6 +1053,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       value={React.useMemo(
         () => ({
           deals,
+          discussions,
           comments,
           savedDeals,
           currentUser,
@@ -930,21 +1064,26 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           addComment,
           voteDeal,
           voteCoupon,
+
           updateDealVote,
           updateCouponVote,
+
           voteComment,
           getDeal,
           getCoupon,
+          getDiscussion,
           getRelatedDeals,
           saveDeal,
           unsaveDeal,
           isSaved,
           fetchDeals,
           fetchCoupons,
+          fetchDiscussions,
           isLoading,
         }),
         [
           deals,
+          discussions,
           comments,
           savedDeals,
           currentUser,
@@ -954,17 +1093,21 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           addComment,
           voteDeal,
           voteCoupon,
+
           updateDealVote,
           updateCouponVote,
+
           voteComment,
           getDeal,
           getCoupon,
+          getDiscussion,
           getRelatedDeals,
           saveDeal,
           unsaveDeal,
           isSaved,
           fetchDeals,
           fetchCoupons,
+          fetchDiscussions,
           isLoading,
         ]
       )}

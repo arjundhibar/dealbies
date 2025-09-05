@@ -72,3 +72,20 @@ export interface Coupon {
   userVote?: "up" | "down"
   imageUrls?: { url: string }[];
 }
+
+export interface Discussion {
+  id: string
+  title: string
+  description: string
+  category: string
+  dealCategory?: string
+  createdAt: string
+  score: number
+  commentCount: number
+  postedBy: {
+    id: string
+    name: string
+    avatar?: string
+  }
+  userVote?: "up" | "down"
+}

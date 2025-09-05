@@ -71,10 +71,12 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppSidebar } from "@/components/app-sidebar";
+import { useAdmin } from "@/hooks/use-admin";
 
 export function Navbar() {
   const { user, signOut } = useAuth();
   const { setCurrentSort, fetchDeals } = useData();
+  const { isAdmin } = useAdmin();
   const [searchQuery, setSearchQuery] = useState("");
   const [isPostDealOpen, setIsPostDealOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -600,6 +602,18 @@ export function Navbar() {
                               }/settings`,
                               showLine: false,
                             },
+                            ...(isAdmin
+                              ? [
+                                  {
+                                    icon: (
+                                      <Settings className="h-5 w-5 text-orange-600" />
+                                    ),
+                                    name: "Admin Dashboard",
+                                    href: "/admin",
+                                    showLine: true,
+                                  },
+                                ]
+                              : []),
 
                             {
                               icon: <LogOut className="h-5 w-5" />,
@@ -1031,6 +1045,17 @@ export function Navbar() {
                       user.email?.split("@")[0]
                     }/settings`,
                   },
+                  ...(isAdmin
+                    ? [
+                        {
+                          icon: (
+                            <Settings className="h-5 w-5 text-orange-600" />
+                          ),
+                          name: "Admin Dashboard",
+                          href: "/admin",
+                        },
+                      ]
+                    : []),
                 ].map((item, index) => (
                   <Link
                     key={index}

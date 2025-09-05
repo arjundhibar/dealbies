@@ -76,182 +76,66 @@ export default function PointsAndRewardsPage() {
         registeredAt={new Date(userProfile.createdAt)}
       />
 
-      <div className="w-[1000px] mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white dark:bg-[#1d1f20] border-gray-200 dark:border-gray-800">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                <Trophy className="h-4 w-4 text-yellow-500" />
-                Total Points
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                1,250
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                +150 this month
-              </p>
-            </CardContent>
-          </Card>
+      <div className="w-[1000px] bg-white mt-2 rounded-xl mx-auto px-4 py-8">
+        <div className="space-y-2">
+          {/* Club Points Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-black">Club</h2>
+              <p className="text-3xl font-bold text-black">0 points</p>
+            </div>
+          </div>
 
-          <Card className="bg-white dark:bg-[#1d1f20] border-gray-200 dark:border-gray-800">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                <Gift className="h-4 w-4 text-purple-500" />
-                Rewards Earned
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                8
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                3 available
-              </p>
-            </CardContent>
-          </Card>
+          {/* Unlock Message */}
+          <div className="">
+            <p className="text-[rgba(4,8,13,0.59)] font-medium">
+              10 points to unlock silver rewards!
+            </p>
+          </div>
 
-          <Card className="bg-white dark:bg-[#1d1f20] border-gray-200 dark:border-gray-800">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                <Star className="h-4 w-4 text-blue-500" />
-                Current Level
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                Gold
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Next: Platinum
-              </p>
-            </CardContent>
-          </Card>
+          {/* Milestone Progress Bar */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between text-sm text-gray-600">
+              <span>Silver 10 points</span>
+              <span>Gold 30 points</span>
+              <span>Platinum 3000 pts</span>
+            </div>
 
-          <Card className="bg-white dark:bg-[#1d1f20] border-gray-200 dark:border-gray-800">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-green-500" />
-                Monthly Rank
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                #42
+            <div className="relative">
+              {/* Progress Bar Background */}
+              <div className="w-full h-3 bg-gray-200 rounded-full">
+                {/* Progress Fill - Orange color based on current points */}
+                <div
+                  className="h-3 bg-orange-500 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.min((0 / 3000) * 100, 100)}%` }}
+                ></div>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Top 10%
-              </p>
-            </CardContent>
-          </Card>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card className="bg-white dark:bg-[#1d1f20] border-gray-200 dark:border-gray-800">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      Deal posted
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      +50 points
-                    </p>
-                  </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    2h ago
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      Comment added
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      +10 points
-                    </p>
-                  </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    1d ago
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      Daily login
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      +5 points
-                    </p>
-                  </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    2d ago
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              {/* Milestone Dots */}
+              <div className="absolute top-0 left-0 w-full h-3 flex justify-between items-center">
+                {/* Silver milestone (10 points) */}
+                <div
+                  className={`w-4 h-4 rounded-full border-2 border-white shadow-sm ${
+                    0 >= 10 ? "bg-orange-500" : "bg-gray-300"
+                  }`}
+                ></div>
 
-          <Card className="bg-white dark:bg-[#1d1f20] border-gray-200 dark:border-gray-800">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white">
-                Available Rewards
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      Free Shipping
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Valid for 30 days
-                    </p>
-                  </div>
-                  <button className="px-3 py-1 bg-dealhunter-red text-white text-xs rounded-full hover:bg-red-700 transition-colors">
-                    Claim
-                  </button>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      20% Off Coupon
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Valid for 7 days
-                    </p>
-                  </div>
-                  <button className="px-3 py-1 bg-dealhunter-red text-white text-xs rounded-full hover:bg-red-700 transition-colors">
-                    Claim
-                  </button>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      Premium Badge
-                    </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Valid for 90 days
-                    </p>
-                  </div>
-                  <button className="px-3 py-1 bg-dealhunter-red text-white text-xs rounded-full hover:bg-red-700 transition-colors">
-                    Claim
-                  </button>
-                </div>
+                {/* Gold milestone (30 points) */}
+                <div
+                  className={`w-4 h-4 rounded-full border-2 border-white shadow-sm ${
+                    0 >= 30 ? "bg-orange-500" : "bg-gray-300"
+                  }`}
+                ></div>
+
+                {/* Platinum milestone (3000 points) */}
+                <div
+                  className={`w-4 h-4 rounded-full border-2 border-white shadow-sm ${
+                    0 >= 3000 ? "bg-orange-500" : "bg-gray-300"
+                  }`}
+                ></div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

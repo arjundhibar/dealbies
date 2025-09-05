@@ -50,10 +50,25 @@ export const typeDefs = gql`
     userVote: String
   }
 
+  type Discussion {
+    id: String!
+    title: String!
+    description: String!
+    category: String!
+    dealCategory: String
+    createdAt: String!
+    score: Int!
+    commentCount: Int!
+    postedBy: User!
+    userVote: String
+  }
+
   type Query {
     deals(category: String, sort: String): [Deal!]!
     deal(id: ID!): Deal
     coupons(merchant: String, category: String, sort: String): [Coupon!]!
     coupon(id: ID!): Coupon
+    discussions(category: String, dealCategory: String, sort: String): [Discussion!]!
+    discussion(id: ID!): Discussion
   }
 `
