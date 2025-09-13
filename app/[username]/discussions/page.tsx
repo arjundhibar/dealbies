@@ -20,6 +20,13 @@ interface Discussion {
   createdAt: string;
   upvotes: number;
   comments: number;
+  category?: string;
+  dealCategory?: string;
+  postedBy?: {
+    id: string;
+    username: string;
+    avatarUrl?: string;
+  };
 }
 
 export default function DiscussionsPage() {
@@ -28,11 +35,14 @@ export default function DiscussionsPage() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [discussionsLoading, setDiscussionsLoading] = useState(false);
+
+  console.log("DiscussionsPage rendered for username:", username);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await fetch(`/api/users/profile?username=${username}`);
+        const response = await fetch(`/api/users/${username}/profile`);
         if (response.ok) {
           const data = await response.json();
           setUserProfile(data);
@@ -53,40 +63,38 @@ export default function DiscussionsPage() {
     const fetchDiscussions = async () => {
       if (!userProfile) return;
 
+      setDiscussionsLoading(true);
       try {
-        // Mock data for now - replace with actual API call
-        const mockDiscussions: Discussion[] = [
-          {
-            id: "1",
-            title: "Best deals on electronics this week?",
-            content:
-              "Looking for recommendations on the best electronics deals. Anyone found anything good?",
-            createdAt: new Date(
-              Date.now() - 2 * 24 * 60 * 60 * 1000
-            ).toISOString(),
-            upvotes: 12,
-            comments: 8,
-          },
-          {
-            id: "2",
-            title: "Black Friday predictions for 2024",
-            content:
-              "What do you think we'll see this year? Any specific categories to watch?",
-            createdAt: new Date(
-              Date.now() - 5 * 24 * 60 * 60 * 1000
-            ).toISOString(),
-            upvotes: 25,
-            comments: 15,
-          },
-        ];
-        setDiscussions(mockDiscussions);
+        console.log("Fetching discussions for username:", username);
+        const apiUrl = `/api/users/${username}/discussions`;
+        console.log("API URL:", apiUrl);
+        const response = await fetch(apiUrl);
+        console.log("Response status:", response.status);
+        console.log("Response URL:", response.url);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Discussions data received:", data);
+          setDiscussions(data);
+        } else {
+          const errorText = await response.text();
+          console.error(
+            "Failed to fetch discussions:",
+            response.statusText,
+            errorText
+          );
+          setDiscussions([]);
+        }
       } catch (error) {
         console.error("Error fetching discussions:", error);
+        setDiscussions([]);
+      } finally {
+        setDiscussionsLoading(false);
       }
     };
 
     fetchDiscussions();
-  }, [userProfile]);
+  }, [userProfile, username]);
 
   if (loading) {
     return (
@@ -136,7 +144,28 @@ export default function DiscussionsPage() {
           </span>
         </div>
 
-        {discussions.length === 0 ? (
+        {discussionsLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <Card
+                key={i}
+                className="bg-white dark:bg-[#1d1f20] border-gray-200 dark:border-gray-800"
+              >
+                <CardContent className="p-6">
+                  <div className="animate-pulse">
+                    <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-3"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3 mb-4"></div>
+                    <div className="flex justify-between">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : discussions.length === 0 ? (
           <Card className="bg-white dark:bg-[#1d1f20] border-gray-200 dark:border-gray-800">
             <CardContent className="p-12 text-center">
               <MessageSquare className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />

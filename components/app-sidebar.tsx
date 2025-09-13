@@ -40,7 +40,7 @@ import { useTheme } from "next-themes";
 
 interface AppSidebarProps {
   onClose?: () => void;
-  initialView?: "main" | "categories";
+  initialView?: "main" | "categories" | "brands";
   onLoginClick?: () => void;
 }
 
@@ -53,7 +53,9 @@ export function AppSidebar({
   const { theme, setTheme } = useTheme();
   const { user } = useAuth();
   const { isAdmin } = useAdmin();
-  const [view, setView] = useState<"main" | "categories">(initialView);
+  const [view, setView] = useState<"main" | "categories" | "brands">(
+    initialView
+  );
 
   const categories = [
     { name: "Electronics", icon: Smartphone, href: "/category/electronics" },
@@ -83,6 +85,32 @@ export function AppSidebar({
       href: "/category/services-and-contracts",
     },
     { name: "To Travel", icon: Plane, href: "/category/to-travel" },
+  ];
+
+  const brands = [
+    { name: "Myntra", domain: "myntra.com", href: "/coupons/myntra" },
+    { name: "Amazon", domain: "amazon.in", href: "/coupons/amazon" },
+    { name: "Flipkart", domain: "flipkart.com", href: "/coupons/flipkart" },
+    { name: "Nykaa", domain: "nykaa.com", href: "/coupons/nykaa" },
+    { name: "Zomato", domain: "zomato.com", href: "/coupons/zomato" },
+    { name: "Swiggy", domain: "swiggy.com", href: "/coupons/swiggy" },
+    { name: "Uber", domain: "uber.com", href: "/coupons/uber" },
+    { name: "Ola", domain: "olacabs.com", href: "/coupons/ola" },
+    {
+      name: "BookMyShow",
+      domain: "bookmyshow.com",
+      href: "/coupons/bookmyshow",
+    },
+    {
+      name: "MakeMyTrip",
+      domain: "makemytrip.com",
+      href: "/coupons/makemytrip",
+    },
+    { name: "Paytm", domain: "paytm.com", href: "/coupons/paytm" },
+    { name: "PhonePe", domain: "phonepe.com", href: "/coupons/phonepe" },
+    { name: "Google Pay", domain: "gpay.com", href: "/coupons/googlepay" },
+    { name: "Netflix", domain: "netflix.com", href: "/coupons/netflix" },
+    { name: "Spotify", domain: "spotify.com", href: "/coupons/spotify" },
   ];
 
   if (view === "categories") {
@@ -132,6 +160,72 @@ export function AppSidebar({
                 <div className="flex items-center">
                   <category.icon className="h-6 w-6 mr-3 text-gray-500" />
                   <span>{category.name}</span>
+                </div>
+                <ChevronRight className="h-6 w-6 text-muted-foreground" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === "brands") {
+    return (
+      <div className="flex flex-col h-full bg-background text-foreground">
+        <div className="px-6 py-4 flex items-center justify-between border-b">
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold">Discount Codes</h2>
+            <Link
+              href="/coupons"
+              className="text-orange-500 text-lg"
+              onClick={onClose}
+            >
+              View All
+            </Link>
+          </div>
+          <SheetClose asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full"
+              onClick={onClose}
+            >
+              <X className="h-6 w-6" />
+              <span className="sr-only">Close</span>
+            </Button>
+          </SheetClose>
+        </div>
+
+        <div className="flex flex-col flex-1 overflow-auto p-6 space-y-6">
+          <button
+            className="flex items-center text-lg font-medium"
+            onClick={() => setView("main")}
+          >
+            <ArrowLeft className="h-6 w-6 mr-3" />
+            Back
+          </button>
+
+          <div className="space-y-4">
+            {brands.map((brand) => (
+              <Link
+                key={brand.name}
+                href={brand.href}
+                className="flex items-center justify-between py-3 text-base"
+                onClick={onClose}
+              >
+                <div className="flex items-center">
+                  <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mr-3">
+                    <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                      {brand.name.charAt(0)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium">{brand.name}</span>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                      {brand.domain}
+                    </div>
+                  </div>
                 </div>
                 <ChevronRight className="h-6 w-6 text-muted-foreground" />
               </Link>

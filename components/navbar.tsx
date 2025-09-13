@@ -87,7 +87,7 @@ export function Navbar() {
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
-  const [view, setView] = useState<"main" | "categories">("main");
+  const [view, setView] = useState<"main" | "categories" | "brands">("main");
   const isSubmissionPage = pathname.startsWith("/submission/");
   const isCategoryPage = pathname.startsWith("/category/");
   const isProfilePage =
@@ -729,6 +729,10 @@ export function Navbar() {
                       variant="ghost"
                       size="sm"
                       className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                      onClick={() => {
+                        setIsSidebarOpen(true);
+                        setView("brands");
+                      }}
                     >
                       <Tag className="h-4 w-4 mr-1" />
                       Discount codes
@@ -788,30 +792,19 @@ export function Navbar() {
                       <ChevronDown className="h-3 w-3 ml-1" />
                     </Button>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="navbar"
-                          size="sm"
-                          className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
-                        >
-                          <Tag className="h-4 w-4 mr-1" />
-                          Discount codes
-                          <ChevronDown className="h-3 w-3 ml-1" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        <DropdownMenuItem asChild>
-                          <Link href="/coupons/popular">Popular</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/coupons/new">New</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/coupons/expiring">Expiring Soon</Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button
+                      variant="navbar"
+                      size="sm"
+                      className="flex items-center gap-1 font-normal text-base p-0 font-['Averta_CY','Helvetica_Neue',Helvetica]"
+                      onClick={() => {
+                        setIsSidebarOpen(true);
+                        setView("brands");
+                      }}
+                    >
+                      <Tag className="h-4 w-4 mr-1" />
+                      Discount codes
+                      <ChevronDown className="h-3 w-3 ml-1" />
+                    </Button>
 
                     <Button
                       variant="navbar"

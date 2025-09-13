@@ -203,15 +203,18 @@ export function CouponCard({ coupon }: CouponCardProps) {
                 className="absolute bottom-1 text-gray-500 left-[40%] -translate-x-1/2 z-10 flex rounded-full"
                 onClick={(e) => e.stopPropagation()}
               >
-                <Link href={`/coupon/${id}#comments`}>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="p-0 font-semibold"
-                  >
-                    <MessagesSquare className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)] dark:hover:text-dealhunter-red" />
-                  </Button>
-                </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="p-0 font-semibold"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    router.push(`/coupon/${id}#comments`);
+                  }}
+                >
+                  <MessagesSquare className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)] dark:hover:text-dealhunter-red" />
+                </Button>
                 <Button variant="ghost" size="icon" className="p-0">
                   <Share2 className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)] dark:hover:text-dealhunter-red" />
                 </Button>
@@ -463,12 +466,14 @@ export function CouponCard({ coupon }: CouponCardProps) {
                   variant="ghost"
                   size="sm"
                   className="gap-1 p-0 hover:text-dealhunter-red shadow-none focus:outline-none focus:ring-0"
-                  asChild
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    router.push(`/coupon/${id}#comments`);
+                  }}
                 >
-                  <Link href={`/coupon/${id}#comments`}>
-                    <MessagesSquare className="h-4 w-4" />
-                    <span className="ml-1">{commentCount}</span>
-                  </Link>
+                  <MessagesSquare className="h-4 w-4" />
+                  <span className="ml-1">{commentCount}</span>
                 </Button>
 
                 {/* Share */}

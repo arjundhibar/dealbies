@@ -43,7 +43,7 @@ export default function SavedDealsPage() {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await fetch(`/api/users/profile?username=${username}`);
+        const response = await fetch(`/api/users/${username}/profile`);
         if (response.ok) {
           const data = await response.json();
           setUserProfile(data);
@@ -113,7 +113,6 @@ export default function SavedDealsPage() {
         username={userProfile.username}
         avatarUrl={userProfile.avatarUrl}
         registeredAt={new Date(userProfile.createdAt)}
-       
       />
 
       <div className="max-w-[82.5rem] mx-auto px-4 py-8">

@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface ProfileHeaderProps {
   username: string;
@@ -22,8 +22,11 @@ export function ProfileHeader({
 }: ProfileHeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const isMobile = useIsMobile();
+  const isMobile = useMediaQuery("(max-width: 767px)");
   const [activeTab, setActiveTab] = useState("points-club");
+
+  // Debug logging
+  console.log("ProfileHeader - isMobile:", isMobile);
   const [offersCount, setOffersCount] = useState(0);
   const [commentsCount, setCommentsCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -202,16 +205,16 @@ export function ProfileHeader({
 
         {/* Mobile Layout - Separate design for mobile */}
         {isMobile && (
-          <Card className="border-0 rounded-2xl shadow-none bg-[rgba(15,55,95,0.05)] dark:bg-[hsla(0,0%,100%,0.11)] mx-4">
+          <Card className="border-0 rounded-2xl shadow-none bg-[rgba(15,55,95,0.05)] dark:bg-[hsla(0,0%,100%,0.11)] mt-6">
             <CardContent className="p-0">
               <div className="flex flex-col justify-center items-center gap-4 pt-6">
                 {/* Avatar - Smaller for mobile */}
                 <div className="relative -mt-12 z-10">
-                  <Avatar className="h-16 w-16 shadow-lg">
+                  <Avatar className="h-20 w-20 shadow-lg">
                     <AvatarImage
                       src={avatarUrl || ""}
                       alt={username}
-                      className="h-16 w-16 object-cover"
+                      className="h-20 w-20 object-cover"
                     />
                     <AvatarFallback className="h-16 w-16 text-lg font-poppins bg-gray-200 dark:bg-gray-700">
                       {username.charAt(0).toUpperCase()}
@@ -251,6 +254,7 @@ export function ProfileHeader({
         {/* Desktop Navigation Tabs - Keep your original design */}
         {!isMobile && (
           <div className="flex justify-center mt-6 -mb-6">
+            
             <Tabs
               value={activeTab}
               onValueChange={handleTabChange}
@@ -319,11 +323,12 @@ export function ProfileHeader({
         {/* Mobile Navigation Tabs - Horizontal scrolling for mobile */}
         {isMobile && (
           <div className="mt-6 -mb-6 px-4">
-            <div className="overflow-x-auto">
-              <div className="flex gap-0 min-w-max">
+           
+            <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
+              <div className="flex gap-2 min-w-max pb-2">
                 <button
                   onClick={() => handleTabChange("points-club")}
-                  className={`h-10 px-3 text-xs whitespace-nowrap border-b-2 transition-colors ${
+                  className={`h-10 px-4 text-xs whitespace-nowrap border-b-2 transition-colors flex-shrink-0 ${
                     activeTab === "points-club"
                       ? "border-dealhunter-red text-dealhunter-red"
                       : "border-transparent text-gray-600 hover:text-dealhunter-red"
@@ -333,7 +338,7 @@ export function ProfileHeader({
                 </button>
                 <button
                   onClick={() => handleTabChange("dealalerts-feed")}
-                  className={`h-10 px-3 text-xs whitespace-nowrap border-b-2 transition-colors ${
+                  className={`h-10 px-4 text-xs whitespace-nowrap border-b-2 transition-colors flex-shrink-0 ${
                     activeTab === "dealalerts-feed"
                       ? "border-dealhunter-red text-dealhunter-red"
                       : "border-transparent text-gray-600 hover:text-dealhunter-red"
@@ -343,7 +348,7 @@ export function ProfileHeader({
                 </button>
                 <button
                   onClick={() => handleTabChange("favourites")}
-                  className={`h-10 px-3 text-xs whitespace-nowrap border-b-2 transition-colors ${
+                  className={`h-10 px-4 text-xs whitespace-nowrap border-b-2 transition-colors flex-shrink-0 ${
                     activeTab === "favourites"
                       ? "border-dealhunter-red text-dealhunter-red"
                       : "border-transparent text-gray-600 hover:text-dealhunter-red"
@@ -353,7 +358,7 @@ export function ProfileHeader({
                 </button>
                 <button
                   onClick={() => handleTabChange("activity")}
-                  className={`h-10 px-3 text-xs whitespace-nowrap border-b-2 transition-colors ${
+                  className={`h-10 px-4 text-xs whitespace-nowrap border-b-2 transition-colors flex-shrink-0 ${
                     activeTab === "activity"
                       ? "border-dealhunter-red text-dealhunter-red"
                       : "border-transparent text-gray-600 hover:text-dealhunter-red"
@@ -363,7 +368,7 @@ export function ProfileHeader({
                 </button>
                 <button
                   onClick={() => handleTabChange("offers")}
-                  className={`h-10 px-3 text-xs whitespace-nowrap border-b-2 transition-colors ${
+                  className={`h-10 px-4 text-xs whitespace-nowrap border-b-2 transition-colors flex-shrink-0 ${
                     activeTab === "offers"
                       ? "border-dealhunter-red text-dealhunter-red"
                       : "border-transparent text-gray-600 hover:text-dealhunter-red"
@@ -373,7 +378,7 @@ export function ProfileHeader({
                 </button>
                 <button
                   onClick={() => handleTabChange("referral-codes")}
-                  className={`h-10 px-3 text-xs whitespace-nowrap border-b-2 transition-colors ${
+                  className={`h-10 px-4 text-xs whitespace-nowrap border-b-2 transition-colors flex-shrink-0 ${
                     activeTab === "referral-codes"
                       ? "border-dealhunter-red text-dealhunter-red"
                       : "border-transparent text-gray-600 hover:text-dealhunter-red"
@@ -383,7 +388,7 @@ export function ProfileHeader({
                 </button>
                 <button
                   onClick={() => handleTabChange("discussion")}
-                  className={`h-10 px-3 text-xs whitespace-nowrap border-b-2 transition-colors ${
+                  className={`h-10 px-4 text-xs whitespace-nowrap border-b-2 transition-colors flex-shrink-0 ${
                     activeTab === "discussion"
                       ? "border-dealhunter-red text-dealhunter-red"
                       : "border-transparent text-gray-600 hover:text-dealhunter-red"
@@ -393,7 +398,7 @@ export function ProfileHeader({
                 </button>
                 <button
                   onClick={() => handleTabChange("badges")}
-                  className={`h-10 px-3 text-xs whitespace-nowrap border-b-2 transition-colors ${
+                  className={`h-10 px-4 text-xs whitespace-nowrap border-b-2 transition-colors flex-shrink-0 ${
                     activeTab === "badges"
                       ? "border-dealhunter-red text-dealhunter-red"
                       : "border-transparent text-gray-600 hover:text-dealhunter-red"
@@ -403,7 +408,7 @@ export function ProfileHeader({
                 </button>
                 <button
                   onClick={() => handleTabChange("statistics")}
-                  className={`h-10 px-3 text-xs whitespace-nowrap border-b-2 transition-colors ${
+                  className={`h-10 px-4 text-xs whitespace-nowrap border-b-2 transition-colors flex-shrink-0 ${
                     activeTab === "statistics"
                       ? "border-dealhunter-red text-dealhunter-red"
                       : "border-transparent text-gray-600 hover:text-dealhunter-red"

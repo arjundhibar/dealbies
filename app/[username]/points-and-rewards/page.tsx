@@ -22,7 +22,7 @@ export default function PointsAndRewardsPage() {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await fetch(`/api/users/profile?username=${username}`);
+        const response = await fetch(`/api/users/${username}/profile`);
         if (response.ok) {
           const data = await response.json();
           setUserProfile(data);
