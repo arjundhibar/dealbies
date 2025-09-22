@@ -139,8 +139,8 @@ export default function DealPage() {
     const handleScroll = () => {
       if (dealCardRef.current) {
         const rect = dealCardRef.current.getBoundingClientRect();
-        // Show sticky nav when the deal card starts going out of view
-        setShowStickyNav(rect.top <= 0);
+        // Show sticky nav only when the deal card is fully out of view
+        setShowStickyNav(rect.bottom <= 0);
       }
     };
 
