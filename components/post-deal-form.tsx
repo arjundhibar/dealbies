@@ -1,27 +1,53 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { AlertCircle } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 
 interface PostDealFormProps {
-  onSuccess?: () => void
-  isOpen?: boolean
-  onOpenChange?: (open: boolean) => void
+  onSuccess?: () => void;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const categories = [
@@ -36,30 +62,44 @@ const categories = [
   "Food",
   "Beauty",
   "Other",
-]
+];
 
 const formSchema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters").max(100, "Title must be less than 100 characters"),
+  title: z
+    .string()
+    .min(5, "Title must be at least 5 characters")
+    .max(100, "Title must be less than 100 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   price: z.coerce.number().positive("Price must be positive"),
-  originalPrice: z.coerce.number().positive("Original price must be positive").optional(),
+  originalPrice: z.coerce
+    .number()
+    .positive("Original price must be positive")
+    .optional(),
   merchant: z.string().min(2, "Merchant name is required"),
   category: z.string().nonempty("Category is required"),
   dealUrl: z.string().url("Please enter a valid URL"),
-  imageUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  imageUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .optional()
+    .or(z.literal("")),
   expiresAt: z.string().optional(),
-})
+});
 
-//remove the form 
-type FormValues = z.infer<typeof formSchema>
+//remove the form
+type FormValues = z.infer<typeof formSchema>;
 
-export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const { user } = useAuth()
-  const { toast } = useToast()
-  const router = useRouter()
-  const isMobile = useIsMobile()
+export function PostDealForm({
+  onSuccess,
+  isOpen,
+  onOpenChange,
+}: PostDealFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+  const isMobile = useIsMobile();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -74,72 +114,78 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
       imageUrl: "",
       expiresAt: "",
     },
-  })
+  });
 
   const onSubmit = async (values: FormValues) => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
       if (!user) {
-        throw new Error("You must be logged in to post a deal")
+        throw new Error("You must be logged in to post a deal");
       }
 
       // Log the values being sent
-      console.log("Submitting deal with values:", values)
-    
-      
+      console.log("Submitting deal with values:", values);
+
       const token = localStorage.getItem("auth_token");
-       if (!token) {
-      throw new Error("Missing authentication token")
-    }
+      if (!token) {
+        throw new Error("Missing authentication token");
+      }
       const response = await fetch("/api/deals", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-           Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(values),
-      })
+      });
 
       // Log the raw response for debugging
-      console.log("Response status:", response.status)
+      console.log("Response status:", response.status);
 
       // Check if the response is JSON
-      const contentType = response.headers.get("content-type")
+      const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text()
-        console.error("Non-JSON response:", text)
+        const text = await response.text();
+        console.error("Non-JSON response:", text);
 
         // Check if this is a Prisma initialization error
         if (text.includes("prisma generate")) {
-          throw new Error("Database initialization error. Please run 'npx prisma generate' and restart the server.")
+          throw new Error(
+            "Database initialization error. Please run 'npx prisma generate' and restart the server."
+          );
         }
 
-        throw new Error(`Server error: ${response.status}. Please try again later.`)
+        throw new Error(
+          `Server error: ${response.status}. Please try again later.`
+        );
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || `Failed to create deal: ${response.status} ${response.statusText}`)
+        throw new Error(
+          data.error ||
+            `Failed to create deal: ${response.status} ${response.statusText}`
+        );
       }
 
       toast({
         title: "Success!",
         description: "Your deal has been posted.",
-      })
+      });
 
-      if (onSuccess) onSuccess()
-      if (onOpenChange) onOpenChange(false)
-      router.push(`/deal/${data.id}`)
+      if (onSuccess) onSuccess();
+      if (onOpenChange) onOpenChange(false);
+      router.push(`/deals/${data.slug || data.id}`);
     } catch (error: any) {
-      console.error("Error posting deal:", error)
-      setError(error.message || "An error occurred while posting the deal.")
+      console.error("Error posting deal:", error);
+      setError(error.message || "An error occurred while posting the deal.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const formContent = (
     <div className="pr-1">
@@ -199,7 +245,9 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
               name="originalPrice"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base">Original Price (₹) (Optional)</FormLabel>
+                  <FormLabel className="text-base">
+                    Original Price (₹) (Optional)
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -207,7 +255,11 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
                       min="0"
                       placeholder="e.g. 299.99"
                       value={field.value || ""}
-                      onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : "")}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : ""
+                        )
+                      }
                       disabled={isLoading}
                       className="h-10 sm:h-11"
                     />
@@ -226,7 +278,12 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
                 <FormItem>
                   <FormLabel className="text-base">Merchant</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. Amazon" {...field} disabled={isLoading} className="h-10 sm:h-11" />
+                    <Input
+                      placeholder="e.g. Amazon"
+                      {...field}
+                      disabled={isLoading}
+                      className="h-10 sm:h-11"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -239,7 +296,11 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-base">Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    disabled={isLoading}
+                  >
                     <FormControl>
                       <SelectTrigger className="h-10 sm:h-11">
                         <SelectValue placeholder="Select a category" />
@@ -304,7 +365,9 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
             name="imageUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base">Image URL (Optional)</FormLabel>
+                <FormLabel className="text-base">
+                  Image URL (Optional)
+                </FormLabel>
                 <FormControl>
                   <Input
                     type="url"
@@ -327,9 +390,16 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
             name="expiresAt"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base">Expiry Date (Optional)</FormLabel>
+                <FormLabel className="text-base">
+                  Expiry Date (Optional)
+                </FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} disabled={isLoading} className="h-10 sm:h-11" />
+                  <Input
+                    type="datetime-local"
+                    {...field}
+                    disabled={isLoading}
+                    className="h-10 sm:h-11"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -348,22 +418,27 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
         </form>
       </Form>
     </div>
-  )
+  );
 
   // If this component is being used directly in a dialog or sheet (controlled by parent)
   if (isOpen !== undefined && onOpenChange) {
     if (isMobile) {
       return (
         <Sheet open={isOpen} onOpenChange={onOpenChange}>
-          <SheetContent side="bottom" className="h-[90vh] overflow-hidden flex flex-col">
+          <SheetContent
+            side="bottom"
+            className="h-[90vh] overflow-hidden flex flex-col"
+          >
             <SheetHeader className="mb-4">
               <SheetTitle>Post a New Deal</SheetTitle>
-              <SheetDescription>Share a great deal with the community</SheetDescription>
+              <SheetDescription>
+                Share a great deal with the community
+              </SheetDescription>
             </SheetHeader>
             <div className="flex-1 overflow-auto pb-8">{formContent}</div>
           </SheetContent>
         </Sheet>
-      )
+      );
     }
 
     return (
@@ -372,15 +447,16 @@ export function PostDealForm({ onSuccess, isOpen, onOpenChange }: PostDealFormPr
           <DialogHeader>
             <DialogTitle>Post a New Deal</DialogTitle>
             <DialogDescription>
-              Share a great deal with the community. Fill out the form below with all the details.
+              Share a great deal with the community. Fill out the form below
+              with all the details.
             </DialogDescription>
           </DialogHeader>
           <div className="flex-1 overflow-auto pb-6">{formContent}</div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
   // If this component is being used directly inside a dialog or sheet content (not controlling the dialog/sheet itself)
-  return formContent
+  return formContent;
 }

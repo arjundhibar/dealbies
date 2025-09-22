@@ -11,6 +11,7 @@ export interface User {
 
 export interface Deal {
   id: string
+  slug?: string
   title: string
   description: string
   price: number

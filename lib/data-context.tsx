@@ -51,6 +51,7 @@ interface DataContextType {
     voteType: "up" | "down"
   ) => Promise<void>;
   getDeal: (id: string) => Promise<Deal | undefined>;
+  getDealBySlug: (slug: string) => Promise<Deal | undefined>;
   getCoupon: (id: string) => Promise<Coupon | undefined>;
   getDiscussion: (id: string) => Promise<Discussion | undefined>;
   getRelatedDeals: (dealId: string, limit?: number) => Promise<Deal[]>;
@@ -210,6 +211,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             query GetDeals($category: String, $sort: String) {
               deals(category: $category, sort: $sort) {
                 id
+                slug
                 title
                 description
                 imageUrls
@@ -756,6 +758,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             query GetDeal($id: ID!) {
               deal(id: $id) {
                 id
+                slug
                 title
                 description
                 price
@@ -783,6 +786,72 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         });
         const { data } = await response.json();
         const deal = data?.deal;
+        if (!deal) return undefined;
+        return {
+          ...deal,
+          imageUrl: deal.imageUrls?.[0] || "",
+          postedBy: {
+            id: deal.postedBy.id,
+            name: deal.postedBy.username,
+            avatar: "",
+          },
+        };
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load deal. Please try refreshing the page.",
+          variant: "destructive",
+        });
+        return undefined;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [toast]
+  );
+
+  const getDealBySlug = useCallback(
+    async (slug: string): Promise<Deal | undefined> => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/graphql", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: `
+            query GetDealBySlug($slug: String!) {
+              dealBySlug(slug: $slug) {
+                id
+                slug
+                title
+                description
+                price
+                originalPrice
+                merchant
+                category
+                dealUrl
+                expired
+                expiresAt
+                startAt
+                createdAt
+                score
+                commentCount
+                postedBy {
+                  id
+                  username
+                }
+                userVote
+                imageUrls
+              }
+            }
+          `,
+            variables: { slug },
+          }),
+        });
+        const { data } = await response.json();
+        const deal = data?.dealBySlug;
         if (!deal) return undefined;
         return {
           ...deal,
@@ -1070,6 +1139,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
           voteComment,
           getDeal,
+          getDealBySlug,
           getCoupon,
           getDiscussion,
           getRelatedDeals,
@@ -1099,6 +1169,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
           voteComment,
           getDeal,
+          getDealBySlug,
           getCoupon,
           getDiscussion,
           getRelatedDeals,

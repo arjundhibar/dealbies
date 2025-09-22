@@ -38,6 +38,7 @@ interface DealCardProps {
 export function DealCard({ deal }: DealCardProps) {
   const {
     id,
+    slug,
     title,
     description,
     imageUrls,
@@ -100,7 +101,7 @@ export function DealCard({ deal }: DealCardProps) {
   // Mobile layout
   if (isMobile) {
     return (
-      <Link href={`/deal/${id}`} className="block group">
+      <Link href={`/deals/${slug || id}`} className="block group">
         <Card className="overflow-hidden shadow-sm border-none">
           <div className="flex flex-grow-0 w-full">
             {/* Left side - Image with overlay controls */}
@@ -180,7 +181,7 @@ export function DealCard({ deal }: DealCardProps) {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    router.push(`/deal/${id}#comments`);
+                    router.push(`/deals/${slug || id}#comments`);
                   }}
                 >
                   <MessagesSquare className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)] dark:hover:text-dealhunter-red" />
@@ -276,7 +277,7 @@ export function DealCard({ deal }: DealCardProps) {
 
   // Desktop layout
   return (
-    <Link href={`/deal/${id}`} className="block group">
+    <Link href={`/deals/${slug || id}`} className="block group">
       <Card className="overflow-hidden shadow-sm hover:shadow-md dark:bg-dark-secondary cursor-pointer min-h-[14.25rem] border-none">
         <div className="flex">
           {/* Left side - Product image */}
@@ -437,7 +438,7 @@ export function DealCard({ deal }: DealCardProps) {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    router.push(`/deal/${id}#comments`);
+                    router.push(`/deals/${slug || id}#comments`);
                   }}
                 >
                   <MessagesSquare className="h-4 w-4" />

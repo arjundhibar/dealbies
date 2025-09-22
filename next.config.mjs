@@ -9,6 +9,12 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  async redirects() {
+    return [
+      // Redirect old singular route to plural, preserving slug or id
+      { source: '/deal/:slug', destination: '/deals/:slug', permanent: true },
+    ]
+  },
 }
 
 export default nextConfig

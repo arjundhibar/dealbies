@@ -25,6 +25,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
       orderBy: { createdAt: "desc" },
       take: limit,
       include: {
+        // include slug for client-side linking
+        
         user: {
           select: {
             id: true,
@@ -48,6 +50,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     const formattedDeals = relatedDeals.map((relatedDeal) => ({
       id: relatedDeal.id,
+      slug: (relatedDeal as any).slug,
       title: relatedDeal.title,
       description: relatedDeal.description,
       imageUrls: relatedDeal.images.map(img => img.cloudflareUrl || `/api/images/${img.slug}`),

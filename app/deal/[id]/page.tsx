@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useParams, notFound } from "next/navigation";
+import { useParams, notFound, redirect } from "next/navigation";
 import { useData } from "@/lib/data-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -36,9 +36,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Carousel } from "@/components/ui/carousel";
 
 export default function DealPage() {
-  const params = useParams();
-  const id = params.id as string;
-  const { getDeal, getRelatedDeals, voteDeal, updateDealVote } = useData();
+  const params = useParams() as any;
+  const idOrSlug = (params.slug ?? params.id) as string;
+  const id = idOrSlug;
+  const { getDeal, getDealBySlug, getRelatedDeals, voteDeal, updateDealVote } =
+    useData();
   const [deal, setDeal] = useState<Deal | undefined>(undefined);
   const [relatedDeals, setRelatedDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +84,11 @@ export default function DealPage() {
     const fetchDealData = async () => {
       setLoading(true);
       try {
-        const dealData = await getDeal(id);
+        // Try fetching by slug first; fall back to id
+        let dealData = await getDealBySlug(idOrSlug);
+        if (!dealData) {
+          dealData = await getDeal(idOrSlug);
+        }
         console.log("this is the deal data in useeffect", dealData);
         // if (!dealData) {
         //   notFound()
@@ -107,7 +113,7 @@ export default function DealPage() {
           }
         }
 
-        const related = await getRelatedDeals(id);
+        const related = await getRelatedDeals(dealData?.id || idOrSlug);
         setRelatedDeals(related);
       } catch (error) {
         console.error("Error fetching deal:", error);
@@ -118,7 +124,7 @@ export default function DealPage() {
     };
 
     fetchDealData();
-  }, [id, getDeal, getRelatedDeals]);
+  }, [idOrSlug, getDeal, getDealBySlug, getRelatedDeals]);
 
   // Sync local vote states with actual vote state
   useEffect(() => {
@@ -992,7 +998,9 @@ export default function DealPage() {
                     return (
                       <Link
                         key={relatedDeal.id}
-                        href={`/deal/${relatedDeal.id}`}
+                        href={`/deals/${
+                          (relatedDeal as any).slug || relatedDeal.id
+                        }`}
                         className="flex-shrink-0"
                       >
                         <Card className="w-36 overflow-hidden hover:shadow-lg transition-shadow">
@@ -1050,7 +1058,7 @@ export default function DealPage() {
 
         {/* Comments section */}
         <div ref={commentRef}>
-          <CommentSection dealId={id} />
+          <CommentSection dealId={deal?.id} />
         </div>
       </div>
     );
@@ -1580,7 +1588,12 @@ export default function DealPage() {
                   : null;
 
                 return (
-                  <Link key={relatedDeal.id} href={`/deal/${relatedDeal.id}`}>
+                  <Link
+                    key={relatedDeal.id}
+                    href={`/deals/${
+                      (relatedDeal as any).slug || relatedDeal.id
+                    }`}
+                  >
                     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
                       <div className="aspect-square relative">
                         <Image
@@ -1631,7 +1644,7 @@ export default function DealPage() {
 
       {/* Comments section */}
       <div ref={commentRef}>
-        <CommentSection dealId={id} />
+        <CommentSection dealId={deal?.id} />
       </div>
     </div>
   );

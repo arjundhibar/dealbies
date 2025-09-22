@@ -66,26 +66,27 @@ export const resolvers = {
                     coverImage = cover || deal.images[0];
                 }
 
-                return {
-                    id: deal.id,
-                    title: deal.title,
-                    description: deal.description,
-                    imageUrls: deal.images.map((img: any) => getImageUrl(img.slug)),
-                    coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
-                    price: deal.price,
-                    originalPrice: deal.originalPrice,
-                    merchant: deal.merchant,
-                    category: deal.category,
-                    dealUrl: deal.dealUrl,
-                    expired: deal.expired,
-                    expiresAt: deal.expiresAt?.toISOString() ?? null,
-                    startAt: deal.startAt?.toISOString() ?? null,
-                    createdAt: deal.createdAt.toISOString(),
-                    score: upVotes - downVotes,
-                    commentCount: deal._count.comments,
-                    postedBy: deal.user,
-                    userVote,
-                }
+            return {
+                id: deal.id,
+                slug: deal.slug,
+                title: deal.title,
+                description: deal.description,
+                imageUrls: deal.images.map((img: any) => getImageUrl(img.slug)),
+                coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
+                price: deal.price,
+                originalPrice: deal.originalPrice,
+                merchant: deal.merchant,
+                category: deal.category,
+                dealUrl: deal.dealUrl,
+                expired: deal.expired,
+                expiresAt: deal.expiresAt?.toISOString() ?? null,
+                startAt: deal.startAt?.toISOString() ?? null,
+                createdAt: deal.createdAt.toISOString(),
+                score: upVotes - downVotes,
+                commentCount: deal._count.comments,
+                postedBy: deal.user,
+                userVote,
+            }
             })
         },
         deal: async (_: any, { id }: any) => {
@@ -114,27 +115,77 @@ export const resolvers = {
                 const cover = deal.images.find((img: any) => img.isCover);
                                     coverImage = cover || deal.images[0];
             }
-            return {
-                id: deal.id,
-                title: deal.title,
-                description: deal.description,
-                imageUrls: deal.images.map((img: any) => getImageUrl(img.slug)),
-                coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
-                price: deal.price,
-                originalPrice: deal.originalPrice,
-                merchant: deal.merchant,
-                category: deal.category,
-                dealUrl: deal.dealUrl,
-                expired: deal.expired,
-                expiresAt: deal.expiresAt?.toISOString() ?? null,
-                startAt: deal.startAt?.toISOString() ?? null,
-                createdAt: deal.createdAt.toISOString(),
-                score: upVotes - downVotes,
-                commentCount: deal._count.comments,
-                postedBy: deal.user,
-                userVote,
-            };
+        return {
+            id: deal.id,
+            slug: deal.slug,
+            title: deal.title,
+            description: deal.description,
+            imageUrls: deal.images.map((img: any) => getImageUrl(img.slug)),
+            coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
+            price: deal.price,
+            originalPrice: deal.originalPrice,
+            merchant: deal.merchant,
+            category: deal.category,
+            dealUrl: deal.dealUrl,
+            expired: deal.expired,
+            expiresAt: deal.expiresAt?.toISOString() ?? null,
+            startAt: deal.startAt?.toISOString() ?? null,
+            createdAt: deal.createdAt.toISOString(),
+            score: upVotes - downVotes,
+            commentCount: deal._count.comments,
+            postedBy: deal.user,
+            userVote,
+        };
         },
+    dealBySlug: async (_: any, { slug }: any) => {
+        const deal = await prisma.deal.findUnique({
+            where: { slug },
+            include: {
+                user: { select: { id: true, username: true, avatarUrl: true } },
+                _count: { select: { comments: true } },
+                votes: true,
+                images: true,
+            },
+        });
+        if (!deal) return null;
+
+        const supabase = getSupabase();
+        const { data: { session } } = await supabase.auth.getSession();
+        let currentUserId: string | null = null;
+        if (session?.user?.email) {
+            const dbUser = await prisma.deal.findFirst({ where: { user: { email: session.user.email } } });
+            currentUserId = (dbUser as any)?.userId || null;
+        }
+        const upVotes = deal.votes.filter((v: any) => v.voteType === 'up').length;
+        const downVotes = deal.votes.filter((v: any) => v.voteType === 'down').length;
+        const userVote = deal.votes.find((v: any) => v.userId === currentUserId)?.voteType;
+        let coverImage = null;
+        if (deal.images && deal.images.length > 0) {
+            const cover = deal.images.find((img: any) => img.isCover);
+            coverImage = cover || deal.images[0];
+        }
+        return {
+            id: deal.id,
+            slug: deal.slug,
+            title: deal.title,
+            description: deal.description,
+            imageUrls: deal.images.map((img: any) => getImageUrl(img.slug)),
+            coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
+            price: deal.price,
+            originalPrice: deal.originalPrice,
+            merchant: deal.merchant,
+            category: deal.category,
+            dealUrl: deal.dealUrl,
+            expired: deal.expired,
+            expiresAt: deal.expiresAt?.toISOString() ?? null,
+            startAt: deal.startAt?.toISOString() ?? null,
+            createdAt: deal.createdAt.toISOString(),
+            score: upVotes - downVotes,
+            commentCount: deal._count.comments,
+            postedBy: deal.user,
+            userVote,
+        };
+    },
         coupons: async (_: any, { merchant, category, sort = 'newest' }: any) => {
             let orderBy: any = { createdAt: 'desc' }
 

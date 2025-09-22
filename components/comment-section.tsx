@@ -1,115 +1,137 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useData } from "@/lib/data-context"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ThumbsUp, ThumbsDown, Reply, AlertCircle } from "lucide-react"
-import { formatRelativeTime } from "@/lib/utils"
-import { cn } from "@/lib/utils"
-import { useToast } from "@/hooks/use-toast"
-import type { Comment } from "@/lib/types"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { TipTapEditor } from "@/components/tiptap-editor"
+import { useState, useEffect } from "react";
+import { useData } from "@/lib/data-context";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ThumbsUp, ThumbsDown, Reply, AlertCircle } from "lucide-react";
+import { formatRelativeTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import type { Comment } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { TipTapEditor } from "@/components/tiptap-editor";
 
 interface CommentSectionProps {
-  dealId?: string
-  couponId?: string
+  dealId?: string;
+  couponId?: string;
 }
 
 export function CommentSection({ dealId, couponId }: CommentSectionProps) {
-  const { currentUser, addComment, voteComment } = useData()
-  const [dealComments, setDealComments] = useState<Comment[]>([])
-  const [replyingTo, setReplyingTo] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const { toast } = useToast()
+  const { currentUser, addComment, voteComment } = useData();
+  const [dealComments, setDealComments] = useState<Comment[]>([]);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  const id = dealId || couponId
-  const isCoupon = !!couponId
+  const id = dealId || couponId;
+  const isCoupon = !!couponId;
 
   useEffect(() => {
     const fetchComments = async () => {
-      if (!id) return
-      
-      setLoading(true)
-      setError(null)
+      if (!id) return;
+
+      setLoading(true);
+      setError(null);
       try {
-        const endpoint = isCoupon ? `/api/coupons/${id}/comments` : `/api/deals/${id}/comments`
-        const response = await fetch(endpoint)
+        const endpoint = isCoupon
+          ? `/api/coupons/${id}/comments`
+          : `/api/deals/${id}/comments`;
+        const response = await fetch(endpoint);
         if (response.ok) {
-          const data = await response.json()
-          setDealComments(data)
+          const data = await response.json();
+          setDealComments(data);
         } else {
-          const errorData = await response.json()
-          throw new Error(errorData.error || "Failed to load comments")
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to load comments");
         }
       } catch (error: any) {
-        console.error("Error fetching comments:", error)
-        setError(error.message || "Failed to load comments. Please try again.")
+        console.error("Error fetching comments:", error);
+        setError(error.message || "Failed to load comments. Please try again.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchComments()
-  }, [id, isCoupon])
-
-
-
-
+    fetchComments();
+  }, [id, isCoupon]);
 
   const handleVote = async (commentId: string, voteType: "up" | "down") => {
-    if (!id) return
-    
+    if (!id) return;
+
     try {
-      await voteComment(id, commentId, voteType)
+      await voteComment(id, commentId, voteType);
 
       // Refresh comments to get updated votes
-      const endpoint = isCoupon ? `/api/coupons/${id}/comments` : `/api/deals/${id}/comments`
-      const response = await fetch(endpoint)
+      const endpoint = isCoupon
+        ? `/api/coupons/${id}/comments`
+        : `/api/deals/${id}/comments`;
+      const response = await fetch(endpoint);
       if (response.ok) {
-        const data = await response.json()
-        setDealComments(data)
+        const data = await response.json();
+        setDealComments(data);
       }
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "You must be logged in to vote.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const renderComment = (comment: Comment) => {
-    const { id, content, createdAt, postedBy, score, userVote, replies } = comment
-    const isReplying = replyingTo === id
+    const {
+      id: commentId,
+      content,
+      createdAt,
+      postedBy,
+      score,
+      userVote,
+      replies,
+    } = comment;
+    const isReplying = replyingTo === commentId;
 
     return (
-      <div key={id} className="border-b py-4 last:border-0 bg-white dark:bg-[#1d1f20]">
+      <div
+        key={commentId}
+        className="border-b py-4 last:border-0 bg-white dark:bg-[#1d1f20]"
+      >
         <div className="flex gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={postedBy.avatar || "/kishan.jpeg"} alt={postedBy.name} />
+            <AvatarImage
+              src={postedBy.avatar || "/kishan.jpeg"}
+              alt={postedBy.name}
+            />
             <AvatarFallback>{postedBy.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <span className="font-medium">{postedBy.name}</span>
-              <span className="text-xs text-muted-foreground">{formatRelativeTime(new Date(createdAt))}</span>
+              <span className="text-xs text-muted-foreground">
+                {formatRelativeTime(new Date(createdAt))}
+              </span>
             </div>
-            <div className="mt-1 prose prose-sm dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
+            <div
+              className="mt-1 prose prose-sm dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
             <div className="mt-2 flex items-center gap-4">
               <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={cn("h-6 w-6 p-0", userVote === "up" && "text-green-600 dark:text-green-400")}
-                  onClick={() => handleVote(id, "up")}
+                  className={cn(
+                    "h-6 w-6 p-0",
+                    userVote === "up" && "text-green-600 dark:text-green-400"
+                  )}
+                  onClick={() => handleVote(commentId, "up")}
                   disabled={!currentUser}
                 >
                   <ThumbsUp className="h-4 w-4" />
@@ -121,8 +143,8 @@ export function CommentSection({ dealId, couponId }: CommentSectionProps) {
                     score > 0
                       ? "text-green-600 dark:text-green-400"
                       : score < 0
-                        ? "text-red-600 dark:text-red-400"
-                        : "",
+                      ? "text-red-600 dark:text-red-400"
+                      : ""
                   )}
                 >
                   Like
@@ -133,7 +155,7 @@ export function CommentSection({ dealId, couponId }: CommentSectionProps) {
                   variant="ghost"
                   size="sm"
                   className="h-6 px-2 text-xs"
-                  onClick={() => setReplyingTo(isReplying ? null : id)}
+                  onClick={() => setReplyingTo(isReplying ? null : commentId)}
                 >
                   <Reply className="mr-1 h-3 w-3" />
                   Reply
@@ -145,7 +167,10 @@ export function CommentSection({ dealId, couponId }: CommentSectionProps) {
               <div className="mt-3">
                 <div className="flex items-start gap-3">
                   <Avatar className="h-10 w-10 flex-shrink-0">
-                    <AvatarImage src={currentUser?.avatarUrl || "/kishan.jpeg"} alt={currentUser?.username || "User"} />
+                    <AvatarImage
+                      src={currentUser?.avatarUrl || "/kishan.jpeg"}
+                      alt={currentUser?.username || "User"}
+                    />
                     <AvatarFallback className="text-xs">
                       {currentUser?.username?.charAt(0).toUpperCase() || "U"}
                     </AvatarFallback>
@@ -154,32 +179,46 @@ export function CommentSection({ dealId, couponId }: CommentSectionProps) {
                     <TipTapEditor
                       placeholder="Write a reply..."
                       onSubmit={async (content) => {
-                        setIsSubmitting(true)
+                        setIsSubmitting(true);
                         try {
-                          await addComment(id, content, id, isCoupon)
-                          
+                          // Use the deal/coupon id as contentId, and the current comment's id as parentId
+                          await addComment(
+                            (dealId || couponId) as string,
+                            content,
+                            commentId,
+                            isCoupon
+                          );
+
                           // Refresh comments to get the updated structure with replies
-                          const endpoint = isCoupon ? `/api/coupons/${id}/comments` : `/api/deals/${id}/comments`
-                          const response = await fetch(endpoint)
+                          const endpoint = isCoupon
+                            ? `/api/coupons/${
+                                (dealId || couponId) as string
+                              }/comments`
+                            : `/api/deals/${
+                                (dealId || couponId) as string
+                              }/comments`;
+                          const response = await fetch(endpoint);
                           if (response.ok) {
-                            const data = await response.json()
-                            setDealComments(data)
+                            const data = await response.json();
+                            setDealComments(data);
                           }
-                          
-                          setReplyingTo(null)
-                          
+
+                          setReplyingTo(null);
+
                           toast({
                             title: "Reply posted",
-                            description: "Your reply has been posted successfully.",
-                          })
+                            description:
+                              "Your reply has been posted successfully.",
+                          });
                         } catch (error: any) {
                           toast({
                             title: "Error",
-                            description: error.message || "Failed to post reply.",
+                            description:
+                              error.message || "Failed to post reply.",
                             variant: "destructive",
-                          })
+                          });
                         } finally {
-                          setIsSubmitting(false)
+                          setIsSubmitting(false);
                         }
                       }}
                       disabled={isSubmitting}
@@ -192,7 +231,7 @@ export function CommentSection({ dealId, couponId }: CommentSectionProps) {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                                                setReplyingTo(null)
+                      setReplyingTo(null);
                     }}
                     disabled={isSubmitting}
                   >
@@ -202,15 +241,22 @@ export function CommentSection({ dealId, couponId }: CommentSectionProps) {
               </div>
             )}
 
-            {replies && replies.length > 0 && <div className="mt-4  border-l-2 pl-4">{replies.map(renderComment)}</div>}
+            {replies && replies.length > 0 && (
+              <div className="mt-4  border-l-2 pl-4">
+                {replies.map(renderComment)}
+              </div>
+            )}
           </div>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   return (
-    <div className="comment-section rounded-lg border bg-white dark:bg-[#1d1f20]" id="comments">
+    <div
+      className="comment-section rounded-lg border bg-white dark:bg-[#1d1f20]"
+      id="comments"
+    >
       <div className="border-b p-4">
         <h2 className="text-xl font-bold">{dealComments.length} Comments </h2>
       </div>
@@ -226,57 +272,64 @@ export function CommentSection({ dealId, couponId }: CommentSectionProps) {
         <div className="mb-6">
           <div className="flex items-start gap-3">
             <Avatar className="h-14 w-14 flex-shrink-0">
-              <AvatarImage src={currentUser?.avatarUrl || "/kishan.jpeg"} alt={currentUser?.username || "User"} />
+              <AvatarImage
+                src={currentUser?.avatarUrl || "/kishan.jpeg"}
+                alt={currentUser?.username || "User"}
+              />
               <AvatarFallback>
                 {currentUser?.username?.charAt(0).toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
               <TipTapEditor
-                placeholder={currentUser ? "Write a comment..." : "Log in to comment"}
+                placeholder={
+                  currentUser ? "Write a comment..." : "Log in to comment"
+                }
                 onSubmit={async (content) => {
                   if (!currentUser) {
                     toast({
                       title: "Error",
                       description: "You must be logged in to comment.",
                       variant: "destructive",
-                    })
-                    return
+                    });
+                    return;
                   }
-                  
+
                   if (!id) {
                     toast({
                       title: "Error",
                       description: "Invalid content ID.",
                       variant: "destructive",
-                    })
-                    return
+                    });
+                    return;
                   }
-                  
-                  setIsSubmitting(true)
+
+                  setIsSubmitting(true);
                   try {
-                    await addComment(id, content, undefined, isCoupon)
-                    
+                    await addComment(id, content, undefined, isCoupon);
+
                     // Refetch comments to get the updated list
-                    const endpoint = isCoupon ? `/api/coupons/${id}/comments` : `/api/deals/${id}/comments`
-                    const response = await fetch(endpoint)
+                    const endpoint = isCoupon
+                      ? `/api/coupons/${id}/comments`
+                      : `/api/deals/${id}/comments`;
+                    const response = await fetch(endpoint);
                     if (response.ok) {
-                      const data = await response.json()
-                      setDealComments(data)
+                      const data = await response.json();
+                      setDealComments(data);
                     }
 
                     toast({
                       title: "Comment posted",
                       description: "Your comment has been posted successfully.",
-                    })
+                    });
                   } catch (error: any) {
                     toast({
                       title: "Error",
                       description: error.message || "Failed to post comment.",
                       variant: "destructive",
-                    })
+                    });
                   } finally {
-                    setIsSubmitting(false)
+                    setIsSubmitting(false);
                   }
                 }}
                 disabled={!currentUser || isSubmitting}
@@ -310,10 +363,12 @@ export function CommentSection({ dealId, couponId }: CommentSectionProps) {
           <div className="space-y-1">{dealComments.map(renderComment)}</div>
         ) : (
           <div className="py-8 text-center">
-            <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
+            <p className="text-muted-foreground">
+              No comments yet. Be the first to comment!
+            </p>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

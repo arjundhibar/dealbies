@@ -10,6 +10,7 @@ export const typeDefs = gql`
 
   type Deal {
     id: String!
+    slug: String!
     title: String!
     description: String!
     imageUrls: [String!]!
@@ -66,6 +67,7 @@ export const typeDefs = gql`
   type Query {
     deals(category: String, sort: String): [Deal!]!
     deal(id: ID!): Deal
+    dealBySlug(slug: String!): Deal
     coupons(merchant: String, category: String, sort: String): [Coupon!]!
     coupon(id: ID!): Coupon
     discussions(category: String, dealCategory: String, sort: String): [Discussion!]!
