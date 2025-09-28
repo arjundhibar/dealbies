@@ -22,6 +22,7 @@ import {
   formatRelativeTime,
   formatCurrency,
   calculateDiscount,
+  getImageUrl,
 } from "@/lib/utils";
 import type { Deal } from "@/lib/types";
 import { useData } from "@/lib/data-context";
@@ -110,7 +111,9 @@ export function DealCard({ deal }: DealCardProps) {
               <div className="relative w-[7rem] h-[7rem]">
                 <Image
                   src={
-                    typeof imageUrls?.[0] === "string"
+                    imageUrls?.[0]?.slug
+                      ? getImageUrl(imageUrls[0].slug)
+                      : typeof imageUrls?.[0] === "string"
                       ? imageUrls[0]
                       : imageUrls?.[0]?.url ||
                         "/placeholder.svg?height=400&width=400&query=product"
@@ -285,7 +288,9 @@ export function DealCard({ deal }: DealCardProps) {
             <div className="relative h-full">
               <Image
                 src={
-                  typeof imageUrls?.[0] === "string"
+                  imageUrls?.[0]?.slug
+                    ? getImageUrl(imageUrls[0].slug)
+                    : typeof imageUrls?.[0] === "string"
                     ? imageUrls[0]
                     : imageUrls?.[0]?.url ||
                       "/placeholder.svg?height=400&width=600&query=product"

@@ -24,6 +24,7 @@ import {
   formatRelativeTime,
   formatCurrency,
   calculateDiscount,
+  getImageUrl,
 } from "@/lib/utils";
 import type { Coupon } from "@/lib/types";
 import { useData } from "@/lib/data-context";
@@ -39,6 +40,7 @@ interface CouponCardProps {
 export function CouponCard({ coupon }: CouponCardProps) {
   const {
     id,
+    slug,
     title,
     description,
     imageUrls,
@@ -130,7 +132,7 @@ export function CouponCard({ coupon }: CouponCardProps) {
   // Mobile layout
   if (isMobile) {
     return (
-      <Link href={`/coupon/${id}`} className="block group">
+      <Link href={`/coupons/${slug || id}`} className="block group">
         <Card className="overflow-hidden shadow-sm border-none">
           <div className="flex flex-grow-0 w-full">
             {/* Left side - Image with overlay controls */}
@@ -139,7 +141,9 @@ export function CouponCard({ coupon }: CouponCardProps) {
               <div className="relative w-[7rem] h-[7rem]">
                 <Image
                   src={
-                    typeof imageUrls?.[0] === "string"
+                    imageUrls?.[0]?.slug
+                      ? getImageUrl(imageUrls[0].slug)
+                      : typeof imageUrls?.[0] === "string"
                       ? imageUrls[0]
                       : imageUrls?.[0]?.url ||
                         "/placeholder.svg?height=400&width=400&query=product"
@@ -210,7 +214,7 @@ export function CouponCard({ coupon }: CouponCardProps) {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    router.push(`/coupon/${id}#comments`);
+                    router.push(`/coupons/${slug || id}#comments`);
                   }}
                 >
                   <MessagesSquare className="h-5 w-5 dark:text-[hsla(0,0%,100%,0.75)] dark:hover:text-dealhunter-red" />
@@ -313,7 +317,7 @@ export function CouponCard({ coupon }: CouponCardProps) {
 
   // Desktop layout
   return (
-    <Link href={`/coupon/${id}`} className="block group">
+    <Link href={`/coupons/${slug || id}`} className="block group">
       <Card className="overflow-hidden shadow-sm hover:shadow-md dark:bg-dark-secondary cursor-pointer min-h-[14.25rem] border-none">
         <div className="flex">
           {/* Left side - Product image */}
@@ -321,7 +325,9 @@ export function CouponCard({ coupon }: CouponCardProps) {
             <div className="relative h-full">
               <Image
                 src={
-                  typeof imageUrls?.[0] === "string"
+                  imageUrls?.[0]?.slug
+                    ? getImageUrl(imageUrls[0].slug)
+                    : typeof imageUrls?.[0] === "string"
                     ? imageUrls[0]
                     : imageUrls?.[0]?.url ||
                       "/placeholder.svg?height=400&width=600&query=product"
@@ -469,7 +475,7 @@ export function CouponCard({ coupon }: CouponCardProps) {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    router.push(`/coupon/${id}#comments`);
+                    router.push(`/coupons/${slug || id}#comments`);
                   }}
                 >
                   <MessagesSquare className="h-4 w-4" />

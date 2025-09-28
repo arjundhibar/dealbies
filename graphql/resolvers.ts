@@ -71,7 +71,10 @@ export const resolvers = {
                 slug: deal.slug,
                 title: deal.title,
                 description: deal.description,
-                imageUrls: deal.images.map((img: any) => getImageUrl(img.slug)),
+                imageUrls: deal.images.map((img: any) => ({
+                    url: getImageUrl(img.slug),
+                    slug: img.slug
+                })),
                 coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
                 price: deal.price,
                 originalPrice: deal.originalPrice,
@@ -120,7 +123,10 @@ export const resolvers = {
             slug: deal.slug,
             title: deal.title,
             description: deal.description,
-            imageUrls: deal.images.map((img: any) => getImageUrl(img.slug)),
+            imageUrls: deal.images.map((img: any) => ({
+                url: getImageUrl(img.slug),
+                slug: img.slug
+            })),
             coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
             price: deal.price,
             originalPrice: deal.originalPrice,
@@ -169,7 +175,10 @@ export const resolvers = {
             slug: deal.slug,
             title: deal.title,
             description: deal.description,
-            imageUrls: deal.images.map((img: any) => getImageUrl(img.slug)),
+            imageUrls: deal.images.map((img: any) => ({
+                url: getImageUrl(img.slug),
+                slug: img.slug
+            })),
             coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
             price: deal.price,
             originalPrice: deal.originalPrice,
@@ -240,9 +249,13 @@ export const resolvers = {
 
                 return {
                     id: coupon.id,
+                    slug: coupon.slug,
                     title: coupon.title,
                     description: coupon.description,
-                    imageUrls: coupon.images.map((img: any) => getImageUrl(img.slug)),
+                    imageUrls: coupon.images.map((img: any) => ({
+                        url: getImageUrl(img.slug),
+                        slug: img.slug
+                    })),
                     coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
                     discountCode: coupon.discountCode,
                     discountType: coupon.discountType,
@@ -290,9 +303,67 @@ export const resolvers = {
             }
             return {
                 id: coupon.id,
+                slug: coupon.slug,
                 title: coupon.title,
                 description: coupon.description,
-                imageUrls: coupon.images.map((img: any) => getImageUrl(img.slug)),
+                imageUrls: coupon.images.map((img: any) => ({
+                    url: getImageUrl(img.slug),
+                    slug: img.slug
+                })),
+                coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
+                discountCode: coupon.discountCode,
+                discountType: coupon.discountType,
+                merchant: coupon.merchant,
+                discountValue: coupon.discountValue,
+                availability: coupon.availability,
+                couponUrl: coupon.couponUrl,
+                expired: coupon.expired,
+                expiresAt: coupon.expiresAt?.toISOString() ?? null,
+                startAt: coupon.startAt?.toISOString() ?? null,
+                category: coupon.category,
+                createdAt: coupon.createdAt.toISOString(),
+                score: upVotes - downVotes,
+                commentCount: coupon._count.comments,
+                postedBy: coupon.user,
+                userVote,
+            };
+        },
+        couponBySlug: async (_: any, { slug }: any) => {
+            const coupon = await prisma.coupon.findUnique({
+                where: { slug },
+                include: {
+                    user: { select: { id: true, username: true, avatarUrl: true } },
+                    _count: { select: { comments: true } },
+                    votes: true,
+                    images: true,
+                },
+            });
+            if (!coupon) return null;
+
+            const supabase = getSupabase();
+            const { data: { session } } = await supabase.auth.getSession();
+            let currentUserId: string | null = null;
+            if (session?.user?.email) {
+                const dbUser = await prisma.user.findUnique({ where: { email: session.user.email } });
+                currentUserId = dbUser?.id || null;
+            }
+            const upVotes = coupon.votes.filter((v: any) => v.voteType === 'up').length;
+            const downVotes = coupon.votes.filter((v: any) => v.voteType === 'down').length;
+            const userVote = coupon.votes.find((v: any) => v.userId === currentUserId)?.voteType;
+            let coverImage = null;
+            if (coupon.images && coupon.images.length > 0) {
+                const cover = coupon.images.find((img: any) => img.isCover);
+                coverImage = cover || coupon.images[0];
+            }
+            return {
+                id: coupon.id,
+                slug: coupon.slug,
+                title: coupon.title,
+                description: coupon.description,
+                imageUrls: coupon.images.map((img: any) => ({
+                    url: getImageUrl(img.slug),
+                    slug: img.slug
+                })),
                 coverImage: coverImage ? getImageUrl(coverImage.slug) : null,
                 discountCode: coupon.discountCode,
                 discountType: coupon.discountType,

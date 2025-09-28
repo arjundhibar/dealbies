@@ -31,7 +31,7 @@ export interface Deal {
     avatar?: string
   }
   userVote?: "up" | "down"
-  imageUrls?: { url: string }[];
+  imageUrls?: { url: string; slug?: string }[];
 }
 
 export interface Comment {
@@ -50,6 +50,7 @@ export interface Comment {
 
 export interface Coupon {
   id: string
+  slug?: string
   title: string
   description: string
   merchant: string
@@ -71,7 +72,7 @@ export interface Coupon {
     avatar?: string
   }
   userVote?: "up" | "down"
-  imageUrls?: { url: string }[];
+  imageUrls?: { url: string; slug?: string }[];
 }
 
 export interface Discussion {

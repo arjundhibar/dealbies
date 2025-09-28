@@ -1,30 +1,30 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
-import { useData } from "@/lib/data-context"
-import { DealCard } from "@/components/deal-card"
-import { CouponCard } from "@/components/coupon-card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Skeleton } from "@/components/ui/skeleton"
-import type { Deal, Coupon } from "@/lib/types"
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { useData } from "@/lib/data-context";
+import { DealCard } from "@/components/deal-card";
+import { CouponCard } from "@/components/coupon-card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Deal, Coupon } from "@/lib/types";
 
 export default function SearchPage() {
-  const searchParams = useSearchParams()
-  const query = searchParams.get("q") || ""
-  const { deals, coupons } = useData()
-  const [loading, setLoading] = useState(true)
-  const [filteredDeals, setFilteredDeals] = useState<Deal[]>([])
-  const [filteredCoupons, setFilteredCoupons] = useState<Coupon[]>([])
-  const [activeTab, setActiveTab] = useState("deals")
+  const searchParams = useSearchParams();
+  const query = searchParams.get("q") || "";
+  const { deals, coupons } = useData();
+  const [loading, setLoading] = useState(true);
+  const [filteredDeals, setFilteredDeals] = useState<Deal[]>([]);
+  const [filteredCoupons, setFilteredCoupons] = useState<Coupon[]>([]);
+  const [activeTab, setActiveTab] = useState("deals");
 
   useEffect(() => {
-    if (!query) return
+    if (!query) return;
 
     // Simulate loading
-    setLoading(true)
+    setLoading(true);
     setTimeout(() => {
-      const lowerQuery = query.toLowerCase()
+      const lowerQuery = query.toLowerCase();
 
       // Filter deals
       const matchedDeals = deals.filter(
@@ -32,8 +32,8 @@ export default function SearchPage() {
           deal.title.toLowerCase().includes(lowerQuery) ||
           deal.description.toLowerCase().includes(lowerQuery) ||
           deal.merchant.toLowerCase().includes(lowerQuery) ||
-          deal.category.toLowerCase().includes(lowerQuery),
-      )
+          deal.category.toLowerCase().includes(lowerQuery)
+      );
 
       // Filter coupons
       const matchedCoupons = coupons.filter(
@@ -41,29 +41,33 @@ export default function SearchPage() {
           coupon.title.toLowerCase().includes(lowerQuery) ||
           coupon.description.toLowerCase().includes(lowerQuery) ||
           coupon.merchant.toLowerCase().includes(lowerQuery) ||
-          coupon.code.toLowerCase().includes(lowerQuery),
-      )
+          coupon.discountCode.toLowerCase().includes(lowerQuery)
+      );
 
-      setFilteredDeals(matchedDeals)
-      setFilteredCoupons(matchedCoupons)
-      setLoading(false)
+      setFilteredDeals(matchedDeals);
+      setFilteredCoupons(matchedCoupons);
+      setLoading(false);
 
       // Set active tab based on results
       if (matchedDeals.length === 0 && matchedCoupons.length > 0) {
-        setActiveTab("coupons")
+        setActiveTab("coupons");
       }
-    }, 500) // Simulate network delay
-  }, [query, deals, coupons])
+    }, 500); // Simulate network delay
+  }, [query, deals, coupons]);
 
   if (!query) {
     return (
       <div className="container mx-auto py-6 px-4">
         <div className="rounded-lg border p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">Search for deals and coupons</h2>
-          <p className="text-muted-foreground">Use the search bar in the header to find deals and coupons.</p>
+          <h2 className="text-xl font-bold mb-2">
+            Search for deals and coupons
+          </h2>
+          <p className="text-muted-foreground">
+            Use the search bar in the header to find deals and coupons.
+          </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -75,10 +79,16 @@ export default function SearchPage() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
           <TabsTrigger value="deals">
-            Deals {!loading && <span className="ml-2 text-xs">({filteredDeals.length})</span>}
+            Deals{" "}
+            {!loading && (
+              <span className="ml-2 text-xs">({filteredDeals.length})</span>
+            )}
           </TabsTrigger>
           <TabsTrigger value="coupons">
-            Coupons {!loading && <span className="ml-2 text-xs">({filteredCoupons.length})</span>}
+            Coupons{" "}
+            {!loading && (
+              <span className="ml-2 text-xs">({filteredCoupons.length})</span>
+            )}
           </TabsTrigger>
         </TabsList>
 
@@ -109,7 +119,9 @@ export default function SearchPage() {
           ) : (
             <div className="rounded-lg border p-8 text-center">
               <h3 className="text-lg font-medium">No deals found</h3>
-              <p className="text-muted-foreground">Try searching with different keywords.</p>
+              <p className="text-muted-foreground">
+                Try searching with different keywords.
+              </p>
             </div>
           )}
         </TabsContent>
@@ -147,11 +159,13 @@ export default function SearchPage() {
           ) : (
             <div className="rounded-lg border p-8 text-center">
               <h3 className="text-lg font-medium">No coupons found</h3>
-              <p className="text-muted-foreground">Try searching with different keywords.</p>
+              <p className="text-muted-foreground">
+                Try searching with different keywords.
+              </p>
             </div>
           )}
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

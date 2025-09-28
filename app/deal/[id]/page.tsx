@@ -25,7 +25,7 @@ import {
   Flag,
 } from "lucide-react";
 import { formatDistanceToNow, isPast, format } from "date-fns";
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn, formatCurrency, getImageUrl } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { CommentSection } from "@/components/comment-section";
 import type { Deal } from "@/lib/types";
@@ -1598,8 +1598,10 @@ export default function DealPage() {
                       <div className="aspect-square relative">
                         <Image
                           src={
-                            relatedDeal.imageUrls?.[0]?.url ||
-                            "/placeholder.svg?height=200&width=200"
+                            relatedDeal.imageUrls?.[0]?.slug
+                              ? getImageUrl(relatedDeal.imageUrls[0].slug)
+                              : relatedDeal.imageUrls?.[0]?.url ||
+                                "/placeholder.svg?height=200&width=200"
                           }
                           alt={relatedDeal.title}
                           fill

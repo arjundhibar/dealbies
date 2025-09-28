@@ -53,6 +53,7 @@ interface DataContextType {
   getDeal: (id: string) => Promise<Deal | undefined>;
   getDealBySlug: (slug: string) => Promise<Deal | undefined>;
   getCoupon: (id: string) => Promise<Coupon | undefined>;
+  getCouponBySlug: (slug: string) => Promise<Coupon | undefined>;
   getDiscussion: (id: string) => Promise<Discussion | undefined>;
   getRelatedDeals: (dealId: string, limit?: number) => Promise<Deal[]>;
   saveDeal: (dealId: string) => Promise<void>;
@@ -214,7 +215,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
                 slug
                 title
                 description
-                imageUrls
+                imageUrls {
+                  url
+                  slug
+                }
                 price
                 originalPrice
                 merchant
@@ -242,7 +246,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
         const result = (data?.deals || []).map((deal: any) => ({
           ...deal,
-          imageUrl: deal.imageUrls?.[0] || "",
+          imageUrl: deal.imageUrls?.[0]?.url || "",
           postedBy: {
             id: deal.postedBy.id,
             name: deal.postedBy.username,
@@ -287,9 +291,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             query GetCoupons($merchant: String, $category: String, $sort: String) {
               coupons(merchant: $merchant, category: $category, sort: $sort) {
                 id
+                slug
                 title
                 description
-                imageUrls
+                imageUrls {
+                  url
+                  slug
+                }
                 discountCode
                 discountType
                 merchant
@@ -319,7 +327,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
         const result = (data?.coupons || []).map((coupon: any) => ({
           ...coupon,
-          imageUrl: coupon.imageUrls?.[0] || "",
+          imageUrl: coupon.imageUrls?.[0]?.url || "",
           postedBy: {
             id: coupon.postedBy.id,
             name: coupon.postedBy.username,
@@ -777,7 +785,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
                   username
                 }
                 userVote
-                imageUrls
+                imageUrls {
+                  url
+                  slug
+                }
               }
             }
           `,
@@ -843,7 +854,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
                   username
                 }
                 userVote
-                imageUrls
+                imageUrls {
+                  url
+                  slug
+                }
               }
             }
           `,
@@ -890,9 +904,13 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
             query GetCoupon($id: ID!) {
               coupon(id: $id) {
                 id
+                slug
                 title
                 description
-                imageUrls
+                imageUrls {
+                  url
+                  slug
+                }
                 discountCode
                 discountType
                 discountValue
@@ -922,7 +940,78 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         if (!coupon) return undefined;
         return {
           ...coupon,
-          imageUrl: coupon.imageUrls?.[0] || "",
+          imageUrl: coupon.imageUrls?.[0]?.url || "",
+          postedBy: {
+            id: coupon.postedBy.id,
+            name: coupon.postedBy.username,
+            avatar: "",
+          },
+        };
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to load coupon. Please try refreshing the page.",
+          variant: "destructive",
+        });
+        return undefined;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [toast]
+  );
+
+  const getCouponBySlug = useCallback(
+    async (slug: string): Promise<Coupon | undefined> => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/graphql", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: `
+            query GetCouponBySlug($slug: String!) {
+              couponBySlug(slug: $slug) {
+                id
+                slug
+                title
+                description
+                imageUrls {
+                  url
+                  slug
+                }
+                discountCode
+                discountType
+                discountValue
+                availability
+                merchant
+                couponUrl
+                expired
+                expiresAt
+                startAt
+                category
+                createdAt
+                score
+                commentCount
+                postedBy {
+                  id
+                  username
+                }
+                userVote
+              }
+            }
+          `,
+            variables: { slug },
+          }),
+        });
+        const { data } = await response.json();
+        const coupon = data?.couponBySlug;
+        if (!coupon) return undefined;
+        return {
+          ...coupon,
+          imageUrl: coupon.imageUrls?.[0]?.url || "",
           postedBy: {
             id: coupon.postedBy.id,
             name: coupon.postedBy.username,
@@ -1141,6 +1230,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           getDeal,
           getDealBySlug,
           getCoupon,
+          getCouponBySlug,
           getDiscussion,
           getRelatedDeals,
           saveDeal,
@@ -1171,6 +1261,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           getDeal,
           getDealBySlug,
           getCoupon,
+          getCouponBySlug,
           getDiscussion,
           getRelatedDeals,
           saveDeal,

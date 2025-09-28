@@ -1,9 +1,14 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Pencil, Trash2, Eye } from "lucide-react"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreHorizontal, Pencil, Trash2, Eye } from "lucide-react";
+import Link from "next/link";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,47 +18,47 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { useState } from "react"
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 interface AdminCouponActionsProps {
   coupon: {
-    id: string
-    title: string
-  }
+    id: string;
+    title: string;
+  };
 }
 
 export function AdminCouponActions({ coupon }: AdminCouponActionsProps) {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const { toast } = useToast()
-  const router = useRouter()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
 
   const handleDelete = async () => {
     try {
       const response = await fetch(`/api/admin/coupons/${coupon.id}`, {
         method: "DELETE",
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to delete coupon")
+        throw new Error("Failed to delete coupon");
       }
 
       toast({
         title: "Coupon deleted",
         description: `"${coupon.title}" has been deleted successfully.`,
-      })
+      });
 
-      router.refresh()
+      router.refresh();
     } catch (error) {
       toast({
         title: "Error",
         description: "There was a problem deleting the coupon.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   return (
     <>
@@ -66,7 +71,7 @@ export function AdminCouponActions({ coupon }: AdminCouponActionsProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link href={`/coupon/${coupon.id}`} target="_blank">
+            <Link href={`/coupons/${coupon.slug || coupon.id}`} target="_blank">
               <Eye className="mr-2 h-4 w-4" />
               View
             </Link>
@@ -77,7 +82,10 @@ export function AdminCouponActions({ coupon }: AdminCouponActionsProps) {
               Edit
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setShowDeleteDialog(true)} className="text-destructive">
+          <DropdownMenuItem
+            onClick={() => setShowDeleteDialog(true)}
+            className="text-destructive"
+          >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete
           </DropdownMenuItem>
@@ -89,17 +97,21 @@ export function AdminCouponActions({ coupon }: AdminCouponActionsProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the coupon "{coupon.title}". This action cannot be undone.
+              This will permanently delete the coupon "{coupon.title}". This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }

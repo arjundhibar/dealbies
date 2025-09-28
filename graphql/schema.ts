@@ -8,12 +8,17 @@ export const typeDefs = gql`
     avatarUrl: String!
   }
 
+  type ImageUrl {
+    url: String!
+    slug: String!
+  }
+
   type Deal {
     id: String!
     slug: String!
     title: String!
     description: String!
-    imageUrls: [String!]!
+    imageUrls: [ImageUrl!]!
     price: Float!
     originalPrice: Float
     merchant: String!
@@ -31,9 +36,10 @@ export const typeDefs = gql`
 
   type Coupon {
     id: String!
+    slug: String!
     title: String!
     description: String!
-    imageUrls: [String!]!
+    imageUrls: [ImageUrl!]!
     discountCode: String!
     discountType: String!
     discountValue: Float
@@ -70,6 +76,7 @@ export const typeDefs = gql`
     dealBySlug(slug: String!): Deal
     coupons(merchant: String, category: String, sort: String): [Coupon!]!
     coupon(id: ID!): Coupon
+    couponBySlug(slug: String!): Coupon
     discussions(category: String, dealCategory: String, sort: String): [Discussion!]!
     discussion(id: ID!): Discussion
   }

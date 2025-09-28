@@ -13,6 +13,7 @@ const nextConfig = {
     return [
       // Redirect old singular route to plural, preserving slug or id
       { source: '/deal/:slug', destination: '/deals/:slug', permanent: true },
+      { source: '/coupon/:slug', destination: '/coupons/:slug', permanent: true },
     ]
   },
 }

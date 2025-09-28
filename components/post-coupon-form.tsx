@@ -1,38 +1,53 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
-import { useData } from "@/lib/data-context"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useData } from "@/lib/data-context";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 interface PostCouponFormProps {
-  onSuccess?: () => void
+  onSuccess?: () => void;
 }
 
 const formSchema = z.object({
   code: z.string().min(1, "Coupon code is required"),
-  title: z.string().min(5, "Title must be at least 5 characters").max(100, "Title must be less than 100 characters"),
+  title: z
+    .string()
+    .min(5, "Title must be at least 5 characters")
+    .max(100, "Title must be less than 100 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   merchant: z.string().min(2, "Merchant name is required"),
-  logoUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  logoUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .optional()
+    .or(z.literal("")),
   expiresAt: z.string().min(1, "Expiry date is required"),
   terms: z.string().optional(),
-})
+});
 
-type FormValues = z.infer<typeof formSchema>
+type FormValues = z.infer<typeof formSchema>;
 
 export function PostCouponForm({ onSuccess }: PostCouponFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { currentUser } = useData()
-  const { toast } = useToast()
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+  const { currentUser } = useData();
+  const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -45,14 +60,14 @@ export function PostCouponForm({ onSuccess }: PostCouponFormProps) {
       expiresAt: "",
       terms: "",
     },
-  })
+  });
 
   const onSubmit = async (values: FormValues) => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       if (!currentUser) {
-        throw new Error("You must be logged in to post a coupon")
+        throw new Error("You must be logged in to post a coupon");
       }
 
       const response = await fetch("/api/coupons", {
@@ -61,33 +76,34 @@ export function PostCouponForm({ onSuccess }: PostCouponFormProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
-      })
+      });
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || "Failed to post coupon")
+        const error = await response.json();
+        throw new Error(error.message || "Failed to post coupon");
       }
 
-      const coupon = await response.json()
+      const coupon = await response.json();
 
       toast({
         title: "Success!",
         description: "Your coupon has been posted.",
-      })
+      });
 
-      if (onSuccess) onSuccess()
-      router.push(`/coupon/${coupon.id}`)
+      if (onSuccess) onSuccess();
+      router.push(`/coupons/${coupon.slug || coupon.id}`);
     } catch (error: any) {
-      console.error("Error posting coupon:", error)
+      console.error("Error posting coupon:", error);
       toast({
         title: "Error",
-        description: error.message || "An error occurred while posting the coupon.",
+        description:
+          error.message || "An error occurred while posting the coupon.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Form {...form}>
@@ -100,9 +116,16 @@ export function PostCouponForm({ onSuccess }: PostCouponFormProps) {
               <FormItem>
                 <FormLabel>Coupon Code</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. SUMMER20" {...field} className="font-mono uppercase" disabled={isLoading} />
+                  <Input
+                    placeholder="e.g. SUMMER20"
+                    {...field}
+                    className="font-mono uppercase"
+                    disabled={isLoading}
+                  />
                 </FormControl>
-                <FormDescription>The code that users will enter at checkout</FormDescription>
+                <FormDescription>
+                  The code that users will enter at checkout
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -115,7 +138,11 @@ export function PostCouponForm({ onSuccess }: PostCouponFormProps) {
               <FormItem>
                 <FormLabel>Merchant</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. Amazon" {...field} disabled={isLoading} />
+                  <Input
+                    placeholder="e.g. Amazon"
+                    {...field}
+                    disabled={isLoading}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -130,7 +157,11 @@ export function PostCouponForm({ onSuccess }: PostCouponFormProps) {
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. 20% off all summer items" {...field} disabled={isLoading} />
+                <Input
+                  placeholder="e.g. 20% off all summer items"
+                  {...field}
+                  disabled={isLoading}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -144,7 +175,12 @@ export function PostCouponForm({ onSuccess }: PostCouponFormProps) {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="Provide details about the coupon..." rows={3} {...field} disabled={isLoading} />
+                <Textarea
+                  placeholder="Provide details about the coupon..."
+                  rows={3}
+                  {...field}
+                  disabled={isLoading}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -158,9 +194,16 @@ export function PostCouponForm({ onSuccess }: PostCouponFormProps) {
             <FormItem>
               <FormLabel>Logo URL (Optional)</FormLabel>
               <FormControl>
-                <Input type="url" placeholder="https://example.com/logo.jpg" {...field} disabled={isLoading} />
+                <Input
+                  type="url"
+                  placeholder="https://example.com/logo.jpg"
+                  {...field}
+                  disabled={isLoading}
+                />
               </FormControl>
-              <FormDescription>URL to the merchant's logo image</FormDescription>
+              <FormDescription>
+                URL to the merchant's logo image
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -204,5 +247,5 @@ export function PostCouponForm({ onSuccess }: PostCouponFormProps) {
         </Button>
       </form>
     </Form>
-  )
+  );
 }
