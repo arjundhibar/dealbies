@@ -35,10 +35,29 @@ export async function GET(
       return new NextResponse('Image source not available', { status: 404 });
     }
 
-    console.log('Redirecting to Cloudflare URL:', image.cloudflareUrl);
+    console.log('Fetching image from Cloudflare URL:', image.cloudflareUrl);
 
-    // Redirect to the Cloudflare URL
-    return NextResponse.redirect(image.cloudflareUrl);
+    // Fetch the image from Cloudflare
+    const response = await fetch(image.cloudflareUrl);
+    
+    if (!response.ok) {
+      console.log('Failed to fetch image from Cloudflare');
+      return new NextResponse('Image not available', { status: 404 });
+    }
+
+    // Get the image data
+    const imageBuffer = await response.arrayBuffer();
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+
+    // Return the image with proper headers
+    return new NextResponse(imageBuffer, {
+      status: 200,
+      headers: {
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=31536000, immutable',
+        'Content-Length': imageBuffer.byteLength.toString(),
+      },
+    });
   } catch (error) {
     console.error('Error serving image:', error);
     return new NextResponse('Internal server error', { status: 500 });
