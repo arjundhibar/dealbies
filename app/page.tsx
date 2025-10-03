@@ -2,6 +2,25 @@ import { Button } from "@/components/ui/button";
 import { DealsList } from "@/components/deals-list";
 import { HottestDealsSidebar } from "@/components/hottest-deal-sidebar";
 import { Card, CardContent } from "@/components/ui/card";
+import { Metadata } from "next";
+import { pageSEO } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: pageSEO.home.title,
+  description: pageSEO.home.description,
+  keywords: pageSEO.home.keywords,
+  openGraph: {
+    title: pageSEO.home.title,
+    description: pageSEO.home.description,
+    type: "website",
+    url: "https://dealbies.com",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: pageSEO.home.title,
+    description: pageSEO.home.description,
+  },
+};
 
 // Sample data for hottest deals
 const hottestDeals = [
