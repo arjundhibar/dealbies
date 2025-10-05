@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Home, Search, ArrowLeft } from "lucide-react";
+import { Home, Search } from "lucide-react";
+import { BackButton } from "@/components/back-button";
 
 export default function NotFound() {
   return (
@@ -40,14 +41,7 @@ export default function NotFound() {
                 </Link>
               </Button>
 
-              <Button
-                variant="ghost"
-                onClick={() => window.history.back()}
-                className="w-full"
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Go Back
-              </Button>
+              <BackButton />
             </div>
 
             <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
