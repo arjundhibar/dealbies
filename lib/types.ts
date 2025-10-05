@@ -28,7 +28,7 @@ export interface Deal {
   postedBy: {
     id: string
     name: string
-    avatar?: string
+    avatarUrl?: string
   }
   userVote?: "up" | "down"
   imageUrls?: { url: string; slug?: string }[];
@@ -41,7 +41,7 @@ export interface Comment {
   postedBy: {
     id: string
     name: string
-    avatar?: string
+    avatarUrl?: string
   }
   score: number
   userVote?: "up" | "down"
@@ -69,7 +69,7 @@ export interface Coupon {
   postedBy: {
     id: string
     name: string
-    avatar?: string
+    avatarUrl?: string
   }
   userVote?: "up" | "down"
   imageUrls?: { url: string; slug?: string }[];
@@ -87,7 +87,7 @@ export interface Discussion {
   postedBy: {
     id: string
     name: string
-    avatar?: string
+    avatarUrl?: string
   }
   userVote?: "up" | "down"
 }

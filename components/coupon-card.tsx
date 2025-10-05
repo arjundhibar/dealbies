@@ -264,7 +264,7 @@ export function CouponCard({ coupon }: CouponCardProps) {
                   <Avatar className="h-5 w-5">
                     <AvatarImage
                       src={
-                        postedBy?.avatar ||
+                        postedBy?.avatarUrl ||
                         "/placeholder.svg?height=40&width=40&text=U"
                       }
                       alt={postedBy?.name || "User"}
@@ -443,7 +443,7 @@ export function CouponCard({ coupon }: CouponCardProps) {
                 <Avatar className="h-5 w-5">
                   <AvatarImage
                     src={
-                      postedBy?.avatar ||
+                      postedBy?.avatarUrl ||
                       "/placeholder.svg?height=40&width=40&text=U"
                     }
                     alt={postedBy?.name || "User"}

@@ -823,7 +823,7 @@ export default function CouponPage() {
             <div className="flex items-center gap-3 mb-6">
               <Avatar className="h-12 w-12">
                 <AvatarImage
-                  src={postedBy.avatar || "/kishan.jpeg"}
+                  src={postedBy.avatarUrl || "/kishan.jpeg"}
                   alt={postedBy.name}
                 />
                 <AvatarFallback>{postedBy.name.charAt(0)}</AvatarFallback>
@@ -1316,7 +1316,7 @@ export default function CouponPage() {
           <div className="flex items-center gap-3 mb-6">
             <Avatar className="h-12 w-12">
               <AvatarImage
-                src={postedBy.avatar || "/placeholder.svg"}
+                src={postedBy.avatarUrl || "/placeholder.svg"}
                 alt={postedBy.name}
               />
               <AvatarFallback>{postedBy.name.charAt(0)}</AvatarFallback>

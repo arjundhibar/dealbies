@@ -37,5 +37,15 @@ export default async function DealsPage() {
     take: 50,
   });
 
-  return <DealsPageClient deals={deals} />;
+  // Convert Decimal objects to numbers for client component
+  const serializedDeals = deals.map((deal) => ({
+    ...deal,
+    price: deal.price.toNumber(),
+    originalPrice: deal.originalPrice
+      ? deal.originalPrice.toNumber()
+      : undefined,
+    postageCosts: deal.postageCosts ? deal.postageCosts.toNumber() : undefined,
+  }));
+
+  return <DealsPageClient deals={serializedDeals} />;
 }

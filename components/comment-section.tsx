@@ -106,7 +106,7 @@ export function CommentSection({ dealId, couponId }: CommentSectionProps) {
         <div className="flex gap-3">
           <Avatar className="h-8 w-8">
             <AvatarImage
-              src={postedBy.avatar || "/kishan.jpeg"}
+              src={postedBy.avatarUrl || "/kishan.jpeg"}
               alt={postedBy.name}
             />
             <AvatarFallback>{postedBy.name.charAt(0)}</AvatarFallback>

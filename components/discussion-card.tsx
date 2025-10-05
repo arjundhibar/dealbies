@@ -120,7 +120,7 @@ export function DiscussionCard({ discussion }: DiscussionCardProps) {
                   <Avatar className="h-5 w-5">
                     <AvatarImage
                       src={
-                        postedBy.avatar ||
+                        postedBy.avatarUrl ||
                         "/placeholder.svg?height=40&width=40&text=U"
                       }
                       alt={postedBy.name}
@@ -171,11 +171,7 @@ export function DiscussionCard({ discussion }: DiscussionCardProps) {
               {/* <Badge variant="outline" className="text-xs">
                 {category}
               </Badge> */}
-              {dealCategory && (
-                <span className="text-xs">
-                  {dealCategory}
-                </span>
-              )}
+              {dealCategory && <span className="text-xs">{dealCategory}</span>}
               {/* Posted time */}
               <div className="text-sm text-muted-foreground pl-[0.5rem] pr-[0.5rem] pb-[0.25rem] pt-[0.25rem] rounded-sm dark:bg-[hsla(0,0%,100%,0.11)] dark:text-[hsla(0,0%,100%,0.75)] bg-[#0f375f0d] ">
                 Posted {formatRelativeTime(postedAtDate)}
@@ -195,7 +191,7 @@ export function DiscussionCard({ discussion }: DiscussionCardProps) {
                 <Avatar className="h-5 w-5">
                   <AvatarImage
                     src={
-                      postedBy.avatar ||
+                      postedBy.avatarUrl ||
                       "/placeholder.svg?height=40&width=40&text=U"
                     }
                     alt={postedBy.name}

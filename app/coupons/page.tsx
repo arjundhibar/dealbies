@@ -37,5 +37,13 @@ export default async function CouponsPage() {
     take: 50,
   });
 
-  return <CouponsPageClient coupons={coupons} />;
+  // Convert Decimal objects to numbers for client component
+  const serializedCoupons = coupons.map((coupon) => ({
+    ...coupon,
+    discountValue: coupon.discountValue
+      ? coupon.discountValue.toNumber()
+      : undefined,
+  }));
+
+  return <CouponsPageClient coupons={serializedCoupons} />;
 }
