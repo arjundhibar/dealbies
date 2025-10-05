@@ -264,18 +264,20 @@ export function CouponCard({ coupon }: CouponCardProps) {
                   <Avatar className="h-5 w-5">
                     <AvatarImage
                       src={
-                        postedBy.avatar ||
+                        postedBy?.avatar ||
                         "/placeholder.svg?height=40&width=40&text=U"
                       }
-                      alt={postedBy.name}
+                      alt={postedBy?.name || "User"}
                       className="h-5 w-5 object-cover"
                     />
                     <AvatarFallback>
-                      {postedBy.name.charAt(0).toUpperCase()}
+                      {postedBy?.name?.charAt(0)?.toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <span>Posted by</span>
-                  <span className="font-medium">{postedBy.name}</span>
+                  <span className="font-medium">
+                    {postedBy?.name || "Unknown User"}
+                  </span>
                 </div>
               </div>
 
@@ -441,18 +443,20 @@ export function CouponCard({ coupon }: CouponCardProps) {
                 <Avatar className="h-5 w-5">
                   <AvatarImage
                     src={
-                      postedBy.avatar ||
-                      "./kishan.jpeg?height=40&width=40&text=U"
+                      postedBy?.avatar ||
+                      "/placeholder.svg?height=40&width=40&text=U"
                     }
-                    alt={postedBy.name}
+                    alt={postedBy?.name || "User"}
                     className="h-5 w-5 object-cover"
                   />
                   <AvatarFallback>
-                    {postedBy.name.charAt(0).toUpperCase()}
+                    {postedBy?.name?.charAt(0)?.toUpperCase() || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <span>Posted by</span>
-                <span className="font-medium">{postedBy.name}</span>
+                <span className="font-medium">
+                  {postedBy?.name || "Unknown User"}
+                </span>
               </div>
             </div>
 
