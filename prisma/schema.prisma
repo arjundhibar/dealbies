@@ -21,6 +21,7 @@ model User {
   coupons    Coupon[]
   deals      Deal[]
   savedDeals SavedDeal[]
+  savedCoupons SavedCoupon[]
   discussions Discussion[]
   votes      Vote[]
 
@@ -90,6 +91,7 @@ model Coupon {
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   votes         Vote[]
   images        CouponImage[] @relation("CouponToImages")
+  savedCoupons  SavedCoupon[]
 
   @@map("coupons")
 }
@@ -157,6 +159,18 @@ model SavedDeal {
 
   @@unique([userId, dealId])
   @@map("saved_deals")
+}
+
+model SavedCoupon {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  couponId  String   @map("coupon_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, couponId])
+  @@map("saved_coupons")
 }
 
 model Discussion {

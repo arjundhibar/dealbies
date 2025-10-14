@@ -87,6 +87,7 @@ export function Navbar() {
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [view, setView] = useState<"main" | "categories" | "brands">("main");
   const isSubmissionPage = pathname.startsWith("/submission/");
   const isCategoryPage = pathname.startsWith("/category/");
@@ -459,7 +460,10 @@ export function Navbar() {
                   )}
 
                   {user ? (
-                    <DropdownMenu>
+                    <DropdownMenu
+                      open={isProfileDropdownOpen}
+                      onOpenChange={setIsProfileDropdownOpen}
+                    >
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant="ghost"
@@ -505,7 +509,10 @@ export function Navbar() {
                           <h3 className="text-base font-semibold text-black dark:text-white">
                             Profile
                           </h3>
-                          <button className="text-[#6b6d70] rounded-full p-1 hover:bg-[rgba(15,55,95,0.05)] hover:text-[#76787b] dark:text-gray-400 dark:hover:text-gray-200">
+                          <button
+                            onClick={() => setIsProfileDropdownOpen(false)}
+                            className="text-[#6b6d70] rounded-full p-1 hover:bg-[rgba(15,55,95,0.05)] hover:text-[#76787b] dark:text-gray-400 dark:hover:text-gray-200"
+                          >
                             <X className="h-5 w-5" />
                           </button>
                         </div>
@@ -513,7 +520,7 @@ export function Navbar() {
                         <div className="">
                           {[
                             {
-                              icon: <Trophy className="h-5 w-5 text-black" />,
+                              icon: <Trophy className="h-5 w-5 text-black dark:text-white" />,
                               name: "Points Club",
                               href: `/${
                                 userProfile?.username ||
@@ -631,7 +638,7 @@ export function Navbar() {
                                   className="flex items-center gap-3 p-[14px]"
                                 >
                                   {item.icon}
-                                  <span className="text-black text-sm font-semibold">
+                                  <span className="text-black dark:text-white text-sm font-semibold">
                                     {item.name}
                                   </span>
                                 </DropdownMenuItem>
@@ -645,7 +652,7 @@ export function Navbar() {
                                     className="flex items-center gap-3 w-full"
                                   >
                                     {item.icon}
-                                    <span className="text-black text-sm font-medium">
+                                    <span className="text-black text-sm font-medium dark:text-white">
                                       {item.name}
                                     </span>
                                   </Link>

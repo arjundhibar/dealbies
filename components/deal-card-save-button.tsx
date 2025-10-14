@@ -1,69 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Bookmark } from "lucide-react";
-import { useData } from "@/lib/data-context";
-import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { SaveButton } from "@/components/save-button";
 
 interface DealCardSaveButtonProps {
   dealId: string;
 }
 
 export function DealCardSaveButton({ dealId }: DealCardSaveButtonProps) {
-  const { currentUser, isSaved, saveDeal, unsaveDeal } = useData();
-  const { toast } = useToast();
-  const router = useRouter();
-  const saved = isSaved(dealId);
-
-  const handleToggleSave = async () => {
-    try {
-      console.log("Save button clicked for deal:", dealId);
-      console.log("Current user:", currentUser);
-      console.log("Currently saved:", saved);
-
-      if (!currentUser) {
-        console.log("No currentUser, redirecting to login");
-        router.push("/login");
-        throw new Error("You must be logged in to save deals");
-      }
-
-      if (saved) {
-        console.log("Unsaving deal:", dealId);
-        await unsaveDeal(dealId);
-        toast({
-          title: "Deal removed",
-          description: "Deal removed from your saved items",
-        });
-      } else {
-        console.log("Saving deal:", dealId);
-        await saveDeal(dealId);
-        toast({
-          title: "Deal saved",
-          description: "Deal added to your saved items",
-        });
-      }
-    } catch (error: any) {
-      console.error("Error in handleToggleSave:", error);
-      toast({
-        title: "Error",
-        description: error.message || "An error occurred",
-        variant: "destructive",
-      });
-    }
-  };
-
-  return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className={cn("gap-1 px-2", saved && "text-primary")}
-      onClick={handleToggleSave}
-      title={saved ? "Remove from saved" : "Save deal"}
-    >
-      <Bookmark className={cn("h-4 w-4", saved && "fill-current")} />
-      <span className="sr-only">{saved ? "Unsave" : "Save"}</span>
-    </Button>
-  );
+  return <SaveButton itemId={dealId} itemType="deal" />;
 }

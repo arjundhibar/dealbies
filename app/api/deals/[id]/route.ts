@@ -14,6 +14,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
             avatarUrl: true,
           },
         },
+        images: {
+          select: {
+            slug: true,
+            cloudflareUrl: true,
+            url: true,
+          },
+        },
         _count: {
           select: {
             comments: true,
@@ -64,6 +71,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json({
       ...deal,
+      imageUrls: deal.images.map(img => ({
+        slug: img.slug,
+        url: img.cloudflareUrl || `/api/images/${img.slug}`,
+      })),
       score,
       commentCount: deal._count.comments,
       postedBy: {
@@ -76,6 +87,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       votes: undefined,
       _count: undefined,
       user: undefined,
+      images: undefined,
     })
   } catch (error) {
     return NextResponse.json({ error: "An error occurred while fetching the deal" }, { status: 500 })

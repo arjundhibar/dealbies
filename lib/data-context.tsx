@@ -14,9 +14,11 @@ import { getSupabase } from "@/lib/supabase";
 
 interface DataContextType {
   deals: Deal[];
+  coupons: Coupon[];
   discussions: Discussion[];
   comments: Record<string, Comment[]>;
   savedDeals: string[];
+  savedCoupons: string[];
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;
   currentSort: string;
@@ -58,7 +60,10 @@ interface DataContextType {
   getRelatedDeals: (dealId: string, limit?: number) => Promise<Deal[]>;
   saveDeal: (dealId: string) => Promise<void>;
   unsaveDeal: (dealId: string) => Promise<void>;
+  saveCoupon: (couponId: string) => Promise<void>;
+  unsaveCoupon: (couponId: string) => Promise<void>;
   isSaved: (dealId: string) => boolean;
+  isCouponSaved: (couponId: string) => boolean;
   fetchDeals: (category?: string, sort?: string) => Promise<Deal[]>;
   fetchCoupons: (
     merchant?: string,
@@ -79,9 +84,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   // Initialize with empty arrays instead of mock data
   const [deals, setDeals] = useState<Deal[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
   const [comments, setComments] = useState<Record<string, Comment[]>>({});
   const [savedDeals, setSavedDeals] = useState<string[]>([]);
+  const [savedCoupons, setSavedCoupons] = useState<string[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentSort, setCurrentSort] = useState<string>("newest");
   const [isLoading, setIsLoading] = useState(true);
@@ -172,6 +179,33 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     };
 
     fetchSavedDeals();
+  }, [user]);
+
+  // Fetch user's saved coupons when user changes
+  useEffect(() => {
+    const fetchSavedCoupons = async () => {
+      if (!user) {
+        setSavedCoupons([]);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/users/saved-coupons`);
+
+        if (response.ok) {
+          const data = await response.json();
+
+          // The API returns full coupon objects, so we need to extract the coupon IDs
+          const couponIds = data.map((coupon: any) => coupon.id);
+
+          setSavedCoupons(couponIds);
+        } else {
+          const errorText = await response.text();
+        }
+      } catch (error) {}
+    };
+
+    fetchSavedCoupons();
   }, [user]);
 
   // Fetch initial data
@@ -1206,14 +1240,116 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     return saved;
   };
 
+  const saveCoupon = async (couponId: string): Promise<void> => {
+    console.log("saveCoupon called with couponId:", couponId);
+    console.log("currentUser:", currentUser);
+
+    if (!currentUser) throw new Error("You must be logged in to save coupons");
+
+    console.log("Making API call to save coupon...");
+    const response = await fetch("/api/users/saved-coupons", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        couponId,
+      }),
+    });
+
+    console.log("Save coupon response status:", response.status);
+    console.log(
+      "Save coupon response headers:",
+      Object.fromEntries(response.headers.entries())
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Save coupon error response text:", errorText);
+
+      let error;
+      try {
+        error = JSON.parse(errorText);
+      } catch (e) {
+        error = { message: errorText };
+      }
+
+      console.error("Save coupon parsed error:", error);
+      throw new Error(error.message || "Failed to save coupon");
+    }
+
+    const responseData = await response.json();
+    console.log("Save coupon success response:", responseData);
+
+    console.log("Coupon saved successfully, updating state");
+    setSavedCoupons((prev) => {
+      const newState = [...prev, couponId];
+      console.log("New saved coupons state:", newState);
+      return newState;
+    });
+  };
+
+  const unsaveCoupon = async (couponId: string): Promise<void> => {
+    console.log("unsaveCoupon called with couponId:", couponId);
+    console.log("currentUser:", currentUser);
+
+    if (!currentUser)
+      throw new Error("You must be logged in to unsave coupons");
+
+    console.log("Making API call to unsave coupon...");
+    const response = await fetch(`/api/users/saved-coupons/${couponId}`, {
+      method: "DELETE",
+    });
+
+    console.log("Unsave coupon response status:", response.status);
+    console.log(
+      "Unsave coupon response headers:",
+      Object.fromEntries(response.headers.entries())
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Unsave coupon error response text:", errorText);
+
+      let error;
+      try {
+        error = JSON.parse(errorText);
+      } catch (e) {
+        error = { message: errorText };
+      }
+
+      console.error("Unsave coupon parsed error:", error);
+      throw new Error(error.message || "Failed to unsave coupon");
+    }
+
+    const responseData = await response.json();
+    console.log("Unsave coupon success response:", responseData);
+
+    console.log("Coupon unsaved successfully, updating state");
+    setSavedCoupons((prev) => {
+      const newState = prev.filter((id) => id !== couponId);
+      console.log("New saved coupons state:", newState);
+      return newState;
+    });
+  };
+
+  const isCouponSaved = (couponId: string): boolean => {
+    const saved = savedCoupons.includes(couponId);
+    console.log(`isCouponSaved check for couponId ${couponId}:`, saved);
+    console.log("Current savedCoupons array:", savedCoupons);
+    return saved;
+  };
+
   return (
     <DataContext.Provider
       value={React.useMemo(
         () => ({
           deals,
+          coupons,
           discussions,
           comments,
           savedDeals,
+          savedCoupons,
           currentUser,
           setCurrentUser,
           currentSort,
@@ -1235,7 +1371,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           getRelatedDeals,
           saveDeal,
           unsaveDeal,
+          saveCoupon,
+          unsaveCoupon,
           isSaved,
+          isCouponSaved,
           fetchDeals,
           fetchCoupons,
           fetchDiscussions,
@@ -1243,9 +1382,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         }),
         [
           deals,
+          coupons,
           discussions,
           comments,
           savedDeals,
+          savedCoupons,
           currentUser,
           currentSort,
           setCurrentSort,
@@ -1266,7 +1407,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
           getRelatedDeals,
           saveDeal,
           unsaveDeal,
+          saveCoupon,
+          unsaveCoupon,
           isSaved,
+          isCouponSaved,
           fetchDeals,
           fetchCoupons,
           fetchDiscussions,

@@ -1,67 +1,91 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 const formSchema = z.object({
-  code: z.string().min(1, "Coupon code is required"),
-  title: z.string().min(5, "Title must be at least 5 characters").max(100, "Title must be less than 100 characters"),
+  discountCode: z.string().min(1, "Coupon code is required"),
+  title: z
+    .string()
+    .min(5, "Title must be at least 5 characters")
+    .max(100, "Title must be less than 100 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   merchant: z.string().min(2, "Merchant name is required"),
-  logoUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  discountType: z.string().min(1, "Discount type is required"),
+  discountValue: z.string().optional(),
+  availability: z.string().min(1, "Availability is required"),
+  couponUrl: z.string().url("Please enter a valid URL"),
   expiresAt: z.string().min(1, "Expiry date is required"),
-  terms: z.string().optional(),
-})
+  category: z.string().min(1, "Category is required"),
+});
 
-type FormValues = z.infer<typeof formSchema>
+type FormValues = z.infer<typeof formSchema>;
 
 interface AdminCouponFormProps {
   coupon?: {
-    id: string
-    code: string
-    title: string
-    description: string
-    merchant: string
-    logoUrl: string | null
-    expiresAt: Date
-    terms: string | null
-  }
+    id: string;
+    discountCode: string;
+    title: string;
+    description: string;
+    merchant: string | null;
+    discountType: string;
+    discountValue: number | null;
+    availability: string;
+    couponUrl: string;
+    expiresAt: Date | null;
+    category: string;
+  };
 }
 
 export function AdminCouponForm({ coupon }: AdminCouponFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
-  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      code: coupon?.code || "",
+      discountCode: coupon?.discountCode || "",
       title: coupon?.title || "",
       description: coupon?.description || "",
       merchant: coupon?.merchant || "",
-      logoUrl: coupon?.logoUrl || "",
-      expiresAt: coupon?.expiresAt ? new Date(coupon.expiresAt).toISOString().slice(0, 16) : "",
-      terms: coupon?.terms || "",
+      discountType: coupon?.discountType || "",
+      discountValue: coupon?.discountValue?.toString() || "",
+      availability: coupon?.availability || "",
+      couponUrl: coupon?.couponUrl || "",
+      expiresAt: coupon?.expiresAt
+        ? new Date(coupon.expiresAt).toISOString().slice(0, 16)
+        : "",
+      category: coupon?.category || "",
     },
-  })
+  });
 
   const onSubmit = async (values: FormValues) => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      const url = coupon ? `/api/admin/coupons/${coupon.id}` : "/api/admin/coupons"
+      const url = coupon
+        ? `/api/admin/coupons/${coupon.id}`
+        : "/api/admin/coupons";
 
-      const method = coupon ? "PUT" : "POST"
+      const method = coupon ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
@@ -69,10 +93,10 @@ export function AdminCouponForm({ coupon }: AdminCouponFormProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(values),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to save coupon")
+        throw new Error("Failed to save coupon");
       }
 
       toast({
@@ -80,21 +104,21 @@ export function AdminCouponForm({ coupon }: AdminCouponFormProps) {
         description: coupon
           ? "The coupon has been updated successfully."
           : "The new coupon has been created successfully.",
-      })
+      });
 
-      router.push("/admin/coupons")
-      router.refresh()
+      router.push("/admin/coupons");
+      router.refresh();
     } catch (error) {
-      console.error("Error saving coupon:", error)
+      console.error("Error saving coupon:", error);
       toast({
         title: "Error",
         description: "There was a problem saving the coupon.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Card>
@@ -104,7 +128,7 @@ export function AdminCouponForm({ coupon }: AdminCouponFormProps) {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}
-                name="code"
+                name="discountCode"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Coupon Code</FormLabel>
@@ -116,7 +140,9 @@ export function AdminCouponForm({ coupon }: AdminCouponFormProps) {
                         disabled={isLoading}
                       />
                     </FormControl>
-                    <FormDescription>The code that users will enter at checkout</FormDescription>
+                    <FormDescription>
+                      The code that users will enter at checkout
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -129,7 +155,11 @@ export function AdminCouponForm({ coupon }: AdminCouponFormProps) {
                   <FormItem>
                     <FormLabel>Merchant</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Amazon" {...field} disabled={isLoading} />
+                      <Input
+                        placeholder="e.g. Amazon"
+                        {...field}
+                        disabled={isLoading}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -144,7 +174,11 @@ export function AdminCouponForm({ coupon }: AdminCouponFormProps) {
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. 20% off all summer items" {...field} disabled={isLoading} />
+                    <Input
+                      placeholder="e.g. 20% off all summer items"
+                      {...field}
+                      disabled={isLoading}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,16 +204,100 @@ export function AdminCouponForm({ coupon }: AdminCouponFormProps) {
               )}
             />
 
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="discountType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Discount Type</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g. percentage, euro, freeShipping"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="discountValue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Discount Value (Optional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="e.g. 20"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="availability"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Availability</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g. ONLINE, OFFLINE"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g. Electronics, Fashion"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
-              name="logoUrl"
+              name="couponUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Logo URL (Optional)</FormLabel>
+                  <FormLabel>Coupon URL</FormLabel>
                   <FormControl>
-                    <Input type="url" placeholder="https://example.com/logo.jpg" {...field} disabled={isLoading} />
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/coupon"
+                      {...field}
+                      disabled={isLoading}
+                    />
                   </FormControl>
-                  <FormDescription>URL to the merchant's logo image</FormDescription>
+                  <FormDescription>
+                    URL where users can redeem this coupon
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -192,23 +310,8 @@ export function AdminCouponForm({ coupon }: AdminCouponFormProps) {
                 <FormItem>
                   <FormLabel>Expiry Date</FormLabel>
                   <FormControl>
-                    <Input type="datetime-local" {...field} disabled={isLoading} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="terms"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Terms & Conditions (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Any terms or restrictions for using this coupon..."
-                      rows={2}
+                    <Input
+                      type="datetime-local"
                       {...field}
                       disabled={isLoading}
                     />
@@ -228,12 +331,16 @@ export function AdminCouponForm({ coupon }: AdminCouponFormProps) {
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : coupon ? "Update Coupon" : "Create Coupon"}
+                {isLoading
+                  ? "Saving..."
+                  : coupon
+                  ? "Update Coupon"
+                  : "Create Coupon"}
               </Button>
             </div>
           </form>
         </Form>
       </CardContent>
     </Card>
-  )
+  );
 }

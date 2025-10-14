@@ -222,7 +222,7 @@ export default function UserSettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0f0f0f]">
+      <div className="min-h-screen bg-white dark:bg-[#0f0f0f]">
         <div className="max-w-[82.5rem] mx-auto px-4 py-8">
           <div className="animate-pulse">
             <div className="h-20 w-20 bg-gray-200 dark:bg-gray-700 rounded-full mb-4"></div>
@@ -239,7 +239,7 @@ export default function UserSettingsPage() {
 
   if (!userProfile) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-[#0f0f0f]">
+      <div className="min-h-screen bg-white dark:bg-[#0f0f0f]">
         <div className="max-w-[82.5rem] mx-auto px-4 py-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             User not found
@@ -250,24 +250,24 @@ export default function UserSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0f0f0f]">
+    <div className="min-h-screen bg-white dark:bg-[#0f0f0f]">
       <div className="max-w-[82.5rem] mx-auto px-4 py-8">
         <div className="bg-white dark:bg-[#1d1f20] rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
           <div className="flex">
             {/* Left Sidebar - Vertical Tabs */}
-            <div className="w-80 bg-gray-50 dark:bg-[#28292a] border-r border-gray-200 dark:border-gray-700">
-              <div className="p-6">
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+            <div className="w-80 bg-white dark:bg-[#28292a] border-r border-gray-200 dark:border-gray-700">
+              <div className="p-8">
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white mb-8">
                   Institutions
                 </h1>
 
-                <nav className="space-y-2">
+                <nav className="space-y-1">
                   {/* Profile Tab */}
                   <button
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`w-full flex items-center gap-3 px-3 py-3 text-sm font-medium transition-colors ${
                       activeTab === "profile"
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700"
+                        ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800"
                     }`}
                     onClick={() => setActiveTab("profile")}
                   >
@@ -289,16 +289,16 @@ export default function UserSettingsPage() {
 
                   {/* Preferences Tab */}
                   <button
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`w-full flex items-center gap-3 px-3 py-3 text-sm font-medium transition-colors ${
                       activeTab === "preferences"
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700"
+                        ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800"
                     }`}
                     onClick={() => setActiveTab("preferences")}
                   >
                     <svg
-                      width="22"
-                      height="22"
+                      width="18"
+                      height="18"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -314,16 +314,16 @@ export default function UserSettingsPage() {
 
                   {/* Social Connect Tab */}
                   <button
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`w-full flex items-center gap-3 px-3 py-3 text-sm font-medium transition-colors ${
                       activeTab === "social"
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700"
+                        ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800"
                     }`}
                     onClick={() => setActiveTab("social")}
                   >
                     <svg
-                      width="20"
-                      height="22"
+                      width="18"
+                      height="18"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -335,21 +335,21 @@ export default function UserSettingsPage() {
                       <polyline points="16,6 12,2 8,6" />
                       <line x1="12" y1="2" x2="12" y2="15" />
                     </svg>
-                    <span>Social Connect</span>
+                    <span>Social connect</span>
                   </button>
 
                   {/* Notifications Tab */}
                   <button
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`w-full flex items-center gap-3 px-3 py-3 text-sm font-medium transition-colors ${
                       activeTab === "notifications"
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700"
+                        ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800"
                     }`}
                     onClick={() => setActiveTab("notifications")}
                   >
                     <svg
                       width="18"
-                      height="22"
+                      height="18"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
@@ -365,15 +365,15 @@ export default function UserSettingsPage() {
 
                   {/* Subscriptions Tab */}
                   <button
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`w-full flex items-center gap-3 px-3 py-3 text-sm font-medium transition-colors ${
                       activeTab === "subscriptions"
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700"
+                        ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800"
                     }`}
                     onClick={() => setActiveTab("subscriptions")}
                   >
                     <svg
-                      width="22"
+                      width="18"
                       height="18"
                       viewBox="0 0 24 24"
                       fill="none"
@@ -390,15 +390,15 @@ export default function UserSettingsPage() {
 
                   {/* Following / Ignored Tab */}
                   <button
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                    className={`w-full flex items-center gap-3 px-3 py-3 text-sm font-medium transition-colors ${
                       activeTab === "follows"
-                        ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700"
+                        ? "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800"
                     }`}
                     onClick={() => setActiveTab("follows")}
                   >
                     <svg
-                      width="24"
+                      width="18"
                       height="18"
                       viewBox="0 0 24 24"
                       fill="none"
@@ -422,71 +422,61 @@ export default function UserSettingsPage() {
             <div className="flex-1 p-8">
               {activeTab === "profile" && (
                 <div className="space-y-8">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
                     Profile
                   </h2>
 
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     {/* Your avatar */}
-                    <div className="py-4 border-b border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                            Your avatar
-                          </h3>
-                          <span className="text-sm text-gray-500 dark:text-gray-400">
-                            Optional
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={
-                              userProfile?.avatarUrl || "/placeholder-user.jpg"
-                            }
-                            alt="Profile Avatar"
-                            className="w-12 h-12 rounded-full object-cover border border-gray-200 dark:border-gray-600"
-                          />
-                          <div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {userProfile?.avatarUrl
-                                ? "Avatar uploaded"
-                                : "No avatar set"}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              For best results, upload a square image
-                            </p>
-                          </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                          Your avatar
+                        </h3>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
+                          Optional
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={
+                            userProfile?.avatarUrl || "/placeholder-user.jpg"
+                          }
+                          alt="Profile Avatar"
+                          className="w-20 h-20 rounded-full object-cover border border-gray-200 dark:border-gray-600"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleAvatarUpload}
+                            className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                          >
+                            Replace
+                          </button>
+                          <button
+                            onClick={handleAvatarRemove}
+                            className="px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          >
+                            Remove
+                          </button>
                         </div>
                       </div>
-                      <div className="flex justify-end">
-                        <button
-                          onClick={handleAvatarUpload}
-                          className="px-4 py-2 text-sm bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
-                        >
-                          Change Avatar
-                        </button>
-                      </div>
+
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        For best results, upload a square image.
+                      </p>
                     </div>
 
                     {/* Your username */}
-                    <div className="py-4 border-b border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                            Your username
-                          </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Your username can only be changed once every 6
-                            months.
-                          </p>
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        Your username
+                      </h3>
+
+                      <div className="flex items-center justify-between">
+                        <div className="text-blue-600 dark:text-blue-400 font-medium">
+                          {profileData.username || "Not set"}
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {profileData.username || "Not set"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex justify-end">
                         <button
                           onClick={() => {
                             const newUsername = prompt(
@@ -500,31 +490,27 @@ export default function UserSettingsPage() {
                               handleInputChange("username", newUsername);
                             }
                           }}
-                          className="px-4 py-2 text-sm bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+                          className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         >
-                          Change Username
+                          Change username
                         </button>
                       </div>
+
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Your username can only be changed once every 6 months.
+                      </p>
                     </div>
 
                     {/* Your description */}
-                    <div className="py-4 border-b border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                            Your description
-                          </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Tell us about yourself
-                          </p>
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        Your description
+                      </h3>
+
+                      <div className="flex items-center justify-between">
+                        <div className="text-gray-500 dark:text-gray-400">
+                          {profileData.description || "..."}
                         </div>
-                        <div className="text-right max-w-md">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {profileData.description || "No description set"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex justify-end">
                         <button
                           onClick={() => {
                             const newDescription = prompt(
@@ -535,31 +521,23 @@ export default function UserSettingsPage() {
                               handleInputChange("description", newDescription);
                             }
                           }}
-                          className="px-4 py-2 text-sm bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+                          className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         >
-                          Change Description
+                          Change description
                         </button>
                       </div>
                     </div>
 
                     {/* Your email */}
-                    <div className="py-4 border-b border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                            Your email
-                          </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Your account email address
-                          </p>
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        Your email
+                      </h3>
+
+                      <div className="flex items-center justify-between">
+                        <div className="text-blue-600 dark:text-blue-400 font-medium">
+                          {profileData.email || "Not set"}
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {profileData.email || "Not set"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex justify-end">
                         <button
                           onClick={() => {
                             const newEmail = prompt(
@@ -570,34 +548,23 @@ export default function UserSettingsPage() {
                               handleInputChange("email", newEmail);
                             }
                           }}
-                          className="px-4 py-2 text-sm bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+                          className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         >
-                          Change Email
+                          Change email address
                         </button>
                       </div>
                     </div>
 
                     {/* Choose a password */}
-                    <div className="py-4 border-b border-gray-200 dark:border-gray-700">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                            Choose a password
-                          </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Because you're registered with a social-connect
-                            account, you don't have a password. Set one here.
-                          </p>
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        Choose a password
+                      </h3>
+
+                      <div className="flex items-center justify-between">
+                        <div className="text-gray-500 dark:text-gray-400">
+                          {profileData.password ? "••••••••" : "..."}
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {profileData.password
-                              ? "••••••••"
-                              : "No password set"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex justify-end">
                         <button
                           onClick={() => {
                             const newPassword = prompt("Enter new password:");
@@ -605,56 +572,19 @@ export default function UserSettingsPage() {
                               handleInputChange("password", newPassword);
                             }
                           }}
-                          className="px-4 py-2 text-sm bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+                          className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         >
-                          Change Password
+                          Add password
                         </button>
                       </div>
-                    </div>
-
-                    {/* Account data */}
-                    <div className="py-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                            Account data
-                          </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            Permanently delete your account
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            Account active
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex justify-end">
-                        <button
-                          onClick={handleDeleteAccount}
-                          className="px-4 py-2 text-sm border border-red-300 dark:border-red-600 text-red-600 dark:text-red-400 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                        >
-                          Delete Account
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Save Button */}
-                    <div className="pt-6 border-t border-gray-200 dark:border-gray-700">
-                      <button
-                        onClick={handleSaveProfile}
-                        className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-                      >
-                        Save Changes
-                      </button>
                     </div>
                   </div>
                 </div>
               )}
 
               {activeTab === "preferences" && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <div className="space-y-8">
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
                     Preferences
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
@@ -669,8 +599,8 @@ export default function UserSettingsPage() {
               )}
 
               {activeTab === "social" && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <div className="space-y-8">
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
                     Social Connect
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
@@ -686,8 +616,8 @@ export default function UserSettingsPage() {
               )}
 
               {activeTab === "notifications" && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <div className="space-y-8">
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
                     Notifications
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
@@ -702,8 +632,8 @@ export default function UserSettingsPage() {
               )}
 
               {activeTab === "subscriptions" && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <div className="space-y-8">
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
                     Subscriptions
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
@@ -718,8 +648,8 @@ export default function UserSettingsPage() {
               )}
 
               {activeTab === "follows" && (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <div className="space-y-8">
+                  <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
                     Following / Ignored
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
