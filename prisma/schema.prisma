@@ -190,6 +190,21 @@ model Discussion {
   @@map("discussions")
 }
 
+model ClickTracking {
+  id        String   @id @default(uuid())
+  slug      String
+  type      String   // "deal" or "coupon"
+  originalUrl String @map("original_url")
+  finalUrl  String   @map("final_url")
+  merchant  String?
+  userAgent String?  @map("user_agent")
+  ipAddress String?  @map("ip_address")
+  referer   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("click_tracking")
+}
+
 enum Role {
   USER
   ADMIN

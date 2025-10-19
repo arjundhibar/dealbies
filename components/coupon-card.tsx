@@ -18,6 +18,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { getSeoAttributes } from "@/lib/affiliate-utils";
+import { useData } from "@/lib/data-context";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { isPast } from "date-fns";
 import {
   cn,
@@ -27,11 +33,6 @@ import {
   getImageUrl,
 } from "@/lib/utils";
 import type { Coupon } from "@/lib/types";
-import { useData } from "@/lib/data-context";
-import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CouponCardProps {
   coupon: Coupon;
@@ -124,8 +125,16 @@ export function CouponCard({ coupon }: CouponCardProps) {
     e.preventDefault();
     e.stopPropagation();
 
-    if (couponUrl) {
-      window.open(couponUrl, "_blank", "noopener,noreferrer");
+    if (slug) {
+      // Get SEO attributes for the merchant
+      const seoAttributes = getSeoAttributes(merchant || "");
+
+      // Create a temporary link with proper SEO attributes
+      const link = document.createElement("a");
+      link.href = `/visit/${slug}`;
+      link.target = seoAttributes.target;
+      link.rel = seoAttributes.rel;
+      link.click();
     }
   };
 

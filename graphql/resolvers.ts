@@ -477,5 +477,82 @@ export const resolvers = {
                 userVote,
             };
         },
+        merchants: async () => {
+            // Get all unique merchants from both deals and coupons
+            const [dealMerchants, couponMerchants] = await Promise.all([
+                prisma.deal.findMany({
+                    where: {
+                        expired: false,
+                    },
+                    select: {
+                        merchant: true,
+                        _count: {
+                            select: {
+                                votes: true,
+                            },
+                        },
+                    },
+                    distinct: ['merchant'],
+                }),
+                prisma.coupon.findMany({
+                    where: {
+                        expired: false,
+                    },
+                    select: {
+                        merchant: true,
+                        _count: {
+                            select: {
+                                votes: true,
+                            },
+                        },
+                    },
+                    distinct: ['merchant'],
+                }),
+            ]);
+
+            // Combine and count merchants
+            const merchantMap = new Map();
+
+            // Process deal merchants
+            dealMerchants.forEach((deal) => {
+                if (deal.merchant) {
+                    const merchant = deal.merchant;
+                    if (!merchantMap.has(merchant)) {
+                        merchantMap.set(merchant, {
+                            name: merchant,
+                            dealCount: 0,
+                            couponCount: 0,
+                            totalVotes: 0,
+                        });
+                    }
+                    merchantMap.get(merchant).dealCount += 1;
+                    merchantMap.get(merchant).totalVotes += deal._count.votes;
+                }
+            });
+
+            // Process coupon merchants
+            couponMerchants.forEach((coupon) => {
+                if (coupon.merchant) {
+                    const merchant = coupon.merchant;
+                    if (!merchantMap.has(merchant)) {
+                        merchantMap.set(merchant, {
+                            name: merchant,
+                            dealCount: 0,
+                            couponCount: 0,
+                            totalVotes: 0,
+                        });
+                    }
+                    merchantMap.get(merchant).couponCount += 1;
+                    merchantMap.get(merchant).totalVotes += coupon._count.votes;
+                }
+            });
+
+            // Convert to array and sort by popularity (total votes)
+            const merchants = Array.from(merchantMap.values())
+                .filter((merchant) => merchant.name && merchant.name.trim() !== '')
+                .sort((a, b) => b.totalVotes - a.totalVotes);
+
+            return merchants;
+        },
     },
 }

@@ -70,6 +70,13 @@ export const typeDefs = gql`
     userVote: String
   }
 
+  type Merchant {
+    name: String!
+    dealCount: Int!
+    couponCount: Int!
+    totalVotes: Int!
+  }
+
   type Query {
     deals(category: String, sort: String): [Deal!]!
     deal(id: ID!): Deal
@@ -79,5 +86,6 @@ export const typeDefs = gql`
     couponBySlug(slug: String!): Coupon
     discussions(category: String, dealCategory: String, sort: String): [Discussion!]!
     discussion(id: ID!): Discussion
+    merchants: [Merchant!]!
   }
 `

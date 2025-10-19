@@ -20,7 +20,7 @@ import {
   Plus,
 } from "lucide-react";
 
-export default function NotFound() {
+export default function Custom404() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 

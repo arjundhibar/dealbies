@@ -24,6 +24,7 @@ import {
   Hourglass,
   Flag,
 } from "lucide-react";
+import { getSeoAttributes } from "@/lib/affiliate-utils";
 import { formatDistanceToNow, isPast, format } from "date-fns";
 import { cn, formatCurrency, getImageUrl } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -557,7 +558,10 @@ export default function DealPage() {
                 className="h-9 bg-[var(--background-default)] hover:bg-[var(--background-hover)] rounded-full flex-shrink-0 px-3 text-xs"
                 asChild
               >
-                <a href={dealUrl} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={`/visit/${deal.slug}`}
+                  {...getSeoAttributes(deal.merchant)}
+                >
                   Deal
                   <ExternalLink className="ml-1 h-3 w-3" strokeWidth={3} />
                 </a>
@@ -727,7 +731,10 @@ export default function DealPage() {
                 className="w-full h-9 flex items-center justify-center bg-[var(--background-default)] hover:bg-[var(--background-hover)] rounded-full text-lg"
                 asChild
               >
-                <a href={dealUrl} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={`/visit/${deal.slug}`}
+                  {...getSeoAttributes(deal.merchant)}
+                >
                   To deal
                   <ExternalLink className="mr-2 h-6 w-6" strokeWidth={3} />
                 </a>
@@ -1151,7 +1158,10 @@ export default function DealPage() {
                 className="bg-[var(--background-default)] hover:bg-[var(--background-hover)] rounded-full"
                 asChild
               >
-                <a href={dealUrl} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={`/visit/${deal.slug}`}
+                  {...getSeoAttributes(deal.merchant)}
+                >
                   To deal
                   <ExternalLink className="ml-2 h-4 w-4" strokeWidth={3} />
                 </a>
@@ -1322,7 +1332,11 @@ export default function DealPage() {
               className="w-1/2 h-14 flex items-center justify-center bg-[var(--background-default)] hover:bg-[var(--background-hover)] rounded-full text-lg"
               asChild
             >
-              <a href={dealUrl} target="_blank" rel="noopener noreferrer">
+              <a
+                href={`/visit/${deal.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 To deal
                 <ExternalLink className="mr-2 h-6 w-6" strokeWidth={3} />
               </a>

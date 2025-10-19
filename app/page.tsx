@@ -22,35 +22,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Sample data for hottest deals
-const hottestDeals = [
-  {
-    id: "1",
-    title:
-      "[Lidl Webshop] Free shipping from €49.99 – activate coupon in the Lidl Plus app",
-    score: 1206,
-    price: "€0",
-    imageUrl: "/generic-supermarket-logo.png",
-    dealUrl: "#",
-  },
-  {
-    id: "2",
-    title: "Sticker Mule 10 custom stickers for €1",
-    score: 496,
-    price: "€1",
-    imageUrl: "/placeholder.svg?height=64&width=64&query=sticker",
-    dealUrl: "#",
-  },
-  {
-    id: "3",
-    title: "BYD DOLPHIN SURF Boost (43.2kWh 332Km, 88hp)",
-    score: 436,
-    price: "€24,990",
-    imageUrl: "/placeholder.svg?height=64&width=64&query=car",
-    dealUrl: "#",
-  },
-];
-
 export default function Home() {
   return (
     <div className="mx-auto max-w-[82.5rem] px-[0.5rem] w-full box-border ">
@@ -65,7 +36,7 @@ export default function Home() {
           </div>
 
           <div className="hidden lg:block mt-16">
-            <HottestDealsSidebar deals={hottestDeals} />
+            <HottestDealsSidebar />
 
             <div className="mt-8">
               <Card className="bg-white p-4 dark:bg-dark-secondary">

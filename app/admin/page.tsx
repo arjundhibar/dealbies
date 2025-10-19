@@ -1,14 +1,22 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import prisma from "@/lib/prisma"
-import { BarChart, Users, ShoppingBag, Ticket } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import prisma from "@/lib/prisma";
+import { BarChart, Users, ShoppingBag, Ticket, TrendingUp } from "lucide-react";
+import { AnalyticsDashboard } from "@/components/admin/analytics-dashboard";
 
 export default async function AdminDashboard() {
   // Get counts for dashboard
-  const userCount = await prisma.user.count()
-  const dealCount = await prisma.deal.count()
-  const couponCount = await prisma.coupon.count()
-  const commentCount = await prisma.comment.count()
+  const userCount = await prisma.user.count();
+  const dealCount = await prisma.deal.count();
+  const couponCount = await prisma.coupon.count();
+  const commentCount = await prisma.comment.count();
+  const clickCount = await prisma.clickTracking.count();
 
   // Get recent users
   const recentUsers = await prisma.user.findMany({
@@ -22,7 +30,7 @@ export default async function AdminDashboard() {
       email: true,
       createdAt: true,
     },
-  })
+  });
 
   return (
     <div className="space-y-6">
@@ -64,12 +72,26 @@ export default async function AdminDashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Comments</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Total Comments
+            </CardTitle>
             <BarChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{commentCount}</div>
             <p className="text-xs text-muted-foreground">User comments</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Clicks</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{clickCount}</div>
+            <p className="text-xs text-muted-foreground">
+              Affiliate clicks tracked
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -79,7 +101,9 @@ export default async function AdminDashboard() {
       <Card>
         <CardHeader>
           <CardTitle>Recent Users</CardTitle>
-          <CardDescription>Recently registered users on the platform</CardDescription>
+          <CardDescription>
+            Recently registered users on the platform
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -89,12 +113,28 @@ export default async function AdminDashboard() {
                   <p className="font-medium">{user.username}</p>
                   <p className="text-sm text-muted-foreground">{user.email}</p>
                 </div>
-                <div className="text-sm text-muted-foreground">{new Date(user.createdAt).toLocaleDateString()}</div>
+                <div className="text-sm text-muted-foreground">
+                  {new Date(user.createdAt).toLocaleDateString()}
+                </div>
               </div>
             ))}
           </div>
         </CardContent>
       </Card>
+
+      <Separator />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Click Analytics</CardTitle>
+          <CardDescription>
+            Track affiliate clicks and performance metrics
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AnalyticsDashboard />
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }
