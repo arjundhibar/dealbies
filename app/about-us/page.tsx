@@ -71,12 +71,12 @@ export default function AboutUs() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-white -m-8 ">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white py-20">
+      <div className="bg-gradient-to-br from-orange-50 to-red-50 text-white py-20">
         <div className="max-w-6xl mx-auto px-4 text-center">
-          <h1 className="text-5xl font-bold mb-6">About Dealbies</h1>
-          <p className="text-xl mb-8 max-w-3xl mx-auto">
+          <h1 className="text-5xl font-bold mb-6 text-black dark:text-white">About Dealbies</h1>
+          <p className="text-xl mb-8 max-w-3xl mx-auto text-black dark:text-white">
             We're on a mission to help you save money and discover amazing
             deals. Founded by deal hunters, for deal hunters.
           </p>
