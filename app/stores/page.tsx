@@ -103,7 +103,7 @@ export default function StoresPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0f0f0f]">
+    <div className="w-full -mt-7">
       <div className="max-w-[82.5rem] mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg p-12 mb-8 text-center text-white">

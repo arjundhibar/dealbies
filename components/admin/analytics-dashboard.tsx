@@ -105,13 +105,13 @@ export function AnalyticsDashboard() {
           className="px-3 py-2 border rounded-md"
         >
           <option value="">All Merchants</option>
-          {Array.from(new Set(analytics.stats.map((s) => s.merchant))).map(
-            (merchant) => (
-              <option key={merchant} value={merchant}>
-                {merchant}
-              </option>
-            )
-          )}
+          {Array.from(
+            new Set((analytics.stats ?? []).map((s) => s.merchant))
+          ).map((merchant) => (
+            <option key={merchant} value={merchant}>
+              {merchant}
+            </option>
+          ))}
         </select>
 
         <select
@@ -153,7 +153,7 @@ export function AnalyticsDashboard() {
                   Unique Merchants
                 </p>
                 <p className="text-2xl font-bold">
-                  {new Set(analytics.stats.map((s) => s.merchant)).size}
+                  {new Set((analytics.stats ?? []).map((s) => s.merchant)).size}
                 </p>
               </div>
               <Users className="h-8 w-8 text-green-500" />

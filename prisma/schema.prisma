@@ -205,6 +205,32 @@ model ClickTracking {
   @@map("click_tracking")
 }
 
+model SiteSettings {
+  id          String   @id @default("site-settings")
+  siteTitle   String   @default("DealHunter - Find the Best Deals & Coupons") @map("site_title")
+  metaDescription String @default("Discover amazing deals, discounts, and coupons from top retailers. Join our community to share and find the best savings on electronics, fashion, home goods, and more.") @map("meta_description")
+  siteName    String   @default("DealHunter") @map("site_name")
+  ogImage     String?  @default("/og-image.jpg") @map("og_image")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("site_settings")
+}
+
+model SchemaMarkupSettings {
+  id          String   @id @default("schema-markup-settings")
+  dealsSchema String?  @default("{\"@context\":\"https://schema.org\",\"@type\":\"Offer\"}") @map("deals_schema") @db.Text
+  couponsSchema String? @default("{\"@context\":\"https://schema.org\",\"@type\":\"Coupon\"}") @map("coupons_schema") @db.Text
+  articlesSchema String? @default("{\"@context\":\"https://schema.org\",\"@type\":\"Article\"}") @map("articles_schema") @db.Text
+  storesSchema String? @default("{\"@context\":\"https://schema.org\",\"@type\":\"Organization\"}") @map("stores_schema") @db.Text
+  faqSchema   String?  @default("{\"@context\":\"https://schema.org\",\"@type\":\"FAQPage\"}") @map("faq_schema") @db.Text
+  enabled     Boolean  @default(true)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("schema_markup_settings")
+}
+
 enum Role {
   USER
   ADMIN

@@ -7,76 +7,117 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/lib/auth-context";
 import { DataProvider } from "@/lib/data-context";
 import { Navbar } from "@/components/navbar";
+import prisma from "@/lib/prisma";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: {
-    default: "DealHunter - Find the Best Deals & Coupons",
-    template: "%s | DealHunter",
-  },
-  description:
-    "Discover amazing deals, discounts, and coupons from top retailers. Join our community to share and find the best savings on electronics, fashion, home goods, and more.",
-  keywords: [
-    "deals",
-    "discounts",
-    "coupons",
-    "savings",
-    "shopping",
-    "retail",
-    "electronics",
-    "fashion",
-    "home goods",
-    "online shopping",
-  ],
-  authors: [{ name: "DealHunter Team" }],
-  creator: "DealHunter",
-  publisher: "DealHunter",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  metadataBase: new URL("https://dealbies.com"),
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: "https://dealbies.com",
-    title: "DealHunter - Find the Best Deals & Coupons",
-    description:
-      "Discover amazing deals, discounts, and coupons from top retailers. Join our community to share and find the best savings.",
-    siteName: "DealHunter",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "DealHunter - Find the Best Deals & Coupons",
-      },
+// Helper function to get site settings
+async function getSiteSettings() {
+  try {
+    let settings = await prisma.siteSettings.findUnique({
+      where: { id: "site-settings" },
+    });
+
+    // If settings don't exist, create default ones
+    if (!settings) {
+      settings = await prisma.siteSettings.create({
+        data: {
+          id: "site-settings",
+          siteTitle: "DealHunter - Find the Best Deals & Coupons",
+          metaDescription:
+            "Discover amazing deals, discounts, and coupons from top retailers. Join our community to share and find the best savings on electronics, fashion, home goods, and more.",
+          siteName: "DealHunter",
+          ogImage: "/og-image.jpg",
+        },
+      });
+    }
+
+    return settings;
+  } catch (error) {
+    console.error("Error fetching site settings:", error);
+    // Return default values if there's an error
+    return {
+      siteTitle: "DealHunter - Find the Best Deals & Coupons",
+      metaDescription:
+        "Discover amazing deals, discounts, and coupons from top retailers. Join our community to share and find the best savings on electronics, fashion, home goods, and more.",
+      siteName: "DealHunter",
+      ogImage: "/og-image.jpg",
+    };
+  }
+}
+
+// Generate metadata dynamically from database
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const ogImageUrl = settings.ogImage?.startsWith("http")
+    ? settings.ogImage
+    : `https://dealbies.com${settings.ogImage || "/og-image.jpg"}`;
+
+  return {
+    title: {
+      default: settings.siteTitle,
+      template: `%s | ${settings.siteName}`,
+    },
+    description: settings.metaDescription,
+    keywords: [
+      "deals",
+      "discounts",
+      "coupons",
+      "savings",
+      "shopping",
+      "retail",
+      "electronics",
+      "fashion",
+      "home goods",
+      "online shopping",
     ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "DealHunter - Find the Best Deals & Coupons",
-    description:
-      "Discover amazing deals, discounts, and coupons from top retailers.",
-    images: ["/og-image.jpg"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+    authors: [{ name: settings.siteName + " Team" }],
+    creator: settings.siteName,
+    publisher: settings.siteName,
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
+    metadataBase: new URL("https://dealbies.com"),
+    alternates: {
+      canonical: "/",
+    },
+    openGraph: {
+      type: "website",
+      locale: "en_US",
+      url: "https://dealbies.com",
+      title: settings.siteTitle,
+      description: settings.metaDescription,
+      siteName: settings.siteName,
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: settings.siteTitle,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: settings.siteTitle,
+      description: settings.metaDescription,
+      images: [ogImageUrl],
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
-  },
-};
+  };
+}
 
 export default function RootLayout({
   children,
