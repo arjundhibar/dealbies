@@ -2,10 +2,34 @@
 
 import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
-import { getSupabase, getSupabaseAdmin } from "@/lib/supabase";
+import { getSupabase, getSupabaseAdmin, isNetworkError } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import type { User, Session } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
+
+// Retry function with exponential backoff
+async function retryWithBackoff<T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  delay = 1000
+): Promise<T> {
+  let lastError: any;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error: any) {
+      lastError = error;
+      if (isNetworkError(error) && i < maxRetries - 1) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, delay * Math.pow(2, i))
+        );
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw lastError;
+}
 
 type AuthContextType = {
   user: User | null;
@@ -38,35 +62,82 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        // Get initial session
-        const {
-          data: { session: initialSession },
-          error: sessionError,
-        } = await supabase.auth.getSession();
+        // Get initial session with retry logic for network errors
+        try {
+          const {
+            data: { session: initialSession },
+            error: sessionError,
+          } = await retryWithBackoff(
+            () => supabase.auth.getSession(),
+            2, // Max 2 retries
+            1000 // Initial delay 1 second
+          );
 
-        if (sessionError) {
-          console.error("Error getting session:", sessionError);
+          if (sessionError) {
+            // Only log non-network errors
+            if (!isNetworkError(sessionError)) {
+              console.error("Error getting session:", sessionError);
+            } else {
+              console.warn(
+                "Network error getting session, will retry on next auth state change"
+              );
+            }
+          }
+
+          setSession(initialSession);
+          setUser(initialSession?.user ?? null);
+        } catch (error: any) {
+          // If it's a network error, keep existing session if available
+          if (isNetworkError(error)) {
+            console.warn(
+              "Network error during session fetch, using cached session if available"
+            );
+            // Try to get session from localStorage as fallback
+            try {
+              const storedSession = localStorage.getItem("sb-auth-token");
+              if (storedSession) {
+                const parsed = JSON.parse(storedSession);
+                if (parsed?.session) {
+                  setSession(parsed.session);
+                  setUser(parsed.session.user);
+                }
+              }
+            } catch {
+              // Ignore localStorage errors
+            }
+          } else {
+            console.error("Error getting session:", error);
+          }
         }
 
-        setSession(initialSession);
-        setUser(initialSession?.user ?? null);
-
-        // Set up auth state listener
+        // Set up auth state listener with error handling
         const {
           data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+        } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+          // Handle token refresh errors gracefully
+          if (event === "TOKEN_REFRESHED" && !newSession) {
+            // Token refresh failed, but don't clear session immediately
+            console.warn("Token refresh failed, keeping existing session");
+            return;
+          }
+
           setSession(newSession);
           setUser(newSession?.user ?? null);
 
           // If user is logged in, check their role and redirect accordingly
           if (newSession?.user) {
             try {
-              // Fetch user role from your database
-              const response = await fetch("/api/admin/verify", {
-                headers: {
-                  Authorization: `Bearer ${newSession.access_token}`,
-                },
-              });
+              // Fetch user role from your database with retry
+              const response = await retryWithBackoff(
+                () =>
+                  fetch("/api/admin/verify", {
+                    headers: {
+                      Authorization: `Bearer ${newSession.access_token}`,
+                    },
+                  }),
+                2,
+                500
+              );
 
               if (response.ok) {
                 const { role } = await response.json();
@@ -80,7 +151,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
               }
             } catch (error) {
-              console.error("Error fetching user role:", error);
+              // Only log non-network errors
+              if (!isNetworkError(error)) {
+                console.error("Error fetching user role:", error);
+              }
             }
           }
 
@@ -259,31 +333,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // If username, get the email via API
       if (!isEmail) {
-        const response = await fetch(
-          `/api/get-email?username=${encodeURIComponent(emailOrUsername)}`
-        );
-        if (!response.ok) {
+        try {
+          const response = await retryWithBackoff(
+            () =>
+              fetch(
+                `/api/get-email?username=${encodeURIComponent(emailOrUsername)}`
+              ),
+            2,
+            500
+          );
+          if (!response.ok) {
+            throw new Error("Invalid username or password");
+          }
+          const data = await response.json();
+          email = data.email;
+        } catch (error: any) {
+          if (isNetworkError(error)) {
+            throw new Error(
+              "Network error: Please check your internet connection and try again"
+            );
+          }
           throw new Error("Invalid username or password");
         }
-        const data = await response.json();
-        email = data.email;
       }
 
-      // Sign in with email & password
-      const { error, data } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Sign in with email & password with retry
+      const { error, data } = await retryWithBackoff(
+        () =>
+          supabase.auth.signInWithPassword({
+            email,
+            password,
+          }),
+        2,
+        1000
+      );
 
       if (error) {
+        if (isNetworkError(error)) {
+          throw new Error(
+            "Network error: Please check your internet connection and try again"
+          );
+        }
         console.error("Error signing in:", error.message);
         throw new Error("Invalid email or password");
       }
 
-      // Fetch session after sign in
-      const { data: sessionData, error: sessionError } =
-        await supabase.auth.getSession();
+      // Fetch session after sign in with retry
+      const { data: sessionData, error: sessionError } = await retryWithBackoff(
+        () => supabase.auth.getSession(),
+        2,
+        1000
+      );
       if (sessionError || !sessionData?.session || !sessionData.session.user) {
+        if (isNetworkError(sessionError)) {
+          throw new Error(
+            "Network error: Please check your internet connection and try again"
+          );
+        }
         throw new Error("Failed to retrieve session after login");
       }
 
@@ -294,22 +400,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       console.log("this is access token", accessToken);
 
-      // Sync user to your database
-      const syncResponse = await fetch("/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          username: data.user?.user_metadata?.username || email.split("@")[0],
-        }),
-      });
+      // Sync user to your database with retry
+      try {
+        const syncResponse = await retryWithBackoff(
+          () =>
+            fetch("/api/users", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${accessToken}`,
+              },
+              body: JSON.stringify({
+                username:
+                  data.user?.user_metadata?.username || email.split("@")[0],
+              }),
+            }),
+          2,
+          500
+        );
 
-      if (!syncResponse.ok) {
-        const errorData = await syncResponse.json();
-        console.error("Error syncing user to database:", errorData.error);
-        // Optionally, you can throw here or ignore to allow login anyway
+        if (!syncResponse.ok) {
+          const errorData = await syncResponse.json();
+          console.error("Error syncing user to database:", errorData.error);
+          // Optionally, you can throw here or ignore to allow login anyway
+        }
+      } catch (error: any) {
+        // Don't fail login if sync fails due to network error
+        if (!isNetworkError(error)) {
+          console.error("Error syncing user:", error);
+        }
       }
 
       // Save token for later use
@@ -321,11 +440,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       try {
-        const roleResponse = await fetch("/api/admin/verify", {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        const roleResponse = await retryWithBackoff(
+          () =>
+            fetch("/api/admin/verify", {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            }),
+          2,
+          500
+        );
 
         if (roleResponse.ok) {
           const { role } = await roleResponse.json();
@@ -337,12 +461,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           router.push("/");
         }
-      } catch (error) {
-        console.error("Error checking role:", error);
+      } catch (error: any) {
+        // Don't fail login if role check fails due to network error
+        if (!isNetworkError(error)) {
+          console.error("Error checking role:", error);
+        }
         router.push("/");
       }
     } catch (error: any) {
       console.error("Error signing in:", error);
+      // Provide user-friendly error messages
+      if (isNetworkError(error)) {
+        toast({
+          title: "Network Error",
+          description:
+            "Unable to connect to the server. Please check your internet connection and try again.",
+          variant: "destructive",
+        });
+        throw new Error(
+          "Network error: Please check your internet connection and try again"
+        );
+      }
       throw new Error(error.message || "Invalid email or password");
     }
   };
